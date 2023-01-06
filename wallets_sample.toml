@@ -1,0 +1,10 @@
+# Rename this to wallets.toml
+
+wallets = [
+    ["myaddress", "eth"],
+    ["myaddress", "avax"],
+    ["myaddress", "ftm"],
+    ["myaddress", "matic"],
+    ["myaddress", "arb"],
+    ["myaddress", "bsc"],
+]

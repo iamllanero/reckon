@@ -1,0 +1,7 @@
+__pycache__
+data/*
+!data/coingecko_coins_list.json
+reckon/secrets.py
+wallets.toml
+.DS_STORE
+wip.py

@@ -1,0 +1,50 @@
+[reports]
+coinbase = [
+    'data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv'
+]
+coinbasepro = [
+    'data/reports/2022-coinbasepro/account.csv'
+]
+binance = [
+    'data/reports/2021-binance/202212041409.csv',
+    'data/reports/2022-binance/202212131739.csv'
+]
+blockfi = [
+    'data/reports/all-blockfi/trade_report_all.csv'
+]
+manual = [
+    'data/reports/manual.csv'
+]
+
+
+[consolidated_parser]
+
+# Equivalent pairs must be alphabetical
+equivalents = [
+    ["b-90clevcvx-10cvx", "b-90clevcvx-10cvx-gauge"],
+    ["b-98acrv-2ctr", "b-98acrv-2ctr-gauge"],
+    ["blusdlusd3-f", "blusdlusd3-f-gauge"],
+    ["bpt-beets-ftm", "fbeets"],
+    ["clevcvx-f", "clevcvx-f-gauge"],
+    ["clevcvx", "clevcvx-f"],
+    ["cleveth-f", "cleveth-f-gauge"],
+    ["cmumami", "mumami"],
+    ["crv", "sdcrv-gauge"],
+    ["ctreth-f", "ctreth-f-gauge"],
+    ["cvxfraxbp-f", "fraxbp-f"],
+    ["eth", "geth"],
+    ["eth", "steth"],
+    ["eth", "weth"],
+    ["fmootombtomb-ftm-3", "mootombtomb-ftm"],
+    ["fmootombtomb-ftm", "mootombtomb-ftm"],
+    ["ftm", "wftm"],
+    ["gmx", "sbfgmx"],
+    ["hmim", "hmim-gauge"],
+    ["jxjoe", "xjoe"],
+    ["memo", "time"],
+    ["mumami", "umami"],
+    ["pxcvx", "ucvx"],
+    ["sdog", "ssdog"],
+    ["spa", "sspa"],
+    ["tbond", "tomb"],
+]
