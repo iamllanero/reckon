@@ -122,5 +122,14 @@ python3 price.py
 
 python3 8949-hifo.py
 
+## CONTRIBUTING
+
+Please feel free to create issues and pull requests with any changes. Since
+this is a personal project, I won't always fix all issues that I am not
+experiencing. But I will try to merge changes reasonably fast.
+
+Tips to come on tips and tricks to contribute under your cryptonym.
+
+
 
 ```
