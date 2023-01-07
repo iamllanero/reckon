@@ -1,5 +1,11 @@
 [reports]
+
+# The files listed below should be replaced with your actual path and filename.
+# If it is not found, you will see a WARN at the command line but it will
+# continue to execute.
+
 coinbase = [
+    'data/reports/coinbase.csv',
     'data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv'
 ]
 coinbasepro = [

@@ -1,5 +1,5 @@
 import datetime
-import pandas as pd
+import os.path
 import tomllib
 from reckon.constants import TXNS_FILE, TXNS_TOML, STABLECOINS, CONSOLIDATED_FILE
 from utils import list_to_csv
@@ -26,15 +26,30 @@ def main():
     with open(TXNS_TOML, 'rb') as f:
         tf = tomllib.load(f)
     for fn in tf['reports']['coinbase']:
-        txns.extend(coinbase_txns(fn))
+        if os.path.isfile(fn):
+            txns.extend(coinbase_txns(fn))
+        else:
+            print(f'WARN: {fn} from {TXNS_TOML} not found')
     for fn in tf['reports']['coinbasepro']:
-        txns.extend(coinbasepro_txns(fn))
+        if os.path.isfile(fn):
+            txns.extend(coinbasepro_txns(fn))
+        else:
+            print(f'WARN: {fn} from {TXNS_TOML} not found')
     for fn in tf['reports']['binance']:
-        txns.extend(binance_txns(fn))
+        if os.path.isfile(fn):
+            txns.extend(binance_txns(fn))
+        else:
+            print(f'WARN: {fn} from {TXNS_TOML} not found')
     for fn in tf['reports']['blockfi']:
-        txns.extend(blockfi_txns(fn))
+        if os.path.isfile(fn):
+            txns.extend(blockfi_txns(fn))
+        else:
+            print(f'WARN: {fn} from {TXNS_TOML} not found')
     for fn in tf['reports']['manual']:
-        txns.extend(manual_txns(fn))
+        if os.path.isfile(fn):
+            txns.extend(manual_txns(fn))
+        else:
+            print(f'WARN: {fn} from {TXNS_TOML} not found')
     txns.extend(consolidated_txns())
 
     list_to_csv(txns, TXNS_FILE)
