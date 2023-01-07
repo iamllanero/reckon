@@ -121,6 +121,7 @@ python3 price.py
 # Create a close to an IRS 8949 list based on the HIFO cost basis
 
 python3 8949-hifo.py
+```
 
 ## CONTRIBUTING
 
@@ -128,8 +129,36 @@ Please feel free to create issues and pull requests with any changes. Since
 this is a personal project, I won't always fix all issues that I am not
 experiencing. But I will try to merge changes reasonably fast.
 
-Tips to come on tips and tricks to contribute under your cryptonym.
+Since many contributors may also be contributing under their IRL identities,
+here are some gotchas to check when you want to contribute under your
+cryptonym:
 
+- Be sure to create and use the correct GitHub account
 
+- Set your local git config appropriately
 
+```
+git config --local user.name "Llanero"
+git config --local user.email "iamllanero@gmail.com"
+```
+
+- Double check your config
+
+```
+git config --local user.name
+git config --local user.email
+```
+
+- As an extra layer of precaution, you can change your global config.
+
+```
+git config --global user.name "Llanero"
+git config --global user.email "iamllanero@gmail.com"
+```
+
+- And, of coure, check the global config
+
+```
+git config --global user.name
+git config --global user.email
 ```
