@@ -208,9 +208,10 @@ def manual_txns(fn):
     txns = []
     with open(fn, 'r') as f:
         next(f)
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             [date, tx_type, token, qty, purchase_token, purchase_token_qty,
-                fees, usd, location, id] = line.rstrip().split(',')
+                fees, usd, location, id] = row
             if tx_type == 'Buy':
                 if purchase_token.lower() in STABLECOINS:
                     txns.append([
@@ -229,9 +230,10 @@ def coinbase_txns(fn):
     txns = []
     with open(fn, 'r') as f:
         next(f)
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             [id, txn_type, date, asset, qty, cost_basis, data_source,
-             asset_disposed, qty_disposed, proceeds] = line.rstrip().split(',')
+             asset_disposed, qty_disposed, proceeds] = row
             date = f'{date[:10]} {date[11:19]}'
 
             if txn_type in ['Reward', 'Interest', 'Fork']:
@@ -248,9 +250,9 @@ def coinbase_txns(fn):
             elif txn_type == 'Converted from':
                 from_token = asset_disposed
                 from_token_qty = qty_disposed
-                line = next(f)
+                row = next(reader)
                 [id, txn_type, date, asset, qty, cost_basis, data_source,
-                 asset_disposed, qty_disposed, proceeds] = line.rstrip().split(',')
+                 asset_disposed, qty_disposed, proceeds] = row
                 date = f'{date[:10]} {date[11:19]}'
 
                 if from_token.lower() in STABLECOINS:
@@ -276,7 +278,7 @@ def coinbase_txns(fn):
             elif txn_type in ['Deposit', 'Incoming', 'Receive', 'Send', 'Withdrawal']:
                 pass  # Not a transaction
             else:
-                print(f'ERROR: Unhandled line from {fn} => {line}')
+                print(f'ERROR: Unhandled line from {fn} => {",".join(row)}')
 
     return txns
 
@@ -292,14 +294,15 @@ def coinbasepro_txns(fn):
     txns = []
     with open(fn, 'r') as f:
         next(f)
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             [portfolio, tx_type, time, amount, balance, unit,
-                transfer_id, trade_id, order_id] = line.rstrip().split(',')
+                transfer_id, trade_id, order_id] = row
             if tx_type == 'match':
                 [portfolio, tx_type, time, next_amount, next_balance, next_unit,
-                    transfer_id, trade_id, order_id] = next(f).rstrip().split(',')
+                    transfer_id, trade_id, order_id] = next(reader)
                 [portfolio, fee_tx_type, time, fee_amount, fee_balance, fee_unit,
-                    transfer_id, trade_id, order_id] = next(f).rstrip().split(',')
+                    transfer_id, trade_id, order_id] = next(reader)
                 amount = float(amount) * -1
                 if unit.lower() in STABLECOINS:
                     txns.append([
@@ -310,11 +313,11 @@ def coinbasepro_txns(fn):
                         tx_type, 'coinbasepro', 'coinbasepro', 'coinbasepro', fn
                     ])
                 else:
-                    print(line)
+                    print(",".join(row))
             elif tx_type in ['deposit', 'withdrawal']:
                 pass
             else:
-                print(line)
+                print(",".join(row))
     return txns
 
 
@@ -322,7 +325,8 @@ def binance_txns(fn):
     txns = []
     with open(fn, 'r') as f:
         next(f)
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             """
             User_Id,
             Time,
@@ -352,7 +356,7 @@ def binance_txns(fn):
              quote_asset, realized_amount_quote_asset, realized_amount_quote_asset_usd,
              fee_asset, realized_amount_fee_asset, realized_amount_fee_asset_usd,
              payment_method, withdrawal_method, addl_notes
-             ] = line.rstrip().split(',')
+             ] = row
 
             time = f'{time[:19]}'
 
@@ -412,11 +416,11 @@ def binance_txns(fn):
                         ])
                 else:
                     print(
-                        f'ERROR: Unhandled line from {fn} => {line.rstrip()}')
+                        f'ERROR: Unhandled line from {fn} => {",".join(row)}')
             elif category in ['Deposit', 'Withdrawal']:
                 pass  # Not a transaction
             else:
-                print(f'ERROR: Unhandled line from {fn} => {line.rstrip()}')
+                print(f'ERROR: Unhandled line from {fn} => {",".join(row)}')
 
             # results = line.rstrip().split(',')
             # txns.append(results)
@@ -427,9 +431,10 @@ def blockfi_txns(fn):
     txns = []
     with open(fn, 'r') as f:
         next(f)
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             [cryptocurrency, amount, txn_type,
-                confirmed_at] = line.rstrip().split(',')
+                confirmed_at] = row
             if txn_type in ['Interest Payment', 'Bonus Payment']:
                 if cryptocurrency.lower() in STABLECOINS and float(amount) < 0.50:
                     pass  # No need to track below $0.50
@@ -446,7 +451,7 @@ def blockfi_txns(fn):
                     ])
             elif txn_type == 'Trade':
                 [next_cryptocurrency, next_amount, next_txn_type,
-                    next_confirmed_at] = next(f).rstrip().split(',')
+                    next_confirmed_at] = next(reader)
                 if cryptocurrency.lower() in STABLECOINS:
                     if next_cryptocurrency.lower() in STABLECOINS:
                         pass  # This is a stablecoin swap
