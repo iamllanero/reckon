@@ -1,3 +1,5 @@
+import csv
+
 def get_nested_dict(d: dict, key: str, msg='', sep='.'):
     """Safely gets a key from a nest dictionary.
 
@@ -26,9 +28,8 @@ def get_nested_dict(d: dict, key: str, msg='', sep='.'):
 def list_to_csv(l: list, fn=None):
     if fn is not None:
         with open(fn, 'w') as f:
-            for row in l:
-                f.write(','.join(map(str, row)))
-                f.write('\n')
+            writer = csv.writer(f)
+            writer.writerows(l)
     else:
         for row in l:
             print(','.join(map(str, row)))

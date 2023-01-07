@@ -1,6 +1,7 @@
 import datetime
 import os.path
 import tomllib
+import csv
 from reckon.constants import TXNS_FILE, TXNS_TOML, STABLECOINS, CONSOLIDATED_FILE
 from utils import list_to_csv
 
@@ -62,7 +63,8 @@ def consolidated_txns():
         next(f)
         lines = 0
         processed_lines = 0
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             lines += 1
             [
                 number,
@@ -105,7 +107,7 @@ def consolidated_txns():
                 tx_params,
                 url,
                 spam
-            ] = line.rstrip().split(',')
+            ] = row
 
             # Test for quick passes
             # TODO Allow for a spam allowlist
