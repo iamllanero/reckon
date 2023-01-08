@@ -192,6 +192,7 @@ def consolidated_txns():
                         float(sends_amount)/float(receives_amount), '',
                         tx_name, project_chain, project_name, tx_from_addr, url
                     ])
+
             else:
                 if receives_token_symbol.lower() != '' and \
                     tx_name in [
@@ -215,6 +216,26 @@ def consolidated_txns():
                         '', '',
                         tx_name, project_chain, project_name, tx_from_addr, url
                     ])
+
+                elif receives_token_symbol.lower() != '' and \
+                    tx_toml['config'].get('include_receive', False):
+                    txns.append([
+                        date, 'receive',
+                        receives_amount, receives_token_symbol,
+                        0.0, '',
+                        0.0, sends_amount,
+                        tx_name, project_chain, project_name, tx_from_addr, url
+                    ])
+
+                elif tx_toml['config'].get('include_send', False):
+                   txns.append([
+                        date, 'send',
+                        0.0, '',
+                        sends_amount, sends_token_symbol,
+                        0.0, sends_amount,
+                        tx_name, project_chain, project_name, tx_from_addr, url
+                    ]) 
+
 
     print(f'{processed_lines} / {lines}')
     return txns, approval_txns, spam_txns

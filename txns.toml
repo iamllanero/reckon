@@ -22,6 +22,10 @@ manual = [
     'data/reports/manual.csv'
 ]
 
+[config]
+include_send = true
+include_receive = true
+
 
 [consolidated_parser]
 
