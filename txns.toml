@@ -47,6 +47,7 @@ equivalents = [
     ["gmx", "sbfgmx"],
     ["hmim", "hmim-gauge"],
     ["jxjoe", "xjoe"],
+    ["matic", "wmatic"],
     ["memo", "time"],
     ["mumami", "umami"],
     ["pxcvx", "ucvx"],
@@ -54,3 +55,8 @@ equivalents = [
     ["spa", "sspa"],
     ["tbond", "tomb"],
 ]
+
+[token_name_overrides]
+"0xcbf6f78981e63ef813cb71852d72a060b583eecf" = "SLP MATIC-FISH"
+"0xa79983daf2a92c2c902cd74217efe3d8af9fba2a" = "SLP TITAN-MATIC"
+"0x85de135ff062df790a5f20b79120f17d3da63b2d" = "SLP IRON-USDC"

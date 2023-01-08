@@ -117,6 +117,12 @@ def consolidated_txns():
                 spam
             ] = row
 
+            if sends_token_id in tx_toml['token_name_overrides']:
+                sends_token_symbol = tx_toml['token_name_overrides'][sends_token_id]
+
+            if receives_token_id in tx_toml['token_name_overrides']:
+                receives_token_symbol = tx_toml['token_name_overrides'][receives_token_id]
+            
             # Test for quick passes
             # TODO Allow for a spam allowlist
             if spam == 'True':
