@@ -2,7 +2,7 @@ import datetime
 import os.path
 import tomllib
 import csv
-from reckon.constants import TXNS_FILE, TXNS_TOML, STABLECOINS, CONSOLIDATED_FILE
+from reckon.constants import TXNS_FILE, TXNS_TOML, STABLECOINS, CONSOLIDATED_FILE, APPROVALS_FILE, SPAM_FILE
 from utils import list_to_csv
 
 HEADERS = [
@@ -24,6 +24,7 @@ HEADERS = [
 
 def main():
     txns = [HEADERS]
+    
     with open(TXNS_TOML, 'rb') as f:
         tf = tomllib.load(f)
     for fn in tf['reports']['coinbase']:
@@ -51,14 +52,21 @@ def main():
             txns.extend(manual_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    txns.extend(consolidated_txns())
+    
+    consolidated, approvals, spam = consolidated_txns()
+
+    txns.extend(consolidated)
 
     list_to_csv(txns, TXNS_FILE)
+    list_to_csv(approvals, APPROVALS_FILE)
+    list_to_csv(spam, SPAM_FILE)
 
 
 def consolidated_txns():
     tx_toml = tomllib.load(open(TXNS_TOML, 'rb'))
     txns = []
+    approval_txns = []
+    spam_txns = []
     with open(CONSOLIDATED_FILE, 'r') as f:
         next(f)
         lines = 0
@@ -111,11 +119,16 @@ def consolidated_txns():
 
             # Test for quick passes
             # TODO Allow for a spam allowlist
-            if spam == 'True' or \
-                    tx_name in [
-                        'approve',
-                        'transfer'
-                    ]:
+            if spam == 'True':
+                spam_txns.append(row)
+                continue
+
+            elif tx_name == 'approve':
+                approval_txns.append(row)
+                continue
+
+            elif tx_name == 'transfer':
+                # skip
                 continue
 
             # sends_token_symbol = sends_token_symbol.lower()
@@ -198,7 +211,7 @@ def consolidated_txns():
                     ])
 
     print(f'{processed_lines} / {lines}')
-    return txns
+    return txns, approval_txns, spam_txns
 
 
 def manual_txns(fn):
