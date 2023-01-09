@@ -129,8 +129,8 @@ Please feel free to create issues and pull requests with any changes. Since
 this is a personal project, I won't always fix all issues that I am not
 experiencing. But I will try to merge changes reasonably fast.
 
-Since many contributors may also be contributing under their IRL identities,
-here are some gotchas to check when you want to contribute under your
+Since contributors may also be using GitHub with their IRL identities,
+here are some gotchas to check if/when you want to contribute under your
 cryptonym:
 
 - Be sure to create and use the correct GitHub account
@@ -162,3 +162,24 @@ git config --global user.email "iamllanero@gmail.com"
 git config --global user.name
 git config --global user.email
 ```
+
+## LOTS OF WORK TO BE DONE!
+
+- Finish 8949 generator.
+
+- Better poetry setup.
+
+- Modularize the report parsing in txns.py so that reports can be specified
+  with a parser.
+
+- Custom designation of income, buy, sell in the txns.py file
+
+- Ability to manually mark / handle transactions known to be weird.
+
+- Consolidate the configuration options and settings. Right now they are
+  spread across multiple toml and py files.
+
+- Unit tests? Blah!
+
+- Sample report files
+
