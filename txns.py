@@ -132,7 +132,7 @@ def process_batch(txn_dicts):
 
                 txns.append(txline('sell', td))
 
-            elif td['receives.token.symbol'].lower() not in STABLECOINS:
+            if td['receives.token.symbol'].lower() not in STABLECOINS:
                 # If not selling to stables, include a "buy" transaction
                 if td['sends.token.symbol'] in STABLECOINS:
                     td['usd_cost'] = td['sends.amount']
