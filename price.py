@@ -6,11 +6,15 @@ from reckon.constants import TXNS_FILE, PRICED_FILE, STABLECOINS
 
 def compute_value(
     date, 
+    txn_type,
     qty, 
     name, 
     purchase_token_cost, 
     purchase_token, 
     usd_cost):
+
+    if txn_type not in ['buy', 'sell', 'income']:
+        return
 
     if not math.isnan(usd_cost):
         return usd_cost
@@ -52,12 +56,14 @@ def main():
         'chain': 'category',
         'project': 'category',
         'wallet': 'category',
-        'source': 'string',
+        'url': 'string',
+        'id': 'string',
     })
 
     df['usd_value'] = df.apply(
         lambda x: (compute_value(
             x['date'], 
+            x['txn_type'],
             x['qty'], 
             x['symbol'], 
             x['purchase_token_cost'],

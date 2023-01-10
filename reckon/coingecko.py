@@ -4,7 +4,7 @@ import os
 import random
 import requests
 import time
-import utils
+import reckon.utils as utils
 from reckon.constants import COINGECKO_ID_EXPLICIT, PRICE_CACHE_FILE, COINGECKO_COINS_LIST_FILE
 
 COINGECKO_ID_LIST = json.load(open(COINGECKO_COINS_LIST_FILE))
@@ -133,7 +133,7 @@ def get_historical_price(symbol: str, date: datetime):
 
     # Make throttled request to CoinGecko API
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}&localization=false"
-    sleep_time = random.randrange(1500, 3500)
+    sleep_time = random.randrange(2500, 4000)
     time.sleep(sleep_time/1000)
     print(f'Throttle {sleep_time} request price {url}', end = ' => ')
     response = requests.get(url)

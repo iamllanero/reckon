@@ -3,7 +3,7 @@ import requests
 import tomllib
 from reckon.constants import TAGS_FILE, WALLETS_CACHE_DIR
 from reckon.secrets import DEBANK_ACCESSKEY
-from utils import list_to_csv
+from reckon.utils import list_to_csv
 
 TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
 

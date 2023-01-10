@@ -7,7 +7,7 @@ from reckon.constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
                               STABLECOINS, TXNS_FILE, TXNS_TOML)
 from config import TXNS_CONFIG, TAGS
 from reckon.debank import FLAT_HEADERS
-from utils import list_to_csv
+from reckon.utils import list_to_csv
 
 HEADERS = [
     'date',

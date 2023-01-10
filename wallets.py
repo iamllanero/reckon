@@ -4,7 +4,6 @@ import tomllib
 
 from reckon.debank import *
 from reckon.constants import WALLETS_TOML, CONSOLIDATED_FILE, WALLETS_CACHE_DIR
-from utils import list_to_csv
 
 def cmd_build():
     """Build and/or refresh wallets listed in config file"""
