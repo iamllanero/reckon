@@ -5,6 +5,7 @@ import os.path
 import tomllib
 from reckon.constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
                               STABLECOINS, TXNS_FILE, TXNS_TOML)
+from config import TXNS_CONFIG
 from reckon.debank import FLAT_HEADERS
 from utils import list_to_csv
 
@@ -28,30 +29,28 @@ HEADERS = [
 
 def main():
     txns = [HEADERS]
-    
-    with open(TXNS_TOML, 'rb') as f:
-        tf = tomllib.load(f)
-    for fn in tf['reports']['coinbase']:
+
+    for fn in TXNS_CONFIG['reports']['coinbase']:
         if os.path.isfile(fn):
             txns.extend(coinbase_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['coinbasepro']:
+    for fn in TXNS_CONFIG['reports']['coinbasepro']:
         if os.path.isfile(fn):
             txns.extend(coinbasepro_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['binance']:
+    for fn in TXNS_CONFIG['reports']['binance']:
         if os.path.isfile(fn):
             txns.extend(binance_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['blockfi']:
+    for fn in TXNS_CONFIG['reports']['blockfi']:
         if os.path.isfile(fn):
             txns.extend(blockfi_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['manual']:
+    for fn in TXNS_CONFIG['reports']['manual']:
         if os.path.isfile(fn):
             txns.extend(manual_txns(fn))
         else:
@@ -91,7 +90,7 @@ def txline(txn_type, txn_dict):
     ]
 
 
-def process_batch(txn_dicts, include_receive=False, include_send=False):
+def process_batch(txn_dicts):
     txns = []
 
     if len(txn_dicts) > 1:
@@ -154,23 +153,21 @@ def process_batch(txn_dicts, include_receive=False, include_send=False):
                 # Income
                 txns.append(txline('income', td))
 
-            elif td['receives.token.symbol'].lower() != '' and include_receive:
+            elif td['receives.token.symbol'].lower() != '' and \
+                TXNS_CONFIG['output']['include_receive']:
                 txns.append(txline('receive', td))
 
-            elif include_send:
+            elif TXNS_CONFIG['output']['include_send']:
                 txns.append(txline('send', td))
 
     return txns
 
 
 def consolidated_txns():
-    tx_toml = tomllib.load(open(TXNS_TOML, 'rb'))
     txns = []
     approval_txns = []
     spam_txns = []
-    include_send = tx_toml['config'].get('include_send', False)
-    include_receive = tx_toml['config'].get('include_receive', False)
-
+    
     with open(CONSOLIDATED_FILE, 'r') as f:
         next(f)
         lines = 0
@@ -190,13 +187,13 @@ def consolidated_txns():
                 approval_txns.append(",".join(row))
                 continue
 
-            if txn_dict['sends.token_id'] in tx_toml['token_name_overrides']:
+            if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
                 txn_dict['sends.token.symbol'] = \
-                    tx_toml['token_name_overrides'][txn_dict['sends.token_id']]
+                    TXNS_CONFIG['token_name_overrides'][txn_dict['sends.token_id']]
 
-            if txn_dict['receives.token_id'] in tx_toml['token_name_overrides']:
+            if txn_dict['receives.token_id'] in TXNS_CONFIG['token_name_overrides']:
                 txn_dict['receives.token.symbol'] = \
-                    tx_toml['token_name_overrides'][txn_dict['receives.token_id']]
+                    TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
 
             if txn_dict['sends.token.symbol'].lower() in STABLECOINS and \
                     txn_dict['receives.token.symbol'].lower() in STABLECOINS:
@@ -204,18 +201,18 @@ def consolidated_txns():
 
             if sorted([txn_dict['sends.token.symbol'].lower(), 
                 txn_dict['receives.token.symbol'].lower()]) in \
-                    tx_toml['consolidated_parser']['equivalents']:
+                    TXNS_CONFIG['consolidated_parser']['equivalents']:
                 continue  # Equivalents swap
 
             processed_lines += 1
     
             if txn_dict['sub'] == '0' and len(txn_batch) > 0:
-                txns.extend(process_batch(txn_batch, include_receive, include_send))
+                txns.extend(process_batch(txn_batch))
                 txn_batch = [txn_dict]
             elif txn_dict['sub'] != '0':
                 txn_batch.append(txn_dict)
 
-        txns.extend(process_batch(txn_batch, include_receive, include_send))
+        txns.extend(process_batch(txn_batch))
 
 
     print(f'{processed_lines} / {lines}')

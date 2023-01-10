@@ -22,7 +22,7 @@ manual = [
     'data/reports/manual.csv'
 ]
 
-[config]
+[output]
 include_send = true
 include_receive = true
 
