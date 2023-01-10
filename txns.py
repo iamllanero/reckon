@@ -210,12 +210,17 @@ def consolidated_txns():
 
             processed_lines += 1
     
-            if txn_dict['sub'] == '0' and len(txn_batch) > 0:
-                txns.extend(process_batch(txn_batch))
-                txn_batch = [txn_dict]
-            elif txn_dict['sub'] != '0':
+            if txn_dict['sub'] != '0':
                 txn_batch.append(txn_dict)
 
+            elif len(txn_batch) > 0:
+                txns.extend(process_batch(txn_batch))
+                txn_batch = [txn_dict]
+
+            else:
+                # First transaction
+                txn_batch = [txn_dict]
+            
         txns.extend(process_batch(txn_batch))
 
 
