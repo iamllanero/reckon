@@ -21,7 +21,8 @@ HEADERS = [
     'chain',
     'project',
     'wallet',
-    'source'
+    'url',
+    'id'
 ]
 
 
@@ -85,7 +86,8 @@ def txline(txn_type, txn_dict):
         txn_dict['project.chain'],
         txn_dict['project.name'], 
         txn_dict['tx.from_addr'], 
-        txn_dict['url']
+        txn_dict['url'],
+        txn_dict['id']
     ]
 
 
