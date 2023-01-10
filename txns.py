@@ -127,14 +127,14 @@ def process_batch(txn_dicts):
 
             if td['sends.token.symbol'].lower() not in STABLECOINS:
                 # If not buying w/stables, include a "sell" transaction
-                if td['receives.token.symbol'] in STABLECOINS:
+                if td['receives.token.symbol'].lower() in STABLECOINS:
                     td['usd_cost'] = td['receives.amount']
 
                 txns.append(txline('sell', td))
 
             if td['receives.token.symbol'].lower() not in STABLECOINS:
                 # If not selling to stables, include a "buy" transaction
-                if td['sends.token.symbol'] in STABLECOINS:
+                if td['sends.token.symbol'].lower() in STABLECOINS:
                     td['usd_cost'] = td['sends.amount']
 
                 txns.append(txline('buy', td))
@@ -220,7 +220,8 @@ def consolidated_txns():
             else:
                 # First transaction
                 txn_batch = [txn_dict]
-            
+
+        # Last transaction(s)    
         txns.extend(process_batch(txn_batch))
 
 
