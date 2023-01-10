@@ -39,7 +39,7 @@ def compute_value(
 def main():
     """
     From txns.csv
-    date,txn_type,qty,symbol,purchase_token_cost,purchase_token,unit_cost,usd_cost,txn_name,chain,project,wallet,source
+    date,txn_type,qty,symbol,purchase_token_cost,purchase_token,usd_cost,txn_name,chain,project,wallet,url,id
     """
     df = pd.read_csv(TXNS_FILE)
 
@@ -50,7 +50,6 @@ def main():
         'symbol': 'category',
         'purchase_token_cost': 'float64',
         'purchase_token': 'category',
-        'unit_cost': 'float64',
         'usd_cost': 'float64',
         'txn_name': 'category',
         'chain': 'category',
