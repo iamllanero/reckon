@@ -190,10 +190,6 @@ def consolidated_txns():
                 approval_txns.append(",".join(row))
                 continue
 
-            # elif txn_dict['tx.name'] == 'transfer':
-            #     # skip
-            #     continue
-
             if txn_dict['sends.token_id'] in tx_toml['token_name_overrides']:
                 txn_dict['sends.token.symbol'] = \
                     tx_toml['token_name_overrides'][txn_dict['sends.token_id']]
