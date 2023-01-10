@@ -184,11 +184,11 @@ def consolidated_txns():
             # Test for quick passes
             # TODO Allow for a spam allowlist
             if txn_dict['spam'] == 'True':
-                spam_txns.append(",".join(row))
+                spam_txns.append(row)
                 continue
 
             elif txn_dict['tx.name'] == 'approve':
-                approval_txns.append(",".join(row))
+                approval_txns.append(row)
                 continue
 
             if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
