@@ -16,7 +16,6 @@ HEADERS = [
     'symbol',
     'purchase_token_cost',
     'purchase_token',
-    'unit_cost',  # Denominated in the purchase token
     'usd_cost',   # Including fees
     'txn_name',
     'chain',
@@ -72,9 +71,6 @@ def txline(txn_type, txn_dict):
     date = datetime.datetime.fromtimestamp(
             float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
 
-    unit_cost = '' if txn_type != "buy" else \
-        float(txn_dict['sends.amount']) / float(txn_dict['receives.amount'])
-
     return [
         date, 
         txn_type,
@@ -82,7 +78,6 @@ def txline(txn_type, txn_dict):
         txn_dict['receives.token.symbol'],
         txn_dict['sends.amount'],
         txn_dict['sends.token.symbol'],
-        unit_cost,
         txn_dict.get('usd_cost', ''), 
         txn_dict['tx.name'], 
         txn_dict['project.chain'],
