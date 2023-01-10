@@ -3,5 +3,6 @@ data/*
 !data/coingecko_coins_list.json
 reckon/secrets.py
 wallets.toml
+tags_local.toml
 .DS_STORE
 wip.py
