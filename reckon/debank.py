@@ -398,6 +398,7 @@ def get_id_url(txn_id, chain_id):
         'ftm': 'https://ftmscan.com/tx',
         'avax': 'https://snowtrace.io/tx',
         'arb': 'https://arbiscan.io/tx',
+        'matic': 'https://polygonscan.com/tx'
     }
     if chain_id in url_map:
         return f'{url_map[chain_id]}/{txn_id}'

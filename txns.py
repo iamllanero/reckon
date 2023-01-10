@@ -1,8 +1,12 @@
+import csv
 import datetime
 import os.path
+
 import tomllib
-import csv
-from reckon.constants import TXNS_FILE, TXNS_TOML, STABLECOINS, CONSOLIDATED_FILE
+from reckon.constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
+                              STABLECOINS, TXNS_FILE, TXNS_TOML)
+from config import TXNS_CONFIG, TAGS
+from reckon.debank import FLAT_HEADERS
 from utils import list_to_csv
 
 HEADERS = [
@@ -18,187 +22,205 @@ HEADERS = [
     'chain',
     'project',
     'wallet',
-    'source'
+    'url',
+    'id'
 ]
 
 
 def main():
     txns = [HEADERS]
-    with open(TXNS_TOML, 'rb') as f:
-        tf = tomllib.load(f)
-    for fn in tf['reports']['coinbase']:
+
+    for fn in TXNS_CONFIG['reports']['coinbase']:
         if os.path.isfile(fn):
             txns.extend(coinbase_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['coinbasepro']:
+    for fn in TXNS_CONFIG['reports']['coinbasepro']:
         if os.path.isfile(fn):
             txns.extend(coinbasepro_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['binance']:
+    for fn in TXNS_CONFIG['reports']['binance']:
         if os.path.isfile(fn):
             txns.extend(binance_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['blockfi']:
+    for fn in TXNS_CONFIG['reports']['blockfi']:
         if os.path.isfile(fn):
             txns.extend(blockfi_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    for fn in tf['reports']['manual']:
+    for fn in TXNS_CONFIG['reports']['manual']:
         if os.path.isfile(fn):
             txns.extend(manual_txns(fn))
         else:
             print(f'WARN: {fn} from {TXNS_TOML} not found')
-    txns.extend(consolidated_txns())
+    
+    consolidated, approvals, spam = consolidated_txns()
+
+    txns.extend(consolidated)
 
     list_to_csv(txns, TXNS_FILE)
+    list_to_csv(approvals, APPROVALS_FILE)
+    list_to_csv(spam, SPAM_FILE)
+
+
+def txline(txn_type, txn_dict):
+    show_tags = TXNS_CONFIG['output'].get("show_tags", False)
+    
+
+    date = datetime.datetime.fromtimestamp(
+            float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
+
+    unit_cost = '' if txn_type != "buy" else \
+        float(txn_dict['sends.amount']) / float(txn_dict['receives.amount'])
+
+    return [
+        date, 
+        txn_type,
+        txn_dict['receives.amount'],
+        txn_dict['receives.token.symbol'],
+        txn_dict['sends.amount'],
+        txn_dict['sends.token.symbol'],
+        unit_cost,
+        txn_dict.get('usd_cost', ''), 
+        txn_dict['tx.name'], 
+        txn_dict['project.chain'],
+        txn_dict['project.name'], 
+        txn_dict['tx.from_addr'] if not show_tags else \
+            TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']), 
+        txn_dict['url'],
+        txn_dict['id']
+    ]
+
+
+def process_batch(txn_dicts):
+    txns = []
+
+    if len(txn_dicts) > 1:
+        # use averages to calculate multi-token LP deposit or withdrawals
+
+        send_amounts = [float(i['sends.amount']) if i['sends.amount'] else 0.0 \
+            for i in txn_dicts]
+        recv_amounts = [float(i['receives.amount']) if i['receives.amount'] else 0.0 \
+            for i in txn_dicts]
+
+        nonzero_sends = sum([1 for i in send_amounts if i > 0])
+        nonzero_recvs = sum([1 for i in recv_amounts if i > 0])
+
+        if nonzero_sends == 1 and nonzero_recvs == len(txn_dicts):
+            # One token was sent, multiple were received back
+            for td in txn_dicts:
+                td['sends.token.symbol'] = txn_dicts[0]['sends.token.symbol']
+                td['sends.amount'] = sum(send_amounts) / float(len(send_amounts))
+
+        if nonzero_recvs == 1 and nonzero_sends == len(txn_dicts):
+            # Multiple tokens were sent, one was received back
+            for td in txn_dicts:
+                td['receives.token.symbol'] = txn_dicts[0]['receives.token.symbol']
+                td['receives.amount'] = sum(recv_amounts) / float(len(recv_amounts))
+            
+    for td in txn_dicts:
+        if td['sends.token.symbol'].lower() != '' and \
+            td['receives.token.symbol'].lower() != '':
+            # swap of some kind
+
+            if td['sends.token.symbol'].lower() not in STABLECOINS:
+                # If not buying w/stables, include a "sell" transaction
+                if td['receives.token.symbol'] in STABLECOINS:
+                    td['usd_cost'] = td['receives.amount']
+
+                txns.append(txline('sell', td))
+
+            elif td['receives.token.symbol'].lower() not in STABLECOINS:
+                # If not selling to stables, include a "buy" transaction
+                if td['sends.token.symbol'] in STABLECOINS:
+                    td['usd_cost'] = td['sends.amount']
+
+                txns.append(txline('buy', td))
+
+        else:
+            if td['receives.token.symbol'].lower() != '' and \
+                td['tx.name'] in [
+                    'claim',
+                    'claim_rewards',
+                    'claimAll',
+                    'claimAllCTR',
+                    'claimFromDistributorViaUniV2EthPair',
+                    'claimMulti',
+                    'claimReward',
+                    'claimRewards',
+                    'getReward',
+                    'harvest', 
+                    'redeem'
+                    ]:
+                # Income
+                txns.append(txline('income', td))
+
+            elif td['receives.token.symbol'].lower() != '' and \
+                TXNS_CONFIG['output']['include_receive']:
+                txns.append(txline('receive', td))
+
+            elif TXNS_CONFIG['output']['include_send']:
+                txns.append(txline('send', td))
+
+    return txns
 
 
 def consolidated_txns():
-    tx_toml = tomllib.load(open(TXNS_TOML, 'rb'))
     txns = []
+    approval_txns = []
+    spam_txns = []
+    
     with open(CONSOLIDATED_FILE, 'r') as f:
         next(f)
         lines = 0
         processed_lines = 0
         reader = csv.reader(f)
+        txn_batch = []
         for row in reader:
             lines += 1
-            [
-                number,
-                sub,
-                cate_id,
-                id,
-                other_addr,
-                other_addr_tag,
-                project_id,
-                project_name,
-                project_chain,
-                project_site_url,
-                time_at,
-                receives_amount,
-                receives_from_addr,
-                receives_from_addr_tag,
-                receives_token_id,
-                receives_token_symbol,
-                receives_token_is_verified,
-                sends_amount,
-                sends_to_addr,
-                sends_to_addr_tag,
-                sends_token_id,
-                sends_token_symbol,
-                sends_token_is_verified,
-                token_approve_spender,
-                token_approve_token_id,
-                token_approve_token_symbol,
-                token_approve_token_is_verified,
-                token_approve_value,
-                tx_name,
-                tx_status,
-                tx_from_addr,
-                tx_from_addr_tag,
-                tx_to_addr,
-                tx_to_addr_tag,
-                tx_eth_gas_fee,
-                tx_usd_gas_fee,
-                tx_value,
-                tx_params,
-                url,
-                spam
-            ] = row
-
+            txn_dict = dict(zip(FLAT_HEADERS, row))
             # Test for quick passes
             # TODO Allow for a spam allowlist
-            if spam == 'True' or \
-                    tx_name in [
-                        'approve',
-                        'transfer'
-                    ]:
+            if txn_dict['spam'] == 'True':
+                spam_txns.append(",".join(row))
                 continue
 
-            # sends_token_symbol = sends_token_symbol.lower()
-            # receives_token_symbol = receives_token_symbol.lower()
-            if sends_token_symbol.lower() in STABLECOINS and \
-                    receives_token_symbol.lower() in STABLECOINS:
+            elif txn_dict['tx.name'] == 'approve':
+                approval_txns.append(",".join(row))
+                continue
+
+            if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
+                txn_dict['sends.token.symbol'] = \
+                    TXNS_CONFIG['token_name_overrides'][txn_dict['sends.token_id']]
+
+            if txn_dict['receives.token_id'] in TXNS_CONFIG['token_name_overrides']:
+                txn_dict['receives.token.symbol'] = \
+                    TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
+
+            if txn_dict['sends.token.symbol'].lower() in STABLECOINS and \
+                    txn_dict['receives.token.symbol'].lower() in STABLECOINS:
                 continue  # Stablecoin swap
 
-            if sorted([sends_token_symbol.lower(), 
-                receives_token_symbol.lower()]) in \
-                    tx_toml['consolidated_parser']['equivalents']:
+            if sorted([txn_dict['sends.token.symbol'].lower(), 
+                txn_dict['receives.token.symbol'].lower()]) in \
+                    TXNS_CONFIG['consolidated_parser']['equivalents']:
                 continue  # Equivalents swap
 
             processed_lines += 1
-            date = datetime.datetime.fromtimestamp(
-                float(time_at)).strftime('%Y-%m-%d %H:%M:%S')
+    
+            if txn_dict['sub'] == '0' and len(txn_batch) > 0:
+                txns.extend(process_batch(txn_batch))
+                txn_batch = [txn_dict]
+            elif txn_dict['sub'] != '0':
+                txn_batch.append(txn_dict)
 
-            if sends_token_symbol.lower() != '' and \
-                receives_token_symbol.lower() != '':
+        txns.extend(process_batch(txn_batch))
 
-                if sends_token_symbol.lower() in STABLECOINS:
-                    # Buy with stablecoin
-                    txns.append([
-                        date, 'buy',
-                        receives_amount, receives_token_symbol,
-                        sends_amount, sends_token_symbol,
-                        float(sends_amount) /
-                        float(receives_amount), sends_amount,
-                        tx_name, project_chain, project_name, tx_from_addr, url
-                    ])
-
-                elif receives_token_symbol.lower() in STABLECOINS:
-                    # Sell with stablecoin
-                    txns.append([
-                        date, 'sell',
-                        sends_amount, sends_token_symbol,
-                        receives_amount, receives_token_symbol,
-                        float(receives_amount) /
-                        float(sends_amount), receives_amount,
-                        tx_name, project_chain, project_name, tx_from_addr, url
-                    ])
-
-                else:
-                    txns.append([
-                        date, 'sell',
-                        sends_amount, sends_token_symbol,
-                        receives_amount, receives_token_symbol,
-                        float(receives_amount)/float(sends_amount), '',
-                        tx_name, project_chain, project_name, tx_from_addr, url
-                    ])
-                    txns.append([
-                        date, 'buy',
-                        receives_amount, receives_token_symbol,
-                        sends_amount, sends_token_symbol,
-                        float(sends_amount)/float(receives_amount), '',
-                        tx_name, project_chain, project_name, tx_from_addr, url
-                    ])
-            else:
-                if receives_token_symbol.lower() != '' and \
-                    tx_name in [
-                        'claim',
-                        'claim_rewards',
-                        'claimAll',
-                        'claimAllCTR',
-                        'claimFromDistributorViaUniV2EthPair',
-                        'claimMulti',
-                        'claimReward',
-                        'claimRewards',
-                        'getReward',
-                        'harvest', 
-                        'redeem'
-                        ]:
-                    # Income
-                    txns.append([
-                        date, 'income',
-                        receives_amount, receives_token_symbol,
-                        sends_amount, sends_token_symbol,
-                        '', '',
-                        tx_name, project_chain, project_name, tx_from_addr, url
-                    ])
 
     print(f'{processed_lines} / {lines}')
-    return txns
+    return txns, approval_txns, spam_txns
 
 
 def manual_txns(fn):
