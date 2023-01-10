@@ -5,7 +5,7 @@ import os.path
 import tomllib
 from reckon.constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
                               STABLECOINS, TXNS_FILE, TXNS_TOML)
-from config import TXNS_CONFIG
+from config import TXNS_CONFIG, TAGS
 from reckon.debank import FLAT_HEADERS
 from utils import list_to_csv
 
@@ -66,6 +66,9 @@ def main():
 
 
 def txline(txn_type, txn_dict):
+    show_tags = TXNS_CONFIG['output'].get("show_tags", False)
+    
+
     date = datetime.datetime.fromtimestamp(
             float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -84,7 +87,8 @@ def txline(txn_type, txn_dict):
         txn_dict['tx.name'], 
         txn_dict['project.chain'],
         txn_dict['project.name'], 
-        txn_dict['tx.from_addr'], 
+        txn_dict['tx.from_addr'] if not show_tags else \
+            TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']), 
         txn_dict['url'],
         txn_dict['id']
     ]

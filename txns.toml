@@ -25,6 +25,7 @@ manual = [
 [output]
 include_send = true
 include_receive = true
+show_tags = true
 
 
 [consolidated_parser]
