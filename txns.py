@@ -132,7 +132,7 @@ def process_batch(txn_dicts):
 
                 txns.append(txline('sell', td))
 
-            elif td['receives.token.symbol'].lower() not in STABLECOINS:
+            if td['receives.token.symbol'].lower() not in STABLECOINS:
                 # If not selling to stables, include a "buy" transaction
                 if td['sends.token.symbol'] in STABLECOINS:
                     td['usd_cost'] = td['sends.amount']
@@ -184,11 +184,11 @@ def consolidated_txns():
             # Test for quick passes
             # TODO Allow for a spam allowlist
             if txn_dict['spam'] == 'True':
-                spam_txns.append(",".join(row))
+                spam_txns.append(row)
                 continue
 
             elif txn_dict['tx.name'] == 'approve':
-                approval_txns.append(",".join(row))
+                approval_txns.append(row)
                 continue
 
             if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
@@ -210,12 +210,17 @@ def consolidated_txns():
 
             processed_lines += 1
     
-            if txn_dict['sub'] == '0' and len(txn_batch) > 0:
-                txns.extend(process_batch(txn_batch))
-                txn_batch = [txn_dict]
-            elif txn_dict['sub'] != '0':
+            if txn_dict['sub'] != '0':
                 txn_batch.append(txn_dict)
 
+            elif len(txn_batch) > 0:
+                txns.extend(process_batch(txn_batch))
+                txn_batch = [txn_dict]
+
+            else:
+                # First transaction
+                txn_batch = [txn_dict]
+            
         txns.extend(process_batch(txn_batch))
 
 
