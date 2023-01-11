@@ -75,7 +75,21 @@ def main():
             x['usd_cost'])),
         axis=1)
 
-    df.to_csv(PRICED_FILE, index=False)
+    df[[
+        'date',
+        'txn_type',
+        'qty',
+        'symbol',
+        'purchase_token_cost',
+        'purchase_token',
+        'usd_value',
+        'txn_name',
+        'chain',
+        'project',
+        'wallet',
+        'id',
+        'url',
+    ]].to_csv(PRICED_FILE, index=False)
 
     # TODO Should create an output file of unpriced transactions.
     #      Especially if it can be used directly to fill price_cache.csv
