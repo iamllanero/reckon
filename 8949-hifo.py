@@ -21,7 +21,6 @@ def main():
         'symbol': 'string',
         'purchase_token_cost': 'float64',
         'purchase_token': 'string',
-        'usd_cost': 'float64',
         'txn_name': 'string',
         'chain': 'string',
         'project': 'string',
