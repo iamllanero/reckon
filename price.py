@@ -16,13 +16,18 @@ def compute_value(
     if txn_type not in ['buy', 'sell', 'income']:
         return
 
-    if not math.isnan(usd_cost):
-        return usd_cost
+    # if not math.isnan(usd_cost):
+    #     return usd_cost
 
     if type(purchase_token) is str and \
         purchase_token.lower() in STABLECOINS:
-        print(f'WARN: Pricing a stablecoin for {qty} {name} <= {purchase_token_cost} {purchase_token}')
+        # print(f'WARN: Pricing a stablecoin for {qty} {name} <= {purchase_token_cost} {purchase_token}')
         return purchase_token_cost
+
+    if type(name) is str and \
+        name.lower() in STABLECOINS:
+        # print(f'WARN: Pricing a stablecoin for {qty} {name} <= {purchase_token_cost} {purchase_token}')
+        return qty
 
     price = cg.get_historical_price(name, date.to_pydatetime())
 
