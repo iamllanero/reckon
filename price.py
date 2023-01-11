@@ -72,6 +72,9 @@ def main():
 
     df.to_csv(PRICED_FILE, index=False)
 
+    # TODO Should create an output file of unpriced transactions.
+    #      Especially if it can be used directly to fill price_cache.csv
+
     cg.clean_cache()
 
 
