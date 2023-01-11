@@ -133,7 +133,7 @@ def get_historical_price(symbol: str, date: datetime):
 
     # Make throttled request to CoinGecko API
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}&localization=false"
-    sleep_time = random.randrange(2500, 4000)
+    sleep_time = random.randrange(3000, 5000)
     time.sleep(sleep_time/1000)
     print(f'Throttle {sleep_time} request price {url}', end = ' => ')
     response = requests.get(url)
