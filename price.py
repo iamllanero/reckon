@@ -11,7 +11,7 @@ def compute_value(
     name, 
     purchase_token_cost, 
     purchase_token, 
-    usd_cost):
+    ):
 
     if txn_type not in ['buy', 'sell', 'income']:
         return
@@ -55,13 +55,12 @@ def main():
         'symbol': 'category',
         'purchase_token_cost': 'float64',
         'purchase_token': 'category',
-        'usd_cost': 'float64',
         'txn_name': 'category',
         'chain': 'category',
         'project': 'category',
         'wallet': 'category',
-        'url': 'string',
         'id': 'string',
+        'url': 'string',
     })
 
     df['usd_value'] = df.apply(
@@ -72,7 +71,7 @@ def main():
             x['symbol'], 
             x['purchase_token_cost'],
             x['purchase_token'],
-            x['usd_cost'])),
+        )),
         axis=1)
 
     df[[

@@ -16,15 +16,18 @@ HEADERS = [
     'symbol',
     'purchase_token_cost',
     'purchase_token',
-    'usd_cost',   # Including fees
+    # 'usd_cost',   # Including fees
     'txn_name',
     'chain',
     'project',
     'wallet',
+    'id',
     'url',
-    'id'
 ]
 
+# 2023-01-11: Stubbed out unit cost and usd cost
+# TODO Remove code for calculating USD cost
+# TODO Change report processing to use tx_line (and maybe externalize)
 
 def main():
     txns = [HEADERS]
@@ -78,14 +81,14 @@ def txline(txn_type, txn_dict):
         txn_dict['receives.token.symbol'],
         txn_dict['sends.amount'],
         txn_dict['sends.token.symbol'],
-        txn_dict.get('usd_cost', ''), 
+        # txn_dict.get('usd_cost', ''), 
         txn_dict['tx.name'], 
         txn_dict['project.chain'],
         txn_dict['project.name'], 
         txn_dict['tx.from_addr'] if not show_tags else \
             TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']), 
+        txn_dict['id'],
         txn_dict['url'],
-        txn_dict['id']
     ]
 
 
@@ -240,11 +243,17 @@ def manual_txns(fn):
                     txns.append([
                         date,
                         'buy',
-                        qty, token,
-                        purchase_token_qty, purchase_token,
-                        float(purchase_token_qty) /
-                        float(qty), purchase_token_qty,
-                        tx_type, location, location, location, fn
+                        qty, 
+                        token,
+                        purchase_token_qty, 
+                        purchase_token,
+                        # float(purchase_token_qty) / float(qty), 
+                        # purchase_token_qty,
+                        tx_type, 
+                        location, 
+                        location, 
+                        location, 
+                        fn
                     ])
     return txns
 
@@ -257,19 +266,43 @@ def coinbase_txns(fn):
         for row in reader:
             [id, txn_type, date, asset, qty, cost_basis, data_source,
              asset_disposed, qty_disposed, proceeds] = row
+
             date = f'{date[:10]} {date[11:19]}'
 
             if txn_type in ['Reward', 'Interest', 'Fork']:
                 if float(cost_basis) > 0.40:
-                    txns.append([date, 'income', qty, asset,
-                                 qty_disposed, asset_disposed, '', cost_basis,
-                                 txn_type, 'coinbase', 'coinbase', 'coinbase', fn])
+                    txns.append([
+                        date, 
+                        'income', 
+                        qty, 
+                        asset,
+                        qty_disposed, 
+                        asset_disposed,
+                        # '', 
+                        # cost_basis,
+                        txn_type,
+                        'coinbase',
+                        'coinbase',
+                        'coinbase',
+                        fn
+                    ])
             elif txn_type == 'Buy':
                 if asset.lower() not in STABLECOINS:
-                    txns.append([date, 'buy', qty, asset,
-                                 cost_basis, 'USD',
-                                 float(cost_basis) / float(qty), cost_basis,
-                                 txn_type, 'coinbase', 'coinbase', 'coinbase', fn])
+                    txns.append([
+                        date,
+                        'buy', 
+                        qty, 
+                        asset,
+                        cost_basis, 
+                        'USD',
+                        # float(cost_basis) / float(qty), 
+                        # cost_basis,
+                        txn_type,
+                        'coinbase', 
+                        'coinbase', 
+                        'coinbase', 
+                        fn
+                    ])
             elif txn_type == 'Converted from':
                 from_token = asset_disposed
                 from_token_qty = qty_disposed
@@ -279,25 +312,67 @@ def coinbase_txns(fn):
                 date = f'{date[:10]} {date[11:19]}'
 
                 if from_token.lower() in STABLECOINS:
-                    txns.append([date, 'buy', qty, asset,
-                                 from_token_qty, from_token,
-                                 float(from_token_qty) /
-                                 float(qty), cost_basis,
-                                 txn_type, 'coinbase', 'coinbase', 'coinbase', fn])
+                    txns.append([
+                        date, 
+                        'buy', 
+                        qty, 
+                        asset,
+                        from_token_qty, 
+                        from_token,
+                        # float(from_token_qty) / float(qty), 
+                        # cost_basis,
+                        txn_type, 
+                        'coinbase', 
+                        'coinbase', 
+                        'coinbase', 
+                        fn
+                    ])
                 elif asset.lower() in STABLECOINS:
-                    txns.append([date, 'sell', from_token_qty, from_token,
-                                 qty, asset, float(
-                                     qty) / float(from_token_qty), cost_basis,
-                                 txn_type, 'coinbase', 'coinbase', 'coinbase', fn])
+                    txns.append([
+                        date, 
+                        'sell', 
+                        from_token_qty, 
+                        from_token,
+                        qty, asset, 
+                        # float(qty) / float(from_token_qty), 
+                        # cost_basis,
+                        txn_type, 
+                        'coinbase', 
+                        'coinbase', 
+                        'coinbase', 
+                        fn
+                    ])
                 else:
-                    txns.append([date, 'sell', from_token_qty, from_token,
-                                 qty, asset, float(
-                                     qty) / float(from_token_qty), cost_basis,
-                                 'Converted from', 'coinbase', 'coinbase', 'coinbase', fn])
-                    txns.append([date, 'buy', qty, asset,
-                                 from_token_qty, from_token,  float(
-                                     from_token_qty) / float(qty), cost_basis,
-                                 txn_type, 'coinbase', 'coinbase', 'coinbase', fn])
+                    txns.append([
+                        date, 
+                        'sell', 
+                        from_token_qty, 
+                        from_token,
+                        qty, 
+                        asset, 
+                        # float(qty) / float(from_token_qty), 
+                        # cost_basis,
+                        'Converted from', 
+                        'coinbase', 
+                        'coinbase', 
+                        'coinbase', 
+                        fn
+                    ])
+                    txns.append([
+                        date, 
+                        'buy', 
+                        qty, 
+                        asset,
+                        from_token_qty, 
+                        from_token,  
+                        # float(from_token_qty) / float(qty), 
+                        # cost_basis,
+                        txn_type, 
+                        'coinbase', 
+                        'coinbase', 
+                        'coinbase', 
+                        fn
+                    ])
             elif txn_type in ['Deposit', 'Incoming', 'Receive', 'Send', 'Withdrawal']:
                 pass  # Not a transaction
             else:
@@ -329,11 +404,19 @@ def coinbasepro_txns(fn):
                 amount = float(amount) * -1
                 if unit.lower() in STABLECOINS:
                     txns.append([
-                        f'{time[:10]} {time[11:19]}', 'buy',
-                        next_amount, next_unit,
-                        amount, unit,
-                        float(amount) / float(next_amount), amount,
-                        tx_type, 'coinbasepro', 'coinbasepro', 'coinbasepro', fn
+                        f'{time[:10]} {time[11:19]}', 
+                        'buy',
+                        next_amount, 
+                        next_unit,
+                        amount, 
+                        unit,
+                        # float(amount) / float(next_amount), 
+                        # amount,
+                        tx_type, 
+                        'coinbasepro', 
+                        'coinbasepro', 
+                        'coinbasepro', 
+                        fn
                     ])
                 else:
                     print(",".join(row))
@@ -388,53 +471,69 @@ def binance_txns(fn):
                 pass
             elif category in ['Buy']:
                 txns.append([
-                    time, 'buy',
-                    realized_amount_quote_asset, quote_asset,
-                    realized_amount_base_asset, base_asset,
-                    float(realized_amount_base_asset) /
-                    float(realized_amount_quote_asset),
-                    realized_amount_base_asset,
+                    time, 
+                    'buy',
+                    realized_amount_quote_asset, 
+                    quote_asset,
+                    realized_amount_base_asset, 
+                    base_asset,
+                    # float(realized_amount_base_asset) / float(realized_amount_quote_asset),
+                    # realized_amount_base_asset,
                     f'{category}/{operation}',
-                    'binance', 'binance', 'binance',
+                    'binance', 
+                    'binance', 
+                    'binance',
                     fn
                 ])
             elif category in ['Sell']:
                 txns.append([
-                    time, 'sell',
-                    realized_amount_base_asset, base_asset,
-                    realized_amount_quote_asset, quote_asset,
-                    float(realized_amount_quote_asset) /
-                    float(realized_amount_base_asset),
-                    realized_amount_quote_asset,
+                    time, 
+                    'sell',
+                    realized_amount_base_asset, 
+                    base_asset,
+                    realized_amount_quote_asset, 
+                    quote_asset,
+                    # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
+                    # realized_amount_quote_asset,
                     f'{category}/{operation}',
-                    'binance', 'binance', 'binance',
+                    'binance', 
+                    'binance', 
+                    'binance',
                     fn
                 ])
             elif category in ['Spot Trading']:
                 if operation == 'Buy':
                     if base_asset.lower() not in STABLECOINS:
                         txns.append([
-                            time, 'buy',
-                            realized_amount_base_asset, base_asset,
-                            realized_amount_quote_asset, quote_asset,
-                            float(realized_amount_quote_asset) /
-                            float(realized_amount_base_asset),
-                            realized_amount_quote_asset,
+                            time, 
+                            'buy',
+                            realized_amount_base_asset, 
+                            base_asset,
+                            realized_amount_quote_asset, 
+                            quote_asset,
+                            # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
+                            # realized_amount_quote_asset,
                             f'{category}/{operation}',
-                            'binance', 'binance', 'binance',
+                            'binance', 
+                            'binance', 
+                            'binance',
                             fn
                         ])
                 elif operation == 'Sell':
                     if base_asset.lower() not in STABLECOINS:
                         txns.append([
-                            time, 'sell',
-                            realized_amount_base_asset, base_asset,
-                            realized_amount_quote_asset, quote_asset,
-                            float(realized_amount_quote_asset) /
-                            float(realized_amount_base_asset),
-                            realized_amount_quote_asset,
+                            time, 
+                            'sell',
+                            realized_amount_base_asset, 
+                            base_asset,
+                            realized_amount_quote_asset, 
+                            quote_asset,
+                            # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
+                            # realized_amount_quote_asset,
                             f'{category}/{operation}',
-                            'binance', 'binance', 'binance',
+                            'binance', 
+                            'binance', 
+                            'binance',
                             fn
                         ])
                 else:
@@ -467,10 +566,17 @@ def blockfi_txns(fn):
                     txns.append([
                         confirmed_at,
                         'income',
-                        f'{float(amount):.8f}', cryptocurrency,
-                        '', '',
-                        '', usd_cost,
-                        txn_type, 'blockfi', 'blockfi', 'blockfi', fn
+                        f'{float(amount):.8f}', 
+                        cryptocurrency,
+                        '', 
+                        '',
+                        # '', 
+                        # usd_cost,
+                        txn_type, 
+                        'blockfi', 
+                        'blockfi', 
+                        'blockfi', 
+                        fn
                     ])
             elif txn_type == 'Trade':
                 [next_cryptocurrency, next_amount, next_txn_type,
@@ -482,37 +588,65 @@ def blockfi_txns(fn):
                         txns.append([
                             confirmed_at,
                             'buy',
-                            f'{float(next_amount):.8f}', next_cryptocurrency,
-                            abs(float(amount)), cryptocurrency,
-                            f'{abs(float(amount))/float(next_amount):.8f}', abs(float(amount)),
-                            txn_type, 'blockfi', 'blockfi', 'blockfi', fn
+                            f'{float(next_amount):.8f}', 
+                            next_cryptocurrency,
+                            abs(float(amount)), 
+                            cryptocurrency,
+                            # f'{abs(float(amount))/float(next_amount):.8f}', 
+                            # abs(float(amount)),
+                            txn_type, 
+                            'blockfi', 
+                            'blockfi', 
+                            'blockfi', 
+                            fn
                         ])
                 else:
                     if next_cryptocurrency.lower() in STABLECOINS:
                         txns.append([
                             confirmed_at,
                             'sell',
-                            f'{float(amount):.8f}', cryptocurrency,
-                            next_amount, next_cryptocurrency,
-                            f'{float(next_amount)/float(amount):.8f}', '',
-                            txn_type, 'blockfi', 'blockfi', 'blockfi', fn
+                            f'{float(amount):.8f}', 
+                            cryptocurrency,
+                            next_amount, 
+                            next_cryptocurrency,
+                            # f'{float(next_amount)/float(amount):.8f}', 
+                            # '',
+                            txn_type,
+                            'blockfi', 
+                            'blockfi', 
+                            'blockfi', 
+                            fn
                         ])
                     else:
                         txns.append([
                             confirmed_at,
                             'sell',
-                            f'{float(amount):.8f}', cryptocurrency,
-                            next_amount, next_cryptocurrency,
-                            f'{float(next_amount)/float(amount):.8f}', '',
-                            txn_type, 'blockfi', 'blockfi', 'blockfi', fn
+                            f'{float(amount):.8f}', 
+                            cryptocurrency,
+                            next_amount, 
+                            next_cryptocurrency,
+                            # f'{float(next_amount)/float(amount):.8f}', 
+                            # '',
+                            txn_type, 
+                            'blockfi', 
+                            'blockfi', 
+                            'blockfi', 
+                            fn
                         ])
                         txns.append([
                             confirmed_at,
                             'buy',
-                            f'{float(next_amount):.8f}', next_cryptocurrency,
-                            amount, cryptocurrency,
-                            f'{float(amount)/float(next_amount):.8f}', '',
-                            txn_type, 'blockfi', 'blockfi', 'blockfi', fn
+                            f'{float(next_amount):.8f}', 
+                            next_cryptocurrency,
+                            amount, 
+                            cryptocurrency,
+                            # f'{float(amount)/float(next_amount):.8f}', 
+                            # '',
+                            txn_type, 
+                            'blockfi', 
+                            'blockfi', 
+                            'blockfi', 
+                            fn
                         ])
             else:
                 # print(line.rstrip())
