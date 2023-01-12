@@ -24,8 +24,6 @@ HEADERS = [
     'url',
 ]
 
-# 2023-01-11: Stubbed out unit cost and usd cost
-# TODO Remove code for calculating USD cost
 # TODO Change report processing to use tx_line (and maybe externalize)
 
 def main():
