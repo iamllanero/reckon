@@ -16,7 +16,6 @@ HEADERS = [
     'symbol',
     'purchase_token_cost',
     'purchase_token',
-    # 'usd_cost',   # Including fees
     'txn_name',
     'chain',
     'project',
@@ -81,7 +80,6 @@ def txline(txn_type, txn_dict):
         txn_dict['receives.token.symbol'],
         txn_dict['sends.amount'],
         txn_dict['sends.token.symbol'],
-        # txn_dict.get('usd_cost', ''), 
         txn_dict['tx.name'], 
         txn_dict['project.chain'],
         txn_dict['project.name'], 
@@ -125,16 +123,10 @@ def process_batch(txn_dicts):
 
             if td['sends.token.symbol'].lower() not in STABLECOINS:
                 # If not buying w/stables, include a "sell" transaction
-                if td['receives.token.symbol'].lower() in STABLECOINS:
-                    td['usd_cost'] = td['receives.amount']
-
                 txns.append(txline('sell', td))
 
             if td['receives.token.symbol'].lower() not in STABLECOINS:
                 # If not selling to stables, include a "buy" transaction
-                if td['sends.token.symbol'].lower() in STABLECOINS:
-                    td['usd_cost'] = td['sends.amount']
-
                 txns.append(txline('buy', td))
 
         else:
@@ -561,8 +553,6 @@ def blockfi_txns(fn):
                 if cryptocurrency.lower() in STABLECOINS and float(amount) < 0.50:
                     pass  # No need to track below $0.50
                 else:
-                    usd_cost = f'{float(amount):.8f}' if cryptocurrency.lower(
-                    ) in STABLECOINS else ''
                     txns.append([
                         confirmed_at,
                         'income',
@@ -571,7 +561,6 @@ def blockfi_txns(fn):
                         '', 
                         '',
                         # '', 
-                        # usd_cost,
                         txn_type, 
                         'blockfi', 
                         'blockfi', 
