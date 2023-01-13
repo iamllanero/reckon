@@ -67,9 +67,8 @@ def main():
 def txline(txn_type, txn_dict):
     show_tags = TXNS_CONFIG['output'].get("show_tags", False)
     
-
     date = datetime.datetime.fromtimestamp(
-            float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
+        float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
 
     return [
         date, 
@@ -115,37 +114,50 @@ def process_batch(txn_dicts):
                 td['receives.amount'] = sum(recv_amounts) / float(len(recv_amounts))
             
     for td in txn_dicts:
-        if td['sends.token.symbol'].lower() != '' and \
-            td['receives.token.symbol'].lower() != '':
+        sends_token = td['sends.token.symbol'].lower()
+        receives_token = td['receives.token.symbol'].lower()
+
+        if sends_token != '' and receives_token != '':
             # swap of some kind
 
-            if td['sends.token.symbol'].lower() not in STABLECOINS:
-                # If not buying w/stables, include a "sell" transaction
-                txns.append(txline('sell', td))
-
-            if td['receives.token.symbol'].lower() not in STABLECOINS:
+            if receives_token not in STABLECOINS:
                 # If not selling to stables, include a "buy" transaction
                 txns.append(txline('buy', td))
 
+            if sends_token not in STABLECOINS:
+                # If not buying w/stables, include a "sell" transaction
+
+                # If neither is a stablecoin (swap), invert send/recv for sell txn
+                if receives_token not in STABLECOINS:
+                    td['receives.amount'], td['sends.amount'] = \
+                        td['sends.amount'], td['receives.amount']
+                    td['receives.token.symbol'], td['sends.token.symbol'] = \
+                        td['sends.token.symbol'], td['receives.token.symbol']
+
+                txns.append(txline('sell', td))
+
+        elif sends_token == '' and receives_token == '':
+            # no tokens sent or received
+            pass
+
         else:
-            if td['receives.token.symbol'].lower() != '' and \
-                td['tx.name'] in [
-                    'claim',
-                    'claim_rewards',
-                    'claimAll',
-                    'claimAllCTR',
-                    'claimFromDistributorViaUniV2EthPair',
-                    'claimMulti',
-                    'claimReward',
-                    'claimRewards',
-                    'getReward',
-                    'harvest', 
-                    'redeem'
-                    ]:
+            if receives_token != '' and td['tx.name'] in [
+                'claim',
+                'claim_rewards',
+                'claimAll',
+                'claimAllCTR',
+                'claimFromDistributorViaUniV2EthPair',
+                'claimMulti',
+                'claimReward',
+                'claimRewards',
+                'getReward',
+                'harvest', 
+                'redeem'
+                ]:
                 # Income
                 txns.append(txline('income', td))
 
-            elif td['receives.token.symbol'].lower() != '' and \
+            elif receives_token != '' and \
                 TXNS_CONFIG['output']['include_receive']:
                 txns.append(txline('receive', td))
 
