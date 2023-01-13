@@ -1,11 +1,13 @@
 import csv
 import datetime
 import os.path
+import sys
 
+import tomlkit
 import tomllib
 from reckon.constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
                               STABLECOINS, TXNS_FILE, TXNS_TOML)
-from config import TXNS_CONFIG, TAGS
+from config import TXNS_CONFIG, TAGS, TXN_OVERRIDES, TRANSACTION_OVERRIDES_FILE
 from reckon.debank import FLAT_HEADERS
 from reckon.utils import list_to_csv
 
@@ -87,9 +89,20 @@ def txline(txn_type, txn_dict):
     ]
 
 
-def process_batch(txn_dicts):
+def process_batch(txn_dicts, do_overrides=True):
     txns = []
 
+    if txn_dicts[0]['id'] in TXN_OVERRIDES.keys() and do_overrides:
+        # This transaction id has an override entry.  Generate lines
+        # directly from override data
+        for txline_data in TXN_OVERRIDES[txn_dicts[0]['id']]:
+            tl = []
+            for header in HEADERS:
+                tl.append(txline_data[header])
+            txns.append(tl)
+
+        return txns
+    
     if len(txn_dicts) > 1:
         # use averages to calculate multi-token LP deposit or withdrawals
 
@@ -652,6 +665,68 @@ def blockfi_txns(fn):
                 pass
     return txns
 
+def cmd_init_override(ids_to_override):
+    for _id in ids_to_override:
+        
+        # Retrieve relevant lines from consolidated
+        with open(CONSOLIDATED_FILE, 'r') as f:
+            next(f)
+            reader = csv.reader(f)
+            txn_batch = []
+
+            for row in reader:
+                txn_dict = dict(zip(FLAT_HEADERS, row))
+
+                if txn_dict['id'] == _id:
+                    txn_batch.append(txn_dict)
+
+        # Generate txn_lines as dict corresponding to standard output
+        std_txlines = process_batch(txn_batch, False)
+        std_txlines_d = [dict(zip(HEADERS, i)) for i in std_txlines]
+
+        # Write (or overwrite) these data to TXN_OVERRIDES_FILE
+        with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
+            overrides = tomlkit.parse(f.read())
+            if len(overrides) == 0:
+                # TODO make a nicer more descriptive set of instructions
+                overrides.add(tomlkit.comment("Default values shown as comments."))
+
+        if _id in overrides.keys():
+            #  WARNING:  this depends on the order of subtransactions in consolidated and txns being consistent
+            print(f"WARN: Overwriting existing override entry for {_id} with defaults.")
+            for src, dest in zip(std_txlines_d, overrides[_id]):
+                for k,v in src.items():
+                    dest[k] = v
+        else:
+            # Generate new tx group entry with comments.
+            # overrides.add_line()
+            overrides.add(tomlkit.ws("\n"))
+            overrides.add(tomlkit.comment("########################################################################"))
+            overrides.add(tomlkit.comment("#########################   NEW TX GROUP   #############################"))
+            overrides.add(tomlkit.comment("########################################################################"))
+            container = tomlkit.aot()
+
+            for entry in std_txlines_d:
+                toml = tomlkit.table()
+                
+                for k,v in entry.items():
+                    toml.add(k, v)
+                    toml[k].comment(v)
+
+                # toml.append(_id, toml)
+                container.append(toml)
+            
+            overrides.append(_id, container)
+            
+        with open(TRANSACTION_OVERRIDES_FILE, "wt") as f:
+            tomlkit.dump(overrides, f)
+            print(f"Updated {TRANSACTION_OVERRIDES_FILE}")
 
 if __name__ == '__main__':
-    main()
+
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        if cmd == 'init_override':
+            cmd_init_override(sys.argv[2:])
+    else:
+        main()

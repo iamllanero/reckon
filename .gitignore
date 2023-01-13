@@ -4,5 +4,6 @@ data/*
 reckon/secrets.py
 wallets.toml
 tags_local.toml
+txoverride.toml
 .DS_STORE
 wip.py
