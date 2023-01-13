@@ -29,6 +29,7 @@ def calc_sell(df, symbol):
     for i, row in df.iterrows():
         if row['txn_type'] == 'sell':
             qty_to_sell = row['qty']
+            unit_price_sold = row['unit_value']
             while qty_to_sell > 0:
                 # Check that there are any buys
                 if len(df.iloc[0:i].query("txn_type in ['buy', 'income'] and qty_unsold > 0")) == 0:
@@ -38,23 +39,24 @@ def calc_sell(df, symbol):
                 hi_row = (df.iloc[0:i].query("txn_type in ['buy', 'income'] and qty_unsold > 0")
                     )['unit_value'].idxmax()
                 hi_unsold = df.iloc[hi_row]['qty_unsold']
-                cost_basis = 0
-                proceeds = 0
+                unit_price_cost = df.iloc[hi_row]['unit_value']
+                # cost_basis = 0
+                # proceeds = 0
                 qty_sold = 0
                 if qty_to_sell <= hi_unsold:
                     # Sold everything against one buy
                     qty_sold = qty_to_sell
                     df.iloc[hi_row, df.columns.get_loc('qty_unsold')] -= qty_to_sell
                     qty_to_sell = 0
-                    cost_basis = df.iloc[hi_row]['usd_value']
-                    proceeds = row['usd_value']
+                    # cost_basis = df.iloc[hi_row]['usd_value']
+                    # proceeds = row['usd_value']
                 else:
                     # Sold only partial against a buy; need to keep going
                     qty_sold = df.iloc[hi_row]['qty_unsold']
                     qty_to_sell -= df.iloc[hi_row]['qty_unsold']
                     df.iloc[hi_row, df.columns.get_loc('qty_unsold')] = 0
-                    cost_basis = hi_unsold * df.iloc[hi_row]['unit_value']
-                    proceeds = hi_unsold * row['unit_value']
+                cost_basis = qty_sold * unit_price_cost
+                proceeds = qty_sold * unit_price_sold
                 sell_list.append([
                     symbol,
                     qty_sold,
@@ -63,8 +65,8 @@ def calc_sell(df, symbol):
                     proceeds,
                     cost_basis,
                     proceeds - cost_basis,
-                    row['unit_value'],
-                    df.iloc[hi_row]['unit_value'],
+                    unit_price_sold,
+                    unit_price_cost,
                 ])
 
     return sell_list
