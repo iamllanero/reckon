@@ -42,6 +42,7 @@ STABLECOINS = [
     "usdc",
     "usde",
     "usdt",
+    "usdt.e",
     "ust",
 ]
 
