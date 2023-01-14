@@ -31,9 +31,8 @@ def compute_value(
 
     if price != None:
         value = price * qty
-        purchase_token_price = abs(value / qty)
-        if type(purchase_token) is str and \
-            purchase_token != '':
+        if type(purchase_token) is str and purchase_token != '':
+            purchase_token_price = value / purchase_token_cost
             cg.save_historical_price(purchase_token, date.to_pydatetime(), purchase_token_price, "Inferred")
         return value
 
