@@ -1,7 +1,5 @@
 import pandas as pd
 import reckon.coingecko as cg
-import math
-from datetime import datetime
 from reckon.constants import TXNS_FILE, PRICED_FILE, STABLECOINS
 
 def compute_value(

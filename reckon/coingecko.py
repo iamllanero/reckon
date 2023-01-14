@@ -39,6 +39,8 @@ def get_coin_id(symbol):
             print(f'ERROR: MORE THAN 1 COIN ID FOR {symbol} => {matches}')
     else:
         print(f'ERROR: NO COIN ID FOUND FOR {symbol}')
+        print(f'  You can manually set an entry for {symbol} in reckon.constants.COINGECKO_ID_EXPLICIT')
+        print(f'  "{symbol}": "<<VALID COIN ID>>",')
     # print(f'Lookup {coin_id}')
     return None
 
