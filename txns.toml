@@ -4,23 +4,38 @@
 # If it is not found, you will see a WARN at the command line but it will
 # continue to execute.
 
-coinbase = [
-    'data/reports/coinbase.csv',
-    'data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv'
-]
-coinbasepro = [
-    'data/reports/2022-coinbasepro/account.csv'
-]
-binance = [
-    'data/reports/2021-binance/202212041409.csv',
-    'data/reports/2022-binance/202212131739.csv'
-]
-blockfi = [
-    'data/reports/all-blockfi/trade_report_all.csv'
-]
-manual = [
-    'data/reports/manual.csv'
-]
+[reports.manual-1]
+file = "data/reports/manual.csv"
+parser = "default"
+
+[reports.manual-2]
+file = "data/reports/test.csv"
+parser = "default"
+
+[reports.coinbase-1]
+file = "data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv"
+parser = "coinbase_us"
+
+[reports.coinbase-pro-1]
+file = "data/reports/2022-coinbasepro/account.csv"
+parser = "coinbasepro_us"
+
+[reports.binance-1]
+file = "data/reports/2021-binance/202212041409.csv"
+parser = "binance_us"
+
+[reports.binance-2]
+file = "data/reports/2022-binance/202212131739.csv"
+parser = "binance_us"
+
+[reports.blockfi-1]
+file = "data/reports/all-blockfi/trade_report_all.csv"
+parser = "blockfi"
+
+# [reports.kucoin-1]
+# file = "data/reports/2021-10-01-2022-10-01-kucoin/Spot Orders_Historical Orders20230113.xlsx"
+# parser = "kucoin_us"
+
 
 [output]
 include_send = true
