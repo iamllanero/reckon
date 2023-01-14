@@ -9,4 +9,4 @@
 - [ ] Consolidate the configuration options and settings. Right now they are spread across multiple toml and py files.
 - [ ] Unit tests? Blah!
 - [ ] Sample report files
-
+- [ ] Input validation for manually edited toml files
