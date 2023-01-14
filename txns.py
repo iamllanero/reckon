@@ -46,7 +46,6 @@ def main():
     reports = TXNS_CONFIG['reports']
     for key in reports.keys():
         print(f'Processing {key} with {reports[key]}')
-        parser = reports[key]['parser']
         no_lines = len(txns)
         txns.extend(
             parse_report(
