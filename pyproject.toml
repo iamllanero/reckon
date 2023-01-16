@@ -12,6 +12,8 @@ wallets-flatten = "wallets:cmd_flatten"
 txns = "txns:main"
 txns_insert = "txns:cmd_init_override"
 price = "price:main"
+8949-hifo = "8949-hifo:main"
+pf = "pf:main"
 
 
 [tool.poetry.dependencies]

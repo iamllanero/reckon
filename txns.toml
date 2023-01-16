@@ -32,9 +32,9 @@ parser = "binance_us"
 file = "data/reports/all-blockfi/trade_report_all.csv"
 parser = "blockfi"
 
-# [reports.kucoin-1]
-# file = "data/reports/2021-10-01-2022-10-01-kucoin/Spot Orders_Historical Orders20230113.xlsx"
-# parser = "kucoin_us"
+[reports.kucoin-1]
+file = "data/reports/2021-10-01-2022-10-01-kucoin/Spot Orders_Historical Orders20230113.csv"
+parser = "kucoin_us"
 
 
 [output]
