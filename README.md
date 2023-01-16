@@ -64,6 +64,21 @@ Here are the main scripts (in order of intended use):
 - Uses the HIFO (highest in, first out) strategy which will take the least
   gains (or highest losses)
 
+`pf.py`
+- Creates `py.csv` a view portfolio style view that shows for every token:
+  - Name
+  - Current Qty
+  - Gain Loss
+  - Unit Cost
+  - Buy Qty
+  - Buy USD
+  - Buy Unit Price
+  - Sell Qty
+  - Sell USD
+  - Sell Unit Price
+  - Income Qty
+  - Income USD
+  
 ## HIFO Algorithm
 - Sort dataframe (df) by date
 - Go through row by row, when hit a sell transaction:
