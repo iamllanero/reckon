@@ -45,13 +45,9 @@ def main():
         sell_usd = sf[(sf['txn_type'] == 'sell')]['usd_value'].sum()
         income_qty = sf[(sf['txn_type'] == 'income')]['qty'].sum()
         income_usd = sf[(sf['txn_type'] == 'income')]['usd_value'].sum()
-        # buy_unit = ''
-        # sell_unit = ''
-        # gain_loss_usd = ''
-        # current_qty = ''
         buy_unit = buy_usd / buy_qty if buy_qty > 0 else ''
         sell_unit = sell_usd / sell_qty if sell_qty > 0 else ''
-        gain_loss_usd = buy_usd + income_usd - sell_usd
+        gain_loss_usd = sell_usd - buy_usd
         current_qty = buy_qty + income_qty - sell_qty
         unit_cost = (buy_usd - sell_usd) / current_qty if current_qty > 0 else ''
         pf.append([
