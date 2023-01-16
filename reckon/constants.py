@@ -44,6 +44,7 @@ STABLECOINS = [
     "usdt",
     "usdt.e",
     "ust",
+    "cad"
 ]
 
 # Dict to cache token symbols. Needed for tokens without symbols that can use
