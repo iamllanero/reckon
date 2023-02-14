@@ -12,7 +12,7 @@ def parse(fn):
         for row in reader:
             [date, tx_type, token, qty, purchase_token, purchase_token_qty,
                 fees, usd, location, id] = row
-            if tx_type == 'Buy':
+            if tx_type.lower() == 'buy':
                 if purchase_token.lower() in STABLECOINS:
                     txns.append([
                         date,
