@@ -10,6 +10,7 @@ TAGS_FILE = 'tags.toml'
 TAGS_LOCAL_FILE = 'tags_local.toml'
 PRICED_FILE = 'data/priced.csv'
 PRICE_CACHE_FILE = 'data/price_cache.csv'
+PRICE_MISSING_FILE = 'data/price_missing.csv'
 COINGECKO_COINS_LIST_FILE = 'data/coingecko_coins_list.json'
 TRANSACTION_OVERRIDES_FILE = 'txoverride.toml'
 
