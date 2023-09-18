@@ -13,3 +13,9 @@ with open(TAGS_FILE, 'rb') as f:
             local_tags = tomllib.load(g)
 
         TAGS.update(local_tags)
+
+if not os.path.exists(TRANSACTION_OVERRIDES_FILE):
+    open(TRANSACTION_OVERRIDES_FILE, "w").write("")
+
+with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
+    TXN_OVERRIDES = tomllib.load(f)

@@ -9,8 +9,7 @@ This is not ready for prime time yet! Although this project does not do
 anything destructive on the blockchain, it does consume Debank credits and
 uses the CoinGecko API.
 
-Use at your own peril. 
-
+Use at your own peril.
 
 ## DESCRIPTION
 
@@ -21,6 +20,7 @@ a series of different scripts for now.
 Here are the main scripts (in order of intended use):
 
 `wallets.py`
+
 - Responsible for obtaining onchain wallet data
 - Outputs wallets as JSON and CSV, and consolidates to `consolidated.csv`
 - Uses `wallets.toml` for wallet addresses
@@ -28,22 +28,24 @@ Here are the main scripts (in order of intended use):
 - Depends on `constants.py` and `utils.py`
 - Depends on `debank.py` for working with the API and object model
 - Command 'build'
-    - Builds and refreshes wallets using Debank API (and debank.py)
-    - Stores data as JSON files for each wallet
+  - Builds and refreshes wallets using Debank API (and debank.py)
+  - Stores data as JSON files for each wallet
 - Command 'flatten'
-    - Creates a denormalized CSV of the JSON wallets
-    - Augments with spam detection, address tags, and transaction URLs
+  - Creates a denormalized CSV of the JSON wallets
+  - Augments with spam detection, address tags, and transaction URLs
 
 `txns.py`
+
 - Responsible for compilling meaningful transactions from:
-    - The `wallets.py` `consolidated.csv` output
-    - Reports from coinbase, binance, blockfi
-    - Manual reports
+  - The `wallets.py` `consolidated.csv` output
+  - Reports from coinbase, binance, blockfi
+  - Manual reports
 - Output is a single `txns.csv` file of all transactions
 - Uses `txns.toml` to get reports and some configuration options
 - Depends on `constants.py` and `utils.py`
 
 `price.py`
+
 - Responsible for adding USD value to transactions from `txns.csv` through a
   combination of inference, CoinGecko API, and caching
 - Output is `priced.csv` which adds an additional column, 'usd_value'
@@ -53,6 +55,7 @@ Here are the main scripts (in order of intended use):
 - Requires manual maintenance of the `coingecko_coins_list.json`
 
 `8949-hifo.py`
+
 - Responsible for generating a IRS 8949-like report that shows the following
   columns:
   - Symbol
@@ -64,7 +67,24 @@ Here are the main scripts (in order of intended use):
 - Uses the HIFO (highest in, first out) strategy which will take the least
   gains (or highest losses)
 
+`pf.py`
+
+- Creates `py.csv` a view portfolio style view that shows for every token:
+  - Name
+  - Current Qty
+  - Gain Loss
+  - Unit Cost
+  - Buy Qty
+  - Buy USD
+  - Buy Unit Price
+  - Sell Qty
+  - Sell USD
+  - Sell Unit Price
+  - Income Qty
+  - Income USD
+  
 ## HIFO Algorithm
+
 - Sort dataframe (df) by date
 - Go through row by row, when hit a sell transaction:
   - Scan backward to the highest not fully sold (qty-qty_sold > 0) transaction
@@ -74,7 +94,7 @@ Here are the main scripts (in order of intended use):
 ## SETUP
 
 You will need an access key and credits from Debank Cloud. You can get them
-at https://cloud.debank.com/.
+at <https://cloud.debank.com/>.
 
 Be sure to configure the following files:
 
@@ -89,14 +109,13 @@ Other files with configuration type items that don't need to be changed:
 - `data/price_cache.csv` - price cache and also manual entries
 
 Consider getting an updated version of the `coingecko_coins_list.json` from
-https://www.coingecko.com/en/api/documentation under /coins/list. You can just
+<https://www.coingecko.com/en/api/documentation> under /coins/list. You can just
 click on "Try it out" and cut/paste the resulting content to replace the current
 `coingecko_coins_list.json`.
 
-
 ## USAGE
 
-```
+```sh
 # First build the local cache of wallets
 # This uses Debank credits so use only to build and to refresh
 # Other commands do not use Debank credits
@@ -137,49 +156,32 @@ cryptonym:
 
 - Set your local git config appropriately
 
-```
+```sh
 git config --local user.name "Llanero"
 git config --local user.email "iamllanero@gmail.com"
 ```
 
 - Double check your config
 
-```
+```sh
 git config --local user.name
 git config --local user.email
 ```
 
 - As an extra layer of precaution, you can change your global config.
 
-```
+```sh
 git config --global user.name "Llanero"
 git config --global user.email "iamllanero@gmail.com"
 ```
 
 - And, of coure, check the global config
 
-```
+```sh
 git config --global user.name
 git config --global user.email
 ```
 
-## LOTS OF WORK TO BE DONE!
+## LOTS OF WORK TO BE DONE
 
-- Finish 8949 generator.
-
-- Better poetry setup.
-
-- Modularize the report parsing in txns.py so that reports can be specified
-  with a parser.
-
-- Custom designation of income, buy, sell in the txns.py file
-
-- Ability to manually mark / handle transactions known to be weird.
-
-- Consolidate the configuration options and settings. Right now they are
-  spread across multiple toml and py files.
-
-- Unit tests? Blah!
-
-- Sample report files
-
+See TODO.md

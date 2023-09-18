@@ -171,6 +171,8 @@ class HistoryList:
         num_rows = max(len(entry['receives']),
                        len(entry['sends']),
                        1)
+        # DEBUGGING ONLY to print out the entire entry before processing
+        # print(entry)
         for i in range(num_rows):
             row = [
                 index,
@@ -258,11 +260,19 @@ class HistoryList:
                     get_tag(entry['tx']['from_addr']),
                     entry['tx']['to_addr'],
                     get_tag(entry['tx']['to_addr']),
-                    entry['tx']['eth_gas_fee'],
-                    entry['tx']['usd_gas_fee'],
+                ])
+                if 'eth_gas_fee' in entry['tx']:
+                    row.extend([entry['tx']['eth_gas_fee']])
+                else:
+                    row.extend([''])
+                if 'usd_gas_fee' in entry['tx']:
+                    row.extend([entry['tx']['usd_gas_fee']])
+                else:
+                    row.extend([''])
+                row.extend([
                     entry['tx']['value'],
                     ':'.join(entry['tx']['params'])
-                ])
+                ])                
             else:
                 row.extend(['' for x in range(10)])
             row.append(get_id_url(entry['id'], self.get_chain_id()))

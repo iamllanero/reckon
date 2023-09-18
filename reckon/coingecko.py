@@ -5,7 +5,7 @@ import random
 import requests
 import time
 import reckon.utils as utils
-from reckon.constants import COINGECKO_ID_EXPLICIT, PRICE_CACHE_FILE, COINGECKO_COINS_LIST_FILE
+from reckon.constants import COINGECKO_ID_EXPLICIT, PRICE_CACHE_FILE, PRICE_MISSING_FILE, COINGECKO_COINS_LIST_FILE
 
 COINGECKO_ID_LIST = json.load(open(COINGECKO_COINS_LIST_FILE))
 COINGECKO_IDS = [elem['symbol'] for elem in COINGECKO_ID_LIST]
@@ -39,6 +39,8 @@ def get_coin_id(symbol):
             print(f'ERROR: MORE THAN 1 COIN ID FOR {symbol} => {matches}')
     else:
         print(f'ERROR: NO COIN ID FOUND FOR {symbol}')
+        print(f'  You can manually set an entry for {symbol} in reckon.constants.COINGECKO_ID_EXPLICIT')
+        print(f'  "{symbol}": "<<VALID COIN ID>>",')
     # print(f'Lookup {coin_id}')
     return None
 
@@ -98,6 +100,20 @@ def save_historical_price(symbol: str,
         pass
 
 
+def save_missing_price(symbol: str, date: datetime):
+    """
+    Saves the price data to PRICE_MISSING_FILE if it doesn't already exist.
+
+    Parameters:
+        symbol (str): ERC-20 token symbol
+        date (datetime): Date of the price
+    """
+    print(f"Saving {symbol} price for {date} to {PRICE_MISSING_FILE}")
+    with open(PRICE_MISSING_FILE, 'a') as f:
+        date_added = datetime.datetime.now().strftime('%Y-%m-%d')
+        f.write(f"{date.strftime('%Y-%m-%d')},{symbol},?,{date_added},Missing\n")
+
+
 def get_historical_price(symbol: str, date: datetime):
     """
     Gets the historical price from CoinGecko or cached result.
@@ -133,20 +149,38 @@ def get_historical_price(symbol: str, date: datetime):
 
     # Make throttled request to CoinGecko API
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}&localization=false"
-    sleep_time = random.randrange(2500, 4000)
-    time.sleep(sleep_time/1000)
-    print(f'Throttle {sleep_time} request price {url}', end = ' => ')
-    response = requests.get(url)
-    price_data = json.loads(response.text)
-    price = utils.get_nested_dict(price_data, 'market_data.current_price.usd')
 
-    if price != None and price != '':
-        save_historical_price(symbol, date, price)
-        print(f'{price}')
-        return float(price)
-    else:
-        print(f'No price found')
-        return None
+    fetched = False
+    while not fetched:
+        print(f"Fetching /{coin_id}/history?date={date.strftime('%d-%m-%Y')}", end=" => ")
+        response = requests.get(url)
+        if response.status_code == 200:
+            fetched = True
+            print(f"200 OK")
+            try:
+                price = float(utils.get_nested_dict(response.json(), 'market_data.current_price.usd'))
+                save_historical_price(symbol, date, price)
+                time.sleep(3)
+                return price
+            except:
+                print(f"ERROR: No price for {date} | {symbol}")
+                save_missing_price(symbol, date)
+                time.sleep(3)
+                return None
+        elif response.status_code == 429:
+            print(f"429 Too Many Requests / Sleeping for 60 seconds")
+            time.sleep(60)
+        elif response.status_code == 404:
+            print(f"404 Not Found")
+            save_missing_price(symbol, date)
+            time.sleep(3)
+            return None
+        else:
+            print(f"ERROR: {response.status_code}")
+            print(response.text)
+            save_missing_price(symbol, date)
+            time.sleep(3)
+            return None
 
 
 def clean_cache():
