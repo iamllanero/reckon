@@ -37,6 +37,11 @@ def parse_report(fn, parser):
 
 # TODO Change report processing to use tx_line (and maybe externalize)
 
+def sort_except(list, ignore):
+    temp = list.pop(ignore)
+    list.sort(key= lambda x: datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S'))
+    list.insert(ignore, temp)
+
 def main():
     txns = [HEADERS]
 
@@ -55,6 +60,9 @@ def main():
         )
         print(f'Added {len(txns) - no_lines} entries')
    
+    # Sort output data for easier reading
+    sort_except(txns, 0)
+    
     list_to_csv(txns, TXNS_FILE)
     list_to_csv(approvals, APPROVALS_FILE)
     list_to_csv(spam, SPAM_FILE)

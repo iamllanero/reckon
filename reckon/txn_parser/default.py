@@ -12,7 +12,13 @@ def parse(fn):
         for row in reader:
             [date, tx_type, token, qty, purchase_token, purchase_token_qty,
                 fees, usd, location, id] = row
-            if tx_type == 'Buy':
+            
+            if id == "": 
+                # generate an id for this tx
+                id = "".join([c for c in date if c not in "-:/ "])
+                id += "".join([c for c in fn if c not in "/"])
+
+            if tx_type.lower() == 'buy':
                 if purchase_token.lower() in STABLECOINS:
                     txns.append([
                         date,
@@ -27,6 +33,7 @@ def parse(fn):
                         location, 
                         location, 
                         location, 
+                        id,
                         fn
                     ])
     return txns
