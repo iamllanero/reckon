@@ -65,7 +65,9 @@ def main():
             income_usd,
         ])
 
-    list_to_csv(pf, 'data/pf.csv')
+    sorted_pf = [pf[0]] + sorted(pf[1:], key=lambda x: x[0], reverse=False)
+
+    list_to_csv(sorted_pf, 'data/pf.csv')
 
 
 if __name__ == '__main__':
