@@ -127,7 +127,7 @@ python3 wallets.py build
 python3 wallets.py flatten
 
 # Generate a transactions file from wallets and CEX reports into a single
-# file "txns.csv"
+# file "txns.csv". ALso applies spam flag.
 
 python3 txns.py
 

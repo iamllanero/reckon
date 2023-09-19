@@ -113,7 +113,54 @@ DEBANK_ALLOW_LIST = [
     "0x8e2549225e21b1da105563d419d5689b80343e01", # sSPA
 ]
 
-DEBANK_KNOWN_SPAM = [
+DEBANK_SPAM_TOKEN_IDS = [
     "0x51158b1f39b81ac83e68c275098a61617f553683", # Visit https://axdom.site to claim rewards
-    "168a045808925471f5d22856fe02bd73", # Incubator
+    "0x62d9bb08cad855a459e4b3a5d509583163f5e240", # $ ConvexLR.com  - Visit to claim bonus rewards
+]
+
+DEBANK_SPAM_TOKEN_NAMES = [
+    "$ Free Claim and Play",
+    "$ USDCDrop.com <- Visit to claim",
+    "$ UniswapLR.com @ 5.75",
+    "$ wBTCLP.com - Visit to claim bonus rewards",
+    "(BNB)",
+    "1BNB",
+    "1XBET",
+    "AIINEDIBLE",
+    "AMC",
+    "ARBK",
+    "AWDD",
+    "Access token to https://dydxfi.org",
+    "AvaxClassic.com",
+    "BABYRFD",
+    "BlurAirdropBox",
+    "Claim USDC at https://chaingeusdc.top",
+    "Claim USDC at https://cusdc.disusd.eth.limo",
+    "Reward Token - Claim at https://stUSD.tech",
+    "RPL: Rewards Pass",
+    "Rewards Token From https://avpool.site",
+    "Socks powered by Unisocks.Fi",
+    "Swap at LINKToken.io",
+    "SpaceX",
+    "TOMI",
+    "USDCGOLD.COM",
+    "Unisocks",
+    "UniswapLP.com",
+    "Uniswapv3LP.com",
+    "Visit https://arbinu.fun to claim rewards.",
+    "Visit https://convex.bz to claim rewards.",
+    "Visit https://creth.xyz to claim rewards.",
+    "Visit https://gpepe.org to claim rewards.",
+    "Visit https://gpepe.xyz to claim rewards.",
+    "Visit https://incr.fi and claim genesis airdrops.",
+    "Visit https://mpepe.xyz to claim rewards.",
+    "Visit https://obonus.site to claim reward",
+    "Visit https://usd2023.com to claim rewards",
+    "Visit https://usdreward.com to claim rewards",
+    "WETH Powered By Noox.Fi",
+    "WETH Powered By Noox.fi",
+    "WETH Powered By Noox.tech",
+    "YUGA x GUCCI Merch",
+    "arbSwap.club",
+
 ]

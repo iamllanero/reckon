@@ -1,7 +1,7 @@
 import json
 import requests
 import tomllib
-from reckon.constants import DEBANK_KNOWN_SPAM, TAGS_FILE, WALLETS_CACHE_DIR
+from reckon.constants import DEBANK_SPAM_TOKEN_IDS, DEBANK_SPAM_TOKEN_NAMES, TAGS_FILE, WALLETS_CACHE_DIR
 from reckon.secrets import DEBANK_ACCESSKEY
 from reckon.utils import list_to_csv
 
@@ -204,6 +204,7 @@ class HistoryList:
             ])
 
             receive_token_id = None
+            receive_token_symbol = None
             receive_token_is_verified = None
             if len(entry['receives']) > i:
                 row.extend([
@@ -217,6 +218,7 @@ class HistoryList:
                     token['is_verified']
                 ])
                 receive_token_id = entry['receives'][i]['token_id']
+                receive_token_symbol = token['symbol']
                 receive_token_is_verified = token['is_verified']
             else:
                 row.extend(['' for x in range(6)])
@@ -278,6 +280,7 @@ class HistoryList:
             row.append(get_id_url(entry['id'], self.get_chain_id()))
             row.append(is_spam(receive_token_id,
                                receive_token_is_verified,
+                               receive_token_symbol,
                                project_id,
                                sends_token_id,
                                tx_name))
@@ -288,6 +291,7 @@ class HistoryList:
     
 def is_spam(receives_token_id,
             receives_token_is_verfied,
+            receives_token_symbol,
             project_id,
             sends_token_id,
             tx_name
@@ -306,7 +310,10 @@ def is_spam(receives_token_id,
     has_sends = False if sends_token_id is None else True
     has_tx = False if tx_name is None else True
 
-    if receives_token_id in DEBANK_KNOWN_SPAM:
+    if receives_token_id in DEBANK_SPAM_TOKEN_IDS:
+        return True
+
+    if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES:
         return True
 
     if has_receives and \
