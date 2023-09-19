@@ -1,7 +1,7 @@
 import json
 import requests
 import tomllib
-from reckon.constants import TAGS_FILE, WALLETS_CACHE_DIR
+from reckon.constants import DEBANK_KNOWN_SPAM, TAGS_FILE, WALLETS_CACHE_DIR
 from reckon.secrets import DEBANK_ACCESSKEY
 from reckon.utils import list_to_csv
 
@@ -306,11 +306,15 @@ def is_spam(receives_token_id,
     has_sends = False if sends_token_id is None else True
     has_tx = False if tx_name is None else True
 
+    if receives_token_id in DEBANK_KNOWN_SPAM:
+        return True
+
     if has_receives and \
         not is_verified and \
         not has_project and \
         not has_sends and \
         not has_tx:
+        # print(f"SPAM: {receives_token_id} => {sends_token_id}")
         return True
 
     return False

@@ -20,6 +20,9 @@ STABLECOINS = [
     "bpt-mimusdcust",
     "bpt-guqinqi",
     "busd",
+    "clevusd",
+    "clevusd3crv-f",
+    "crvusdusdc-f",
     "dai.e",
     "dai",
     "fusdt",
@@ -52,7 +55,10 @@ STABLECOINS = [
 # another token (i.e. WETH) and tokens with multiple matches.
 COINGECKO_ID_EXPLICIT = {
     "aave": "aave",
+    "abccvx": "convex-finance",
+    "abccvx-gauge": "convex-finance",
     "acrv": "aladdin-cvxcrv",
+    "afrxeth": "frax-ether",
     "avax": "avalanche-2",
     "b-90clevcvx-10cvx": "convex-finance",
     "bch": "bitcoin-cash",
@@ -63,10 +69,11 @@ COINGECKO_ID_EXPLICIT = {
     "clevcvx": "clever-cvx",
     "cnc": "conic-finance",
     "ctr": "concentrator",
-    "cvxfxs": "frax-share",
-    "cvxfxsfxs-f": "frax-share",
+    "cvxfxs": "convex-fxs",
+    "cvxfxsfxs-f": "convex-fxs",
     "dot": "polkadot",
     "eth": "ethereum",
+    "frxethcrv": "curve-dao-token",
     "ftm": "fantom",
     "gftm": "geist-ftm",
     "geth": "geist-eth",
@@ -89,11 +96,15 @@ COINGECKO_ID_EXPLICIT = {
     "sspa": "spartacus",
     "splp": "splp",
     "sspell": "spell-token",
+    "stkcvxcrv": "convex-crv",
     "time": "wonderland",
     "tomb-v2-lp": "tomb",
+    "ucrv": "curve-dao-token",
     "ucvx": "convex-finance",
-    "usdc": "usd-coin",
+    "ucvxcrv": "convex-crv",
+    # "usdc": "usd-coin",
     "weth": "ethereum",
+    "xald": "aladdin-dao",
 }
 
 DEBANK_ALLOW_LIST = [
@@ -102,3 +113,7 @@ DEBANK_ALLOW_LIST = [
     "0x8e2549225e21b1da105563d419d5689b80343e01", # sSPA
 ]
 
+DEBANK_KNOWN_SPAM = [
+    "0x51158b1f39b81ac83e68c275098a61617f553683", # Visit https://axdom.site to claim rewards
+    "168a045808925471f5d22856fe02bd73", # Incubator
+]
