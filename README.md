@@ -19,20 +19,25 @@ a series of different scripts for now.
 
 Here are the main scripts (in order of intended use):
 
-`wallets.py`
+`build.py`
 
 - Responsible for obtaining onchain wallet data
-- Outputs wallets as JSON and CSV, and consolidates to `consolidated.csv`
+- Uses `wallets.toml` for wallet addresses
+- Depends on `constants.py` and `utils.py`
+- Depends on `debank.py` for working with the API and object model
+- Builds and refreshes wallets using Debank API (and debank.py)
+- Stores data as JSON files for each wallet
+
+`flatten.py`
+
+- Creates CSV versions of wallet JSON files
+= Consolidates to `consolidated.csv`
 - Uses `wallets.toml` for wallet addresses
 - Uses `tags.toml` for address tagging
 - Depends on `constants.py` and `utils.py`
 - Depends on `debank.py` for working with the API and object model
-- Command 'build'
-  - Builds and refreshes wallets using Debank API (and debank.py)
-  - Stores data as JSON files for each wallet
-- Command 'flatten'
-  - Creates a denormalized CSV of the JSON wallets
-  - Augments with spam detection, address tags, and transaction URLs
+- Creates a denormalized CSV of the JSON wallets
+- Augments with spam detection, address tags, and transaction URLs
 
 `txns.py`
 
@@ -96,10 +101,10 @@ Here are the main scripts (in order of intended use):
 You will need an access key and credits from Debank Cloud. You can get them
 at <https://cloud.debank.com/>.
 
-Be sure to configure the following files:
+Be sure to configure the following files in the config directory:
 
 - `wallets.toml` (see `wallets_sample.toml`)
-- `secrets.py` (see `secrets_sample.py`)
+- `debank.toml` (see `debank_sample.toml`)
 - `txns.toml` - reports from CEX and trade equivalents
 
 Other files with configuration type items that don't need to be changed:
@@ -120,26 +125,26 @@ click on "Try it out" and cut/paste the resulting content to replace the current
 # This uses Debank credits so use only to build and to refresh
 # Other commands do not use Debank credits
 
-python3 wallets.py build
+python3 reckon/build.py
 
 # Flatten the wallets into CSV files and consolidate to "consolidated.csv"
 
-python3 wallets.py flatten
+python3 reckon/flat.py
 
 # Generate a transactions file from wallets and CEX reports into a single
 # file "txns.csv". ALso applies spam flag.
 
-python3 txns.py
+python3 reckon/txns.py
 
 # Fill in the gaps for prices using the CoinGecko API and any manually 
 # entered prices in the "price_cache.csv" file creating a new file "priced.csv"
 
-python3 price.py
+python3 reckon/price.py
 
 # WIP
 # Create a close to an IRS 8949 list based on the HIFO cost basis
 
-python3 8949-hifo.py
+python3 reckon/8949-hifo.py
 ```
 
 ## CONTRIBUTING
