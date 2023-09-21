@@ -1,9 +1,10 @@
 import json
 import requests
 import tomllib
-from reckon.constants import DEBANK_SPAM_TOKEN_IDS, DEBANK_SPAM_TOKEN_NAMES, TAGS_FILE, WALLETS_CACHE_DIR
-from reckon.secrets import DEBANK_ACCESSKEY
-from reckon.utils import list_to_csv
+from constants import DEBANK_FILE, DEBANK_SPAM_TOKEN_IDS, DEBANK_SPAM_TOKEN_NAMES, TAGS_FILE, WALLETS_CACHE_DIR
+from utils import list_to_csv
+
+DEBANK_ACCESSKEY = tomllib.load(open(DEBANK_FILE, 'rb'))['DEBANK_ACCESSKEY']
 
 TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
 

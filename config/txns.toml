@@ -47,6 +47,7 @@ show_tags = true
 
 # Equivalent pairs must be alphabetical
 equivalents = [
+    ["abccvx", "abccvx-gauge"],
     ["b-90clevcvx-10cvx", "b-90clevcvx-10cvx-gauge"],
     ["b-98acrv-2ctr", "b-98acrv-2ctr-gauge"],
     ["blusdlusd3-f", "blusdlusd3-f-gauge"],
@@ -54,8 +55,10 @@ equivalents = [
     ["clevcvx-f", "clevcvx-f-gauge"],
     ["clevcvx", "clevcvx-f"],
     ["cleveth-f", "cleveth-f-gauge"],
+    ["clevusd", "clevusd3crv-f"],
     ["cmumami", "mumami"],
     ["crv", "sdcrv-gauge"],
+    ["crvusdusdc-f", "crvusdusdc-f-gauge"],
     ["ctreth-f", "ctreth-f-gauge"],
     ["cvxfraxbp-f", "fraxbp-f"],
     ["eth", "geth"],
@@ -71,6 +74,7 @@ equivalents = [
     ["memo", "time"],
     ["mumami", "umami"],
     ["pxcvx", "ucvx"],
+    ["sdCRV", "sdCRV-gauge"],
     ["sdog", "ssdog"],
     ["spa", "sspa"],
     ["tbond", "tomb"],

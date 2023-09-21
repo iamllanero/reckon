@@ -1,6 +1,6 @@
 import pandas as pd
-import reckon.coingecko as cg
-from reckon.constants import TXNS_FILE, PRICED_FILE, STABLECOINS
+import coingecko as cg
+from constants import TXNS_FILE, PRICED_FILE, STABLECOINS
 
 def compute_value(
     date, 

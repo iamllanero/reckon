@@ -1,35 +1,39 @@
-WALLETS_TOML = 'wallets.toml'
+WALLETS_TOML = 'config/wallets.toml'
 WALLETS_CACHE_DIR = 'data/wallets_cache'
 CONSOLIDATED_FILE = 'data/consolidated.csv'
 
-TXNS_TOML = 'txns.toml'
+TXNS_TOML = 'config/txns.toml'
 TXNS_FILE = 'data/txns.csv'
 SPAM_FILE = 'data/spam.csv'
 APPROVALS_FILE = 'data/approvals.csv'
-TAGS_FILE = 'tags.toml'
-TAGS_LOCAL_FILE = 'tags_local.toml'
+TAGS_FILE = 'config/tags.toml'
+TAGS_LOCAL_FILE = 'config/tags_local.toml'
 PRICED_FILE = 'data/priced.csv'
 PRICE_CACHE_FILE = 'data/price_cache.csv'
+PRICE_MANUAL_FILE = 'data/price_manual.csv'
 PRICE_MISSING_FILE = 'data/price_missing.csv'
 COINGECKO_COINS_LIST_FILE = 'data/coingecko_coins_list.json'
-TRANSACTION_OVERRIDES_FILE = 'txoverride.toml'
+TRANSACTION_OVERRIDES_FILE = 'config/txoverride.toml'
+DEBANK_FILE = 'config/debank.toml'
 
 STABLECOINS = [
     "alusd",
     "bpt-deiusdc",
-    "bpt-mimusdcust",
     "bpt-guqinqi",
+    "bpt-mimusdcust",
     "busd",
+    "cad"
     "clevusd",
     "clevusd3crv-f",
+    "crvusd",
     "crvusdusdc-f",
     "dai.e",
     "dai",
-    "fusdt",
     "frax",
     "fraxbp-f",
-    "gusd",
+    "fusdt",
     "gdai",
+    "gusd",
     "hmim",
     "lusd",
     "lusd3crv-f",
@@ -37,7 +41,7 @@ STABLECOINS = [
     "mim",
     "mimatic",
     "moobeetdoubledollarfugue",
-    "moobeetguqinqi2",  # Beefy Guqin Qi 2 vault
+    "moobeetguqinqi2",
     "moogeistmim",
     "mooscreamdai",
     "s*usdc",
@@ -45,18 +49,17 @@ STABLECOINS = [
     "usdc.e",
     "usdc",
     "usde",
-    "usdt",
     "usdt.e",
+    "usdt",
     "ust",
-    "cad"
 ]
 
 # Dict to cache token symbols. Needed for tokens without symbols that can use
 # another token (i.e. WETH) and tokens with multiple matches.
 COINGECKO_ID_EXPLICIT = {
     "aave": "aave",
-    "abccvx": "convex-finance",
     "abccvx-gauge": "convex-finance",
+    "abccvx": "convex-finance",
     "acrv": "aladdin-cvxcrv",
     "afrxeth": "frax-ether",
     "avax": "avalanche-2",
@@ -75,8 +78,8 @@ COINGECKO_ID_EXPLICIT = {
     "eth": "ethereum",
     "frxethcrv": "curve-dao-token",
     "ftm": "fantom",
-    "gftm": "geist-ftm",
     "geth": "geist-eth",
+    "gftm": "geist-ftm",
     "gmx": "gmx",
     "grt": "the-graph",
     "ice": "ice-token",
@@ -93,8 +96,8 @@ COINGECKO_ID_EXPLICIT = {
     "shib": "shiba-inu",
     "spa": "spartacus",
     "spirit-lp": "spiritswap",
-    "sspa": "spartacus",
     "splp": "splp",
+    "sspa": "spartacus",
     "sspell": "spell-token",
     "stkcvxcrv": "convex-crv",
     "time": "wonderland",
@@ -102,7 +105,7 @@ COINGECKO_ID_EXPLICIT = {
     "ucrv": "curve-dao-token",
     "ucvx": "convex-finance",
     "ucvxcrv": "convex-crv",
-    # "usdc": "usd-coin",
+    "usdc": "usd-coin",
     "weth": "ethereum",
     "xald": "aladdin-dao",
 }
@@ -143,12 +146,15 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "CocoX",
     "CONNECT",
     "CYBER",
+    "CyberX",
     "DogeX",
     "EGOD",
     "FIGHT",
     "FK12",
     "LIL",
     "LOOKSDROP.COM",
+    "LPUniV3.com",
+    "M32",
     "Noox Distribution Protocol",
     "NUDES",
     "PHY",
@@ -180,6 +186,7 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "Visit https://obonus.site to claim reward",
     "Visit https://usd2023.com to claim rewards",
     "Visit https://usdreward.com to claim rewards",
+    "WAVAX.net",
     "WETH Powered By Noox.fi",
     "WETH Powered By Noox.Fi",
     "WETH Powered By Noox.tech",
@@ -187,4 +194,14 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "X3.0",
     "YUGA x GUCCI Merch",
     "ZRO",
+    "ZPR NFT",
+    "ZT.WTF",
+    "ZachXBT.xyz",
+    "kUSDC.org",
+    "mScDAIMVT",
+    "mScWETHMVT",
+    "moaAVXMVT",
+    "wHEX",
+    "NHTYWEW",
+    "Incubator", # Not spam but no USD value or pricing
 ]

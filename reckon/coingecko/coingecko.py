@@ -1,11 +1,16 @@
 import datetime
 import json
 import os
-import random
 import requests
 import time
-import reckon.utils as utils
-from reckon.constants import COINGECKO_ID_EXPLICIT, PRICE_CACHE_FILE, PRICE_MISSING_FILE, COINGECKO_COINS_LIST_FILE
+import utils
+from constants import (
+    COINGECKO_ID_EXPLICIT, 
+    PRICE_CACHE_FILE, 
+    PRICE_MANUAL_FILE, 
+    PRICE_MISSING_FILE, 
+    COINGECKO_COINS_LIST_FILE
+    )
 
 COINGECKO_ID_LIST = json.load(open(COINGECKO_COINS_LIST_FILE))
 COINGECKO_IDS = [elem['symbol'] for elem in COINGECKO_ID_LIST]
@@ -62,6 +67,15 @@ def get_cached_historical_price(symbol: str, date: datetime):
     # Verify parameters
     if type(date) != datetime.datetime:
         raise Exception("Date is not a valid datetime object")
+
+    if os.path.isfile(PRICE_MANUAL_FILE):
+        with open(PRICE_MANUAL_FILE, 'r') as f:
+            for line in f:
+                ldate, lsymbol, lprice, ldate_added, lsource = line.rstrip().split(',')
+                if ldate == date.strftime("%Y-%m-%d") and \
+                    lsymbol.lower() == symbol.lower() and \
+                    lprice != '':
+                    return float(lprice)
 
     if os.path.isfile(PRICE_CACHE_FILE):
         with open(PRICE_CACHE_FILE, 'r') as f:

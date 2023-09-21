@@ -1,10 +1,10 @@
 __pycache__
 data/*
 !data/coingecko_coins_list.json
-reckon/secrets.py
+debank.toml
 wallets.toml
 tags_local.toml
 txoverride.toml
 .DS_STORE
 wip.py
-notebooks/
+venv/

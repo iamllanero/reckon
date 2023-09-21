@@ -1,6 +1,6 @@
 import tomllib
 import os.path
-from reckon.constants import *
+from constants import *
 
 with open(TXNS_TOML, 'rb') as f:
     TXNS_CONFIG = tomllib.load(f)

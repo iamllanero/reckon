@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from constants import STABLECOINS
 
 def parse(fn):
     txns = []

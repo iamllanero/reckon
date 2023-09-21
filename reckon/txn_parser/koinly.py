@@ -1,6 +1,6 @@
 import csv
 import datetime
-from reckon.constants import STABLECOINS
+from constants import STABLECOINS
 
 def parse(fn):
     
