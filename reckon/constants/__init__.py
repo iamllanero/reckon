@@ -1,17 +1,27 @@
 WALLETS_TOML = 'config/wallets.toml'
-WALLETS_CACHE_DIR = 'data/wallets_cache'
-CONSOLIDATED_FILE = 'data/consolidated.csv'
+
+WALLETS_DIR = 'output/wallets'
+
+FLATTEN_DIR = 'output/flatten'
+FLATTEN_OUTPUT = 'output/flatten.csv'
 
 TXNS_TOML = 'config/txns.toml'
-TXNS_FILE = 'data/txns.csv'
-SPAM_FILE = 'data/spam.csv'
-APPROVALS_FILE = 'data/approvals.csv'
+
+TXNS_OUTPUT = 'output/txns.csv'
+SPAM_OUTPUT = 'output/txns_spam.csv'
+APPROVALS_OUTPUT = 'output/txns_approvals.csv'
+
 TAGS_FILE = 'config/tags.toml'
 TAGS_LOCAL_FILE = 'config/tags_local.toml'
-PRICED_FILE = 'data/priced.csv'
-PRICE_CACHE_FILE = 'data/price_cache.csv'
-PRICE_MANUAL_FILE = 'data/price_manual.csv'
-PRICE_MISSING_FILE = 'data/price_missing.csv'
+
+PRICE_OUTPUT = 'output/price.csv'
+PRICE_CACHE_OUTPUT = 'output/price_cache.csv'
+PRICE_MANUAL_OUTPUT = 'output/price_manual.csv'
+PRICE_MISSING_OUTPUT = 'output/price_missing.csv'
+
+PF_OUTPUT = 'output/pf.csv'
+HIFO8949_OUTPUT = 'output/hifo8949.csv'
+
 COINGECKO_COINS_LIST_FILE = 'data/coingecko_coins_list.json'
 TRANSACTION_OVERRIDES_FILE = 'config/txoverride.toml'
 DEBANK_FILE = 'config/debank.toml'

@@ -1,5 +1,6 @@
 import pandas as pd
-from reckon.utils import list_to_csv
+from utils import list_to_csv
+from constants import HIFO8949_OUTPUT, PRICE_OUTPUT
 
 def calc_sell(df, symbol):
     """
@@ -83,7 +84,7 @@ def main():
     - Gain or loss
     """
 
-    df = pd.read_csv('data/priced.csv')
+    df = pd.read_csv(PRICE_OUTPUT)
 
     df = df.astype({
         'date': 'datetime64[ns]',
@@ -122,7 +123,7 @@ def main():
         sell_list.extend(calc_sell(df, symbol))
 
     # df.to_csv('data/8949-hifo-wip.csv')
-    list_to_csv(sell_list, 'data/8949-hifo.csv')
+    list_to_csv(sell_list, HIFO8949_OUTPUT)
 
 if __name__ == '__main__':
     main()

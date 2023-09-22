@@ -1,6 +1,6 @@
 import pandas as pd
 import coingecko as cg
-from constants import TXNS_FILE, PRICED_FILE, STABLECOINS
+from constants import TXNS_OUTPUT, PRICE_OUTPUT, STABLECOINS
 
 def compute_value(
     date, 
@@ -43,7 +43,7 @@ def main():
     From txns.csv
     date,txn_type,qty,symbol,purchase_token_cost,purchase_token,usd_cost,txn_name,chain,project,wallet,url,id
     """
-    df = pd.read_csv(TXNS_FILE)
+    df = pd.read_csv(TXNS_OUTPUT)
 
     df = df.astype({
         'date': 'datetime64[ns]',
@@ -85,7 +85,7 @@ def main():
         'wallet',
         'id',
         'url',
-    ]].to_csv(PRICED_FILE, index=False)
+    ]].to_csv(PRICE_OUTPUT, index=False)
 
     # TODO Should create an output file of unpriced transactions.
     #      Especially if it can be used directly to fill price_cache.csv

@@ -5,8 +5,14 @@ import os.path
 # import sys
 
 # import tomlkit
-from constants import (APPROVALS_FILE, CONSOLIDATED_FILE, SPAM_FILE,
-                              STABLECOINS, TXNS_FILE, TXNS_TOML)
+from constants import (
+    APPROVALS_OUTPUT, 
+    FLATTEN_OUTPUT, 
+    SPAM_OUTPUT,
+    STABLECOINS, 
+    TXNS_OUTPUT, 
+    TXNS_TOML
+    )
 from config import TXNS_CONFIG, TAGS, TXN_OVERRIDES, TRANSACTION_OVERRIDES_FILE
 from debank import FLAT_HEADERS
 from utils import list_to_csv
@@ -63,9 +69,9 @@ def main():
     # Sort output data for easier reading
     sort_except(txns, 0)
     
-    list_to_csv(txns, TXNS_FILE)
-    list_to_csv(approvals, APPROVALS_FILE)
-    list_to_csv(spam, SPAM_FILE)
+    list_to_csv(txns, TXNS_OUTPUT)
+    list_to_csv(approvals, APPROVALS_OUTPUT)
+    list_to_csv(spam, SPAM_OUTPUT)
 
 
 def txline(txn_type, txn_dict):
@@ -187,7 +193,7 @@ def consolidated_txns():
     approval_txns = []
     spam_txns = []
     
-    with open(CONSOLIDATED_FILE, 'r') as f:
+    with open(FLATTEN_OUTPUT, 'r') as f:
         next(f)
         lines = 0
         processed_lines = 0

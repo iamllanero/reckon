@@ -1,12 +1,13 @@
 import pandas as pd
-from reckon.utils import list_to_csv
+from utils import list_to_csv
+from constants import PRICE_OUTPUT, PF_OUTPUT
 
 def main():
     """
     Quick implementation of a rudimentary portfolio view.
     """
 
-    df = pd.read_csv('data/priced.csv')
+    df = pd.read_csv(PRICE_OUTPUT)
     df = df.astype({
             'date': 'datetime64[ns]',
             'txn_type': 'string',
@@ -67,7 +68,7 @@ def main():
 
     sorted_pf = [pf[0]] + sorted(pf[1:], key=lambda x: x[0], reverse=False)
 
-    list_to_csv(sorted_pf, 'data/pf.csv')
+    list_to_csv(sorted_pf, PF_OUTPUT)
 
 
 if __name__ == '__main__':

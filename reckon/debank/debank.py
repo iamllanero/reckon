@@ -1,7 +1,14 @@
 import json
 import requests
 import tomllib
-from constants import DEBANK_FILE, DEBANK_SPAM_TOKEN_IDS, DEBANK_SPAM_TOKEN_NAMES, TAGS_FILE, WALLETS_CACHE_DIR
+from constants import (
+    DEBANK_FILE, 
+    DEBANK_SPAM_TOKEN_IDS, 
+    DEBANK_SPAM_TOKEN_NAMES, 
+    TAGS_FILE, 
+    WALLETS_DIR,
+    FLATTEN_DIR,
+    )
 from utils import list_to_csv
 
 DEBANK_ACCESSKEY = tomllib.load(open(DEBANK_FILE, 'rb'))['DEBANK_ACCESSKEY']
@@ -117,7 +124,7 @@ class HistoryList:
 
     def write(self):
         """Writes the HistoryList as a JSON to file"""
-        with open(f'{WALLETS_CACHE_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.json', "w") as f:
+        with open(f'{WALLETS_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.json', "w") as f:
             json.dump(self.data, f)
     
     def write_flat_csv(self):
@@ -125,7 +132,7 @@ class HistoryList:
         flat_hl = [FLAT_HEADERS]
         for i in range(self.get_size()):
             flat_hl.extend(self.get_history_entry_flat(i))
-            list_to_csv(flat_hl, f'{WALLETS_CACHE_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.csv')
+            list_to_csv(flat_hl, f'{FLATTEN_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.csv')
 
     def get_wallet_addr(self):
         return self.data['wallet_addr']
@@ -332,7 +339,7 @@ def is_spam(receives_token_id,
 def load_history(wallet_addr, chain_id) -> HistoryList:
     """Creates a HistoryList based on an existing file."""
 
-    with open(f'{WALLETS_CACHE_DIR}/{wallet_addr}-{chain_id}.json', 'rb') as f:
+    with open(f'{WALLETS_DIR}/{wallet_addr}-{chain_id}.json', 'rb') as f:
         data = json.load(f)
     hlr = HistoryList(wallet_addr, chain_id, data)
     return hlr

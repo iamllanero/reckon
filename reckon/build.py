@@ -2,7 +2,7 @@ import os
 import tomllib
 
 from debank import fetch_all_history
-from constants import WALLETS_TOML, WALLETS_CACHE_DIR
+from constants import WALLETS_TOML, WALLETS_DIR
 
 def main():
     """Build and/or refresh wallets listed in config file"""
@@ -19,9 +19,9 @@ def main():
         hl.write()
 
 # Make sure there is a wallets_cache directory
-if not os.path.isdir(WALLETS_CACHE_DIR):
-    print(f'Creating a wallets cache directory => {WALLETS_CACHE_DIR}')
-    os.makedirs(WALLETS_CACHE_DIR)
+if not os.path.isdir(WALLETS_DIR):
+    print(f'Creating a wallets cache directory => {WALLETS_DIR}')
+    os.makedirs(WALLETS_DIR)
 
 if __name__ == '__main__':
     main()
