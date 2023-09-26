@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 import sys
-from config import PRICED_FILE
+from config import PRICE_OUTPUT
 
 
 def main(token: str) -> None:
     # Read the CSV
-    df = pd.read_csv(PRICED_FILE)
+    df = pd.read_csv(PRICE_OUTPUT)
 
     # Filter by the token
     df = df[df['symbol'].str.lower() == token.lower()].copy()
