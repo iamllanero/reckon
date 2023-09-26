@@ -1,16 +1,11 @@
-import tomllib
-
 from debank import load_history
-from constants import WALLETS_TOML, FLATTEN_OUTPUT, WALLETS_DIR, FLATTEN_DIR
+from constants import FLATTEN_OUTPUT, FLATTEN_DIR, WALLETS
 
 def main():
 
-    print(f'Flattening wallets in {WALLETS_TOML}')
+    print(f'Flattening wallets')
 
-    with open(WALLETS_TOML, 'rb') as f:
-        wf = tomllib.load(f)
-
-    for wallet in wf['wallets']:
+    for wallet in WALLETS:
         id = wallet[0]
         chain_id = wallet[1]
         hl = load_history(id, chain_id)
@@ -18,10 +13,10 @@ def main():
         hl.write_flat_csv()
 
     # Consolidate flattened wallets
-    print(f'Consolidating files to {FLATTEN_OUTPUT}')
+    print(f'Consolidating flattened files')
     headers = False
     with open(FLATTEN_OUTPUT, 'w') as f:
-        for wallet in wf['wallets']:
+        for wallet in WALLETS:
             with open(f'{FLATTEN_DIR}/{wallet[0]}-{wallet[1]}.csv', 'r') as wf:
                 if headers:
                     next(wf)

@@ -1,8 +1,31 @@
+import tomllib
+import os
+import sys
+
+# File that stores the wallet
 WALLETS_TOML = 'config/wallets.toml'
 
+if not os.path.isfile(WALLETS_TOML):
+    sys.exit("No wallet file was found.")
+
+with open(WALLETS_TOML, 'rb') as f:
+    WALLETS = tomllib.load(f)['wallets']
+
+# Directory for wallet output
 WALLETS_DIR = 'output/wallets'
 
+if not os.path.isdir(WALLETS_DIR):
+    print(f'Creating {WALLETS_DIR}')
+    os.makedirs(WALLETS_DIR)
+
+# Directory for flattened wallet output
 FLATTEN_DIR = 'output/flatten'
+
+if not os.path.isdir(FLATTEN_DIR):
+    print(f'Creating {WALLETS_DIR}')
+    os.makedirs(FLATTEN_DIR)
+
+# File that stores the combined flattened wallet
 FLATTEN_OUTPUT = 'output/flatten.csv'
 
 TXNS_TOML = 'config/txns.toml'
