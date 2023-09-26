@@ -30,12 +30,34 @@ FLATTEN_OUTPUT = 'output/flatten.csv'
 
 TXNS_TOML = 'config/txns.toml'
 
+with open(TXNS_TOML, 'rb') as f:
+    TXNS_CONFIG = tomllib.load(f)
+
+
 TXNS_OUTPUT = 'output/txns.csv'
 SPAM_OUTPUT = 'output/txns_spam.csv'
 APPROVALS_OUTPUT = 'output/txns_approvals.csv'
 
 TAGS_FILE = 'config/tags.toml'
 TAGS_LOCAL_FILE = 'config/tags_local.toml'
+
+with open(TAGS_FILE, 'rb') as f:
+    TAGS = tomllib.load(f)
+
+    if os.path.exists(TAGS_LOCAL_FILE):
+        with open(TAGS_LOCAL_FILE, 'rb') as g:
+            local_tags = tomllib.load(g)
+
+        TAGS.update(local_tags)
+
+TRANSACTION_OVERRIDES_FILE = 'config/txoverride.toml'
+
+if not os.path.exists(TRANSACTION_OVERRIDES_FILE):
+    open(TRANSACTION_OVERRIDES_FILE, "w").write("")
+
+with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
+    TXN_OVERRIDES = tomllib.load(f)
+
 
 PRICE_OUTPUT = 'output/price.csv'
 PRICE_CACHE_OUTPUT = 'output/price_cache.csv'
@@ -46,7 +68,6 @@ PF_OUTPUT = 'output/pf.csv'
 HIFO8949_OUTPUT = 'output/hifo8949.csv'
 
 COINGECKO_COINS_LIST_FILE = 'data/coingecko_coins_list.json'
-TRANSACTION_OVERRIDES_FILE = 'config/txoverride.toml'
 DEBANK_FILE = 'config/debank.toml'
 
 STABLECOINS = [

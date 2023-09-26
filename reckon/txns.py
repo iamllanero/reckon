@@ -11,9 +11,12 @@ from constants import (
     SPAM_OUTPUT,
     STABLECOINS, 
     TXNS_OUTPUT, 
-    TXNS_TOML
+    TXNS_TOML,
+    TXNS_CONFIG, 
+    TAGS, 
+    TXN_OVERRIDES, 
+    # TRANSACTION_OVERRIDES_FILE
     )
-from config import TXNS_CONFIG, TAGS, TXN_OVERRIDES, TRANSACTION_OVERRIDES_FILE
 from debank import FLAT_HEADERS
 from utils import list_to_csv
 
