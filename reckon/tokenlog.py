@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import sys
 from config import PRICE_OUTPUT
 
