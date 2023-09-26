@@ -1,3 +1,13 @@
+# Configuration options for Reckon
+#
+# Some general conventions:
+# X_TOML - Path to a TOML file
+# X_OUTPUT - Path to an output file that will be overwritten
+# X_DIR - Path to a directory that will be used (and created, if needed)
+# X_FILE - Path to a file that will be used (and created, if needed)
+# X_CONFIG - A dict that will be used as a config
+# X - A variable that will be used directly (i.e. WALLETS)
+
 import tomllib
 import os
 import sys
@@ -9,7 +19,7 @@ if not os.path.isfile(WALLETS_TOML):
     sys.exit("No wallet file was found.")
 
 with open(WALLETS_TOML, 'rb') as f:
-    WALLETS = tomllib.load(f)['wallets']
+    WALLETS = tomllib.load(f)['WALLETS']
 
 # Directory for wallet output
 WALLETS_DIR = 'output/wallets'
@@ -28,12 +38,13 @@ if not os.path.isdir(FLATTEN_DIR):
 # File that stores the combined flattened wallet
 FLATTEN_OUTPUT = 'output/flatten.csv'
 
+# File that stores many config options for txns
 TXNS_TOML = 'config/txns.toml'
 
 with open(TXNS_TOML, 'rb') as f:
     TXNS_CONFIG = tomllib.load(f)
 
-
+# Files to store key txns data
 TXNS_OUTPUT = 'output/txns.csv'
 SPAM_OUTPUT = 'output/txns_spam.csv'
 APPROVALS_OUTPUT = 'output/txns_approvals.csv'
@@ -58,55 +69,27 @@ if not os.path.exists(TRANSACTION_OVERRIDES_FILE):
 with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
     TXN_OVERRIDES = tomllib.load(f)
 
-
+# Key output for price.py
 PRICE_OUTPUT = 'output/price.csv'
 PRICE_CACHE_OUTPUT = 'output/price_cache.csv'
 PRICE_MANUAL_OUTPUT = 'output/price_manual.csv'
 PRICE_MISSING_OUTPUT = 'output/price_missing.csv'
 
+# Output of pf
 PF_OUTPUT = 'output/pf.csv'
+
+# Output of hifo8949
 HIFO8949_OUTPUT = 'output/hifo8949.csv'
 
 COINGECKO_COINS_LIST_FILE = 'data/coingecko_coins_list.json'
 DEBANK_FILE = 'config/debank.toml'
 
-STABLECOINS = [
-    "alusd",
-    "bpt-deiusdc",
-    "bpt-guqinqi",
-    "bpt-mimusdcust",
-    "busd",
-    "cad"
-    "clevusd",
-    "clevusd3crv-f",
-    "crvusd",
-    "crvusdusdc-f",
-    "dai.e",
-    "dai",
-    "frax",
-    "fraxbp-f",
-    "fusdt",
-    "gdai",
-    "gusd",
-    "hmim",
-    "lusd",
-    "lusd3crv-f",
-    "mai",
-    "mim",
-    "mimatic",
-    "moobeetdoubledollarfugue",
-    "moobeetguqinqi2",
-    "moogeistmim",
-    "mooscreamdai",
-    "s*usdc",
-    "usd",
-    "usdc.e",
-    "usdc",
-    "usde",
-    "usdt.e",
-    "usdt",
-    "ust",
-]
+# File that lists known stablecoins
+STABLECOINS_TOML = 'config/stablecoins.toml'
+
+with open(STABLECOINS_TOML, 'rb') as f:
+    STABLECOINS = tomllib.load(f)['STABLECOINS']
+
 
 # Dict to cache token symbols. Needed for tokens without symbols that can use
 # another token (i.e. WETH) and tokens with multiple matches.
