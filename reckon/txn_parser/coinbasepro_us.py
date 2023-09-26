@@ -1,5 +1,5 @@
 import csv
-from constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     """

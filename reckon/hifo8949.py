@@ -1,6 +1,6 @@
 import pandas as pd
 from utils import list_to_csv
-from constants import HIFO8949_OUTPUT, PRICE_OUTPUT
+from config import HIFO8949_OUTPUT, PRICE_OUTPUT
 
 def calc_sell(df, symbol):
     """

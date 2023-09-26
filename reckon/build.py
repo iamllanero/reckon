@@ -1,5 +1,5 @@
 from debank import fetch_all_history
-from constants import WALLETS
+from config import WALLETS
 
 def main():
     """Build and/or refresh wallets listed in config file"""

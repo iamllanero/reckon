@@ -5,7 +5,7 @@ import os.path
 # import sys
 
 # import tomlkit
-from constants import (
+from config import (
     APPROVALS_OUTPUT, 
     FLATTEN_OUTPUT, 
     SPAM_OUTPUT,

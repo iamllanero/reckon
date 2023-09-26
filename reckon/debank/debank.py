@@ -1,7 +1,7 @@
 import json
 import requests
 import tomllib
-from constants import (
+from config import (
     DEBANK_FILE, 
     DEBANK_SPAM_TOKEN_IDS, 
     DEBANK_SPAM_TOKEN_NAMES, 

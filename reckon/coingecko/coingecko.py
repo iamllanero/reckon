@@ -4,7 +4,7 @@ import os
 import requests
 import time
 import utils
-from constants import (
+from config import (
     COINGECKO_ID_EXPLICIT, 
     PRICE_CACHE_OUTPUT, 
     PRICE_MANUAL_OUTPUT, 

@@ -1,6 +1,6 @@
 import pandas as pd
 from utils import list_to_csv
-from constants import PRICE_OUTPUT, PF_OUTPUT
+from config import PRICE_OUTPUT, PF_OUTPUT
 
 def main():
     """

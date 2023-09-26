@@ -1,5 +1,5 @@
 from debank import load_history
-from constants import FLATTEN_OUTPUT, FLATTEN_DIR, WALLETS
+from config import FLATTEN_OUTPUT, FLATTEN_DIR, WALLETS
 
 def main():
 
