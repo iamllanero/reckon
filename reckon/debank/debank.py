@@ -1,19 +1,29 @@
 import json
 import requests
 import tomllib
+import os
+import sys
 from config import (
     DEBANK_FILE, 
     DEBANK_SPAM_TOKEN_IDS, 
     DEBANK_SPAM_TOKEN_NAMES, 
-    TAGS_FILE, 
+    # TAGS_FILE, 
     WALLETS_DIR,
     FLATTEN_DIR,
+    TAGS
     )
 from utils import list_to_csv
 
-DEBANK_ACCESSKEY = tomllib.load(open(DEBANK_FILE, 'rb'))['DEBANK_ACCESSKEY']
+# DEBANK_ACCESSKEY = tomllib.load(open(DEBANK_FILE, 'rb'))['DEBANK_ACCESSKEY']
 
-TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
+DEBANK_ACCESSKEY = os.getenv('DEBANK_ACCESSKEY')
+# Check if the environment variable is set
+if DEBANK_ACCESSKEY is not None:
+    print('DEBANK_ACCESSKEY:', DEBANK_ACCESSKEY)
+else:
+    sys.exit('Environment variable DEBANK_ACCESSKEY is not set')
+
+# TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
 
 FLAT_HEADERS = [
             'number',
