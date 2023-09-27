@@ -104,7 +104,7 @@ at <https://cloud.debank.com/>.
 Be sure to configure the following files in the config directory:
 
 - `wallets.toml` (see `wallets_sample.toml`)
-- `debank.toml` (see `debank_sample.toml`)
+- `debank.toml`
 - `txns.toml` - reports from CEX and trade equivalents
 
 Other files with configuration type items that don't need to be changed:
@@ -121,6 +121,9 @@ click on "Try it out" and cut/paste the resulting content to replace the current
 ## USAGE
 
 ```sh
+# Be sure you have set DEBANK_ACCESSKEY in your environment
+export DEBANK_ACCESSKEY="mykey"
+
 # First build the local cache of wallets
 # This uses Debank credits so use only to build and to refresh
 # Other commands do not use Debank credits
@@ -148,6 +151,18 @@ python3 reckon/8949-hifo.py
 ```
 
 ## CONTRIBUTING
+
+Some general design principles:
+
+- This is a CLI heavy project intended for technical users.
+- Users should be expected to configure, make manual entries, and overrides
+  via editing text files (vs. any sort of UI or CLI).
+- For now, one py file in the main directory should be used for each function.
+- Each py file can take input from other py files, but should generally not
+  modify them; instead, only creating their own file.
+- Files in the output directory should be expected to be overwritten by py
+  files.
+- Files in other directories should not be overwritten by py files.
 
 Please feel free to create issues and pull requests with any changes. Since
 this is a personal project, I won't always fix all issues that I am not
