@@ -31,6 +31,8 @@ HEADERS = [
     'chain',
     'project',
     'wallet',
+    'token_id',
+    'purchase_token_id',
     'id',
     'url',
 ]
@@ -54,7 +56,7 @@ def sort_except(list, ignore):
 
 def write_csv(list, file_path):
     with open(file_path, 'w', newline='') as csvfile:
-        csvwriter = csv.writer(file_path)
+        csvwriter = csv.writer(csvfile)
         csvwriter.writerows(list)
 
 
@@ -89,7 +91,7 @@ def txline(txn_type, txn_dict):
     
     date = datetime.datetime.fromtimestamp(
         float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
-
+    # print(txn_dict)
     return [
         date, 
         txn_type,
@@ -102,6 +104,8 @@ def txline(txn_type, txn_dict):
         txn_dict['project.name'], 
         txn_dict['tx.from_addr'] if not show_tags else \
             TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']), 
+        txn_dict['receives.token_id'] if 'receives.token_id' in txn_dict else '',
+        txn_dict['sends.token_id'] if 'send.token_id' in txn_dict else '',
         txn_dict['id'],
         txn_dict['url'],
     ]
@@ -164,6 +168,8 @@ def process_batch(txn_dicts, do_overrides=True):
                         td['sends.amount'], td['receives.amount']
                     td['receives.token.symbol'], td['sends.token.symbol'] = \
                         td['sends.token.symbol'], td['receives.token.symbol']
+                    td['receives.token_id'], td['sends.token_id'] = \
+                        td['sends.token_id'], td['receives.token_id']
 
                 txns.append(txline('sell', td))
 
