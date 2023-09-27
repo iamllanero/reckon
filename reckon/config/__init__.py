@@ -1,6 +1,13 @@
 # Configuration options for Reckon
 #
+# Design considerations
+#
+# - Users should not need to directly modify this file
+# - Files that need user modification should be pushed to TOML files
+# - This file should validate files and dirs taking appropriate actions
+#
 # Some general conventions:
+#
 # X_TOML - Path to a TOML file
 # X_OUTPUT - Path to an output file that will be overwritten
 # X_DIR - Path to a directory that will be used (and created, if needed)
@@ -69,10 +76,12 @@ if not os.path.exists(TRANSACTION_OVERRIDES_FILE):
 with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
     TXN_OVERRIDES = tomllib.load(f)
 
+# File that stores the price overrides
+PRICE_MANUAL_FILE = 'config/price_manual.csv'
+
 # Key output for price.py
 PRICE_OUTPUT = 'output/price.csv'
 PRICE_CACHE_OUTPUT = 'output/price_cache.csv'
-PRICE_MANUAL_OUTPUT = 'output/price_manual.csv'
 PRICE_MISSING_OUTPUT = 'output/price_missing.csv'
 
 # Output of pf
