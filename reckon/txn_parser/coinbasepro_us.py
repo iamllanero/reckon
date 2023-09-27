@@ -35,7 +35,9 @@ def parse(fn):
                         tx_type, 
                         'coinbasepro', 
                         'coinbasepro', 
-                        'coinbasepro', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
                 else:

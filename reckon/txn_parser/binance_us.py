@@ -56,7 +56,9 @@ def parse(fn):
                     f'{category}/{operation}',
                     'binance', 
                     'binance', 
-                    'binance',
+                    '',
+                    '',
+                    '',
                     fn
                 ])
             elif category in ['Sell']:
@@ -72,7 +74,9 @@ def parse(fn):
                     f'{category}/{operation}',
                     'binance', 
                     'binance', 
-                    'binance',
+                    '',
+                    '',
+                    '',
                     fn
                 ])
             elif category in ['Spot Trading']:
@@ -90,7 +94,9 @@ def parse(fn):
                             f'{category}/{operation}',
                             'binance', 
                             'binance', 
-                            'binance',
+                            '',
+                            '',
+                            '',
                             fn
                         ])
                 elif operation == 'Sell':
@@ -107,7 +113,9 @@ def parse(fn):
                             f'{category}/{operation}',
                             'binance', 
                             'binance', 
-                            'binance',
+                            '',
+                            '',
+                            '',
                             fn
                         ])
                 else:

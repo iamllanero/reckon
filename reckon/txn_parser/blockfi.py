@@ -24,7 +24,9 @@ def parse(fn):
                         txn_type, 
                         'blockfi', 
                         'blockfi', 
-                        'blockfi', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
             elif txn_type == 'Trade':
@@ -46,7 +48,9 @@ def parse(fn):
                             txn_type, 
                             'blockfi', 
                             'blockfi', 
-                            'blockfi', 
+                            '', 
+                            '',
+                            '',
                             fn
                         ])
                 else:
@@ -63,7 +67,9 @@ def parse(fn):
                             txn_type,
                             'blockfi', 
                             'blockfi', 
-                            'blockfi', 
+                            '', 
+                            '',
+                            '',
                             fn
                         ])
                     else:
@@ -79,7 +85,9 @@ def parse(fn):
                             txn_type, 
                             'blockfi', 
                             'blockfi', 
-                            'blockfi', 
+                            '', 
+                            '',
+                            '',
                             fn
                         ])
                         txns.append([
@@ -94,7 +102,9 @@ def parse(fn):
                             txn_type, 
                             'blockfi', 
                             'blockfi', 
-                            'blockfi', 
+                            '', 
+                            '',
+                            '',
                             fn
                         ])
             else:

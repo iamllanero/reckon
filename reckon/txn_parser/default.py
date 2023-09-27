@@ -33,6 +33,8 @@ def parse(fn):
                         location, 
                         location, 
                         location, 
+                        '', # token_id
+                        '', # purchase_token_id
                         id,
                         fn
                     ])

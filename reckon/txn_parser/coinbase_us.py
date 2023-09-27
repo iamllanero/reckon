@@ -26,7 +26,9 @@ def parse(fn):
                         txn_type,
                         'coinbase',
                         'coinbase',
-                        'coinbase',
+                        '',
+                        '',
+                        '',
                         fn
                     ])
             elif txn_type == 'Buy':
@@ -43,7 +45,9 @@ def parse(fn):
                         txn_type,
                         'coinbase', 
                         'coinbase', 
-                        'coinbase', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
             elif txn_type == 'Converted from':
@@ -67,7 +71,9 @@ def parse(fn):
                         txn_type, 
                         'coinbase', 
                         'coinbase', 
-                        'coinbase', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
                 elif asset.lower() in STABLECOINS:
@@ -82,7 +88,9 @@ def parse(fn):
                         txn_type, 
                         'coinbase', 
                         'coinbase', 
-                        'coinbase', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
                 else:
@@ -98,7 +106,9 @@ def parse(fn):
                         'Converted from', 
                         'coinbase', 
                         'coinbase', 
-                        'coinbase', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
                     txns.append([
@@ -113,7 +123,9 @@ def parse(fn):
                         txn_type, 
                         'coinbase', 
                         'coinbase', 
-                        'coinbase', 
+                        '', 
+                        '',
+                        '',
                         fn
                     ])
             elif txn_type in ['Deposit', 'Incoming', 'Receive', 'Send', 'Withdrawal']:
