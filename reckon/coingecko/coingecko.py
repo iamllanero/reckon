@@ -228,16 +228,13 @@ def clean_cache(file_path):
         csvwriter.writerows(cache)
 
 
-clean_cache(PRICE_CACHE_OUTPUT)
-clean_cache(PRICE_MISSING_OUTPUT)
+def clean_caches():
+    clean_cache(PRICE_CACHE_OUTPUT)
+    clean_cache(PRICE_MISSING_OUTPUT)
+
+
+clean_caches()
+
 
 if __name__ == '__main__':
-    # save_historical_price('btc', datetime.datetime(2021, 2, 7), 100.0)
-    # historical_price('cvx', 'Not a date')
-    # historical_price('btc', datetime.datetime(2021, 2, 7))
-    # print(cached_historical_price('btc', datetime.datetime(2021, 2, 7)))
-    # historical_price('eth', datetime.datetime(2021, 3, 31))
-    # historical_price('crv', datetime.datetime(2021, 1, 12))
-    # historical_price('made-up-doesnt-exist', '01-12-2022')
-    # clean_cache()
-    pass
+    clean_caches()

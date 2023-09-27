@@ -90,7 +90,7 @@ def main():
     # TODO Should create an output file of unpriced transactions.
     #      Especially if it can be used directly to fill price_cache.csv
 
-    cg.clean_cache()
+    cg.clean_caches()
 
 
 if __name__ == '__main__':
