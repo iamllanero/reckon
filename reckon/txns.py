@@ -18,7 +18,7 @@ from config import (
     # TRANSACTION_OVERRIDES_FILE
     )
 from debank import FLAT_HEADERS
-from utils import list_to_csv
+# from utils import list_to_csv
 
 HEADERS = [
     'date',
@@ -51,6 +51,13 @@ def sort_except(list, ignore):
     list.sort(key= lambda x: datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S'))
     list.insert(ignore, temp)
 
+
+def write_csv(list, file_path):
+    with open(file_path, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(file_path)
+        csvwriter.writerows(list)
+
+
 def main():
     txns = [HEADERS]
 
@@ -72,9 +79,9 @@ def main():
     # Sort output data for easier reading
     sort_except(txns, 0)
     
-    list_to_csv(txns, TXNS_OUTPUT)
-    list_to_csv(approvals, APPROVALS_OUTPUT)
-    list_to_csv(spam, SPAM_OUTPUT)
+    write_csv(txns, TXNS_OUTPUT)
+    write_csv(approvals, APPROVALS_OUTPUT)
+    write_csv(spam, SPAM_OUTPUT)
 
 
 def txline(txn_type, txn_dict):
