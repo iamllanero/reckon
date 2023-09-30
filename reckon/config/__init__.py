@@ -55,6 +55,9 @@ with open(TXNS_TOML, 'rb') as f:
 TXNS_OUTPUT = 'output/txns.csv'
 SPAM_OUTPUT = 'output/txns_spam.csv'
 APPROVALS_OUTPUT = 'output/txns_approvals.csv'
+STABLECOINS_OUTPUT = 'output/txns_stablecoins.csv'
+EQUIVALENTS_OUTPUT = 'output/txns_equivalents.csv'
+EMPTY_OUTPUT = 'output/txns_empty.csv'
 
 TAGS_FILE = 'config/tags.toml'
 TAGS_LOCAL_FILE = 'config/tags_local.toml'
