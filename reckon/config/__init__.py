@@ -44,6 +44,8 @@ if not os.path.isdir(FLATTEN_DIR):
 
 # File that stores the combined flattened wallet
 FLATTEN_OUTPUT = 'output/flatten.csv'
+FLATTEN_PROJ_OUTPUT = 'output/flatten_proj.csv'
+FLATTEN_TXNAMES_OUTPUT = 'output/flatten_txnames.csv'
 
 # File that stores many config options for txns
 TXNS_TOML = 'config/txns.toml'

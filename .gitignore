@@ -1,5 +1,6 @@
 .DS_STORE
 __pycache__
+.vscode/*
 venv/
 output/*
 data/reports/*
@@ -7,3 +8,5 @@ config/debank.toml
 config/wallets.toml
 config/tags_local.toml
 config/txoverride.toml
+config/price_manual.csv
+wip.py
