@@ -4,34 +4,43 @@ from datetime import datetime
 from collections import defaultdict
 
 def get_timestamp_from_date(date_str, date_format="%Y-%m-%d %H:%M:%S"):
-    """
-    Convert a date string to a timestamp.
-
-    Args:
-    - date_str (str): The date string to convert.
-    - date_format (str, optional): The format of the date string. Defaults to "%Y-%m-%d %H:%M:%S".
-
-    Returns:
-    - int: The timestamp corresponding to the date string.
-    """
+    """Convert a date string to a timestamp."""
     dt = datetime.strptime(date_str, date_format)
     timestamp = int(dt.timestamp())
     return timestamp
 
 
-def get_price_historical(chain, token_id, timestamp):
+def get_date_from_timestamp(timestamp, date_format="%Y-%m-%d %H:%M:%S"):
+    """Convert a timestamp to a date string."""
+    dt = datetime.fromtimestamp(timestamp)
+    date_str = dt.strftime(date_format)
+    return date_str
+
+
+def get_price(chain, token_id, date=None):
     """
-    Get historical prices.
+    Get current or historical prices.
 
     Chain can be:
     - ethereum
     - avax
     - fantom
     """
-    url = f"https://coins.llama.fi/prices/historical/{timestamp}/{chain}:{token_id}"
-    response = requests.get(url)
-    print(response.status_code)
-    print(response.json())
+
+    # If no date, then get the latest price
+    if date is None:
+        url = f"https://coins.llama.fi/prices/current/{chain}:{token_id}"
+        response = requests.get(url)
+        print(response.status_code)
+        print(response.text)
+
+    # Otherwise, get the price at the specified date
+    else:
+        timestamp = get_timestamp_from_date(date)
+        url = f"https://coins.llama.fi/prices/historical/{timestamp}/{chain}:{token_id}"
+        response = requests.get(url)
+        print(response.status_code)
+        print(response.text)
 
 
 def get_prices(request_list):
@@ -48,19 +57,55 @@ def get_prices(request_list):
     request_dict = defaultdict(list)
     for request in request_list:
         chain = request[0]
-        chain = "ethererum" if chain == "eth" else chain
         token_id = request[1]
         timestamp = get_timestamp_from_date(request[2])
         request_dict[f'{chain}:{token_id}'].append(timestamp)
-    json = str(dict(request_dict))
-    json = json.replace("'", '"')
-    print(json)
-    # json = '{"avax:0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e": [1666876743, 1666862343]}'
-    url = f"https://coins.llama.fi/batchHistorical?coins={quote(json)}&searchWidth=600"
-    print(url)
+    request = str(dict(request_dict))
+    request = request.replace("'", '"')
+    # print(request)
+    url = f"https://coins.llama.fi/batchHistorical?coins={quote(request)}&searchWidth=600"
+    # print(url)
     response = requests.get(url)
-    print(response.status_code)
-    print(response.text)
+    json = response.json()
+    prices_response = []
+    if 'coins' in json:
+        coins_dict = json['coins']
+        for coin, coin_data in coins_dict.items():
+            chain, token_id = coin.split(':')
+            # print(coin_data)
+            for prices in coin_data['prices']:
+                timestamp = prices['timestamp']
+                date = get_date_from_timestamp(timestamp)
+                price = prices['price']
+                confidence = prices['confidence'] if 'confidence' in prices else ''
+                print(f"{date} {chain} {token_id} {price} {confidence}")
+                prices_response.append([
+                    date,
+                    chain,
+                    token_id,
+                    price,
+                    confidence
+                ])
+
+    return prices_response
+    # priced = []
+    # unpriced = []
+
+    # prices_set = {(date, chain, token_id) for date, chain, token_id, _, _ in prices_response}
+
+    # print(prices_set)
+    # for req in request_list:
+    #     print(req)
+    #     chain, token_id, date = req
+    #     if (date, chain, token_id) in prices_set:
+    #         # Find the matching response to get the price
+    #         matching_response = next(price for price in prices_response if (price[0], price[1], price[2]) == (date, chain, token_id))
+    #         priced.append(req + [matching_response[3]])  # Append the price to the request
+    #     else:
+    #         unpriced.append(req)
+
+    # print(priced)
+    # print(unpriced)
 
 
 if __name__ == "__main__":
@@ -78,10 +123,29 @@ if __name__ == "__main__":
     # for req in reqs:
     #     get_price_historical(req[0], req[1], req[2])
 
-    get_prices([
+    # get_prices([
+    #     ['ethereum', crv_token_id, '2021-08-04 14:58:23'],
+    #     ['ethereum', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '2021-08-04 14:58:23'], # WETH
+    #     ['ethereum', '0xaa0c3f5f7dfd688c6e646f66cd2a6b66acdbe434', '2023-10-01 11:51:11'],
+    #     ['ethereum', crv_token_id, '2022-09-04 14:58:23'],
+    #     ['ethereum', clev_token_id, '2023-09-01 12:58:23'],
+    #     ['fantom', beets_token_id, '2021-12-09 01:18:45'],
+    #     ['avax', time_token_id, '2021-12-13 04:05:12'],
+    # ])
+
+    price_reqs = [
         ['ethereum', crv_token_id, '2021-08-04 14:58:23'],
         ['ethereum', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '2021-08-04 14:58:23'], # WETH
+        ['ethereum', '0xaa0c3f5f7dfd688c6e646f66cd2a6b66acdbe434', '2023-10-01 11:51:11'],
+        ['ethereum', crv_token_id, '2022-09-04 14:58:23'],
         ['ethereum', clev_token_id, '2023-09-01 12:58:23'],
         ['fantom', beets_token_id, '2021-12-09 01:18:45'],
         ['avax', time_token_id, '2021-12-13 04:05:12'],
-    ])
+        ['ethereum', crv_token_id],
+    ]
+
+    for req in price_reqs:
+        if len(req) == 3:
+            get_price(req[0], req[1], req[2])
+        else:
+            get_price(req[0], req[1])
