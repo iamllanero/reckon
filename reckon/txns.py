@@ -14,6 +14,7 @@ from config import (
     EMPTY_OUTPUT,
     STABLECOINS, 
     TXNS_OUTPUT, 
+    TXNS_PRICE_REQ_OUTPUT,
     TXNS_TOML,
     TXNS_CONFIG, 
     TAGS, 
@@ -63,6 +64,21 @@ def write_csv(list, file_path):
         csvwriter.writerows(list)
 
 
+def create_price_requests(txns):
+    requests = []
+    for txn in txns:
+        txn_dict = dict(zip(HEADERS, txn))
+        if txn_dict['txn_type'] in ['buy', 'sell', 'income']:
+            requests.append([
+                txn_dict['date'],
+                txn_dict['chain'],
+                txn_dict['symbol'],
+                txn_dict['token_id'],
+                txn_dict['txn_type'],
+            ])
+    write_csv(requests, TXNS_PRICE_REQ_OUTPUT)
+
+
 def main():
     txns = [HEADERS]
 
@@ -96,6 +112,8 @@ def main():
     write_csv(stable_txns, STABLECOINS_OUTPUT)
     write_csv(equivalent_txns, EQUIVALENTS_OUTPUT)
     write_csv(empty_txns, EMPTY_OUTPUT)
+
+    create_price_requests(txns)
 
 
 def txline(txn_type, txn_dict):

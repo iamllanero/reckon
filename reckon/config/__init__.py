@@ -55,6 +55,7 @@ with open(TXNS_TOML, 'rb') as f:
 
 # Files to store key txns data
 TXNS_OUTPUT = 'output/txns.csv'
+TXNS_PRICE_REQ_OUTPUT = 'output/txns_price_req.csv'
 SPAM_OUTPUT = 'output/txns_spam.csv'
 APPROVALS_OUTPUT = 'output/txns_approvals.csv'
 STABLECOINS_OUTPUT = 'output/txns_stablecoins.csv'
@@ -174,6 +175,7 @@ DEBANK_SPAM_TOKEN_IDS = [
 
 DEBANK_SPAM_TOKEN_NAMES = [
     "(BNB)",
+    "# Visit UrgentDT.com to secure your funds ASAP. A hacker has access to your funds.",
     "$ ConvexLR.com  - Visit to claim bonus rewards",
     "$ Free Claim and Play",
     "$ UniswapLR.com @ 5.75",
@@ -202,11 +204,19 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "EGOD",
     "FIGHT",
     "FK12",
+    "Incubator",
+    "kUSDC.org",
     "LIL",
     "LOOKSDROP.COM",
     "LPUniV3.com",
     "M32",
+    "moaAVXMVT",
+    "mScDAIMVT",
+    "mScWETHMVT",
+    "NHTYWEW",
+    "Nobody",
     "Noox Distribution Protocol",
+    "NOTIONAL_BETA",
     "NUDES",
     "PHY",
     "PNDC",
@@ -226,10 +236,13 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "UniswapLP.com",
     "Uniswapv3LP.com",
     "USDCGOLD.COM",
+    "Visit https://aeth.trade to claim rewards",
+    "Visit https://apyeth.net to claim rewards",
     "Visit https://arbinu.fun to claim rewards.",
     "Visit https://axdom.site to claim rewards.",
     "Visit https://convex.bz to claim rewards.",
     "Visit https://creth.xyz to claim rewards.",
+    "Visit https://ethapy.org to claim rewards",
     "Visit https://gpepe.org to claim rewards.",
     "Visit https://gpepe.xyz to claim rewards.",
     "Visit https://incr.fi and claim genesis airdrops.",
@@ -241,18 +254,13 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "WETH Powered By Noox.fi",
     "WETH Powered By Noox.Fi",
     "WETH Powered By Noox.tech",
+    "wHEX",
     "X2.0",
     "X3.0",
+    "YES2049",
     "YUGA x GUCCI Merch",
-    "ZRO",
-    "ZPR NFT",
-    "ZT.WTF",
     "ZachXBT.xyz",
-    "kUSDC.org",
-    "mScDAIMVT",
-    "mScWETHMVT",
-    "moaAVXMVT",
-    "wHEX",
-    "NHTYWEW",
-    "Incubator", # Not spam but no USD value or pricing
+    "ZPR NFT",
+    "ZRO",
+    "ZT.WTF",
 ]
