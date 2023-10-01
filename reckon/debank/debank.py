@@ -242,8 +242,11 @@ class HistoryList:
                 row.extend(['' for x in range(6)])
 
             sends_token_id = None
+            sends_token_symbol = None
             if len(entry['sends']) > i:
                 sends_token_id = entry['sends'][i]['token_id']
+                token = self.get_token(sends_token_id)
+                sends_token_symbol = token['symbol']
                 row.extend([
                     entry['sends'][i]['amount'],
                     entry['sends'][i]['to_addr'],
@@ -300,6 +303,7 @@ class HistoryList:
                                receive_token_is_verified,
                                receive_token_symbol,
                                project_id,
+                               sends_token_symbol,
                                sends_token_id,
                                tx_name))
 
@@ -311,6 +315,7 @@ def is_spam(receives_token_id,
             receives_token_is_verfied,
             receives_token_symbol,
             project_id,
+            sends_token_symbol,
             sends_token_id,
             tx_name
             ):
@@ -328,10 +333,15 @@ def is_spam(receives_token_id,
     has_sends = False if sends_token_id is None else True
     has_tx = False if tx_name is None else True
 
-    if receives_token_id in DEBANK_SPAM_TOKEN_IDS:
-        return True
+    # if receives_token_id in DEBANK_SPAM_TOKEN_IDS:
+    #     return True
 
-    if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES:
+    # if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES:
+    #     return True
+    if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
+        receives_token_id in DEBANK_SPAM_TOKEN_IDS or \
+        sends_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
+        sends_token_id in DEBANK_SPAM_TOKEN_IDS:
         return True
 
     if has_receives and \
