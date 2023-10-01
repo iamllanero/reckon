@@ -124,18 +124,22 @@ click on "Try it out" and cut/paste the resulting content to replace the current
 # Be sure you have set DEBANK_ACCESSKEY in your environment
 export DEBANK_ACCESSKEY="mykey"
 
-# First build the local cache of wallets
-# This uses Debank credits so use only to build and to refresh
-# Other commands do not use Debank credits
+# First build the local cache of wallets.
+# Be aware that this script uses Debank credits. It does cache aggressively
+# to conserve credits. Run this script any time your wallets will have onchain
+# transactions that are not yet cached. This script, via the debank module, 
+# is responsible for flagging likely spam transactions.
 
 python3 reckon/build.py
 
-# Flatten the wallets into CSV files and consolidate to "consolidated.csv"
+# Flatten the wallets into CSV files and consolidates into a single file.
 
 python3 reckon/flat.py
 
-# Generate a transactions file from wallets and CEX reports into a single
-# file "txns.csv". ALso applies spam flag.
+# Calculates taxable transactions based on flatten output, generating a
+# transactions file txns.csv from wallets and CEX reports into a single. Also
+# generates a number of additional txns_xyz.csv files to show processing
+# results.
 
 python3 reckon/txns.py
 
@@ -150,58 +154,3 @@ python3 reckon/price.py
 python3 reckon/8949-hifo.py
 ```
 
-## CONTRIBUTING
-
-Some general design principles:
-
-- This is a CLI heavy project intended for technical users.
-- Users should be expected to configure, make manual entries, and overrides
-  via editing text files (vs. any sort of UI or CLI).
-- For now, one py file in the main directory should be used for each function.
-- Each py file can take input from other py files, but should generally not
-  modify them; instead, only creating their own file.
-- Files in the output directory should be expected to be overwritten by py
-  files.
-- Files in other directories should not be overwritten by py files.
-
-Please feel free to create issues and pull requests with any changes. Since
-this is a personal project, I won't always fix all issues that I am not
-experiencing. But I will try to merge changes reasonably fast.
-
-Since contributors may also be using GitHub with their IRL identities,
-here are some gotchas to check if/when you want to contribute under your
-cryptonym:
-
-- Be sure to create and use the correct GitHub account
-
-- Set your local git config appropriately
-
-```sh
-git config --local user.name "Llanero"
-git config --local user.email "iamllanero@gmail.com"
-```
-
-- Double check your config
-
-```sh
-git config --local user.name
-git config --local user.email
-```
-
-- As an extra layer of precaution, you can change your global config.
-
-```sh
-git config --global user.name "Llanero"
-git config --global user.email "iamllanero@gmail.com"
-```
-
-- And, of coure, check the global config
-
-```sh
-git config --global user.name
-git config --global user.email
-```
-
-## LOTS OF WORK TO BE DONE
-
-See TODO.md
