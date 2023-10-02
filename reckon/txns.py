@@ -65,10 +65,17 @@ def write_csv(list, file_path):
 
 
 def create_price_requests(txns):
-    requests = []
+    requests = [[
+        'date',
+        'chain',
+        'symbol',
+        'token_id',
+        'txn_type'
+    ]]
     for txn in txns:
         txn_dict = dict(zip(HEADERS, txn))
-        if txn_dict['txn_type'] in ['buy', 'sell', 'income']:
+        if txn_dict['txn_type'] in ['buy', 'sell', 'income'] and \
+            txn_dict['symbol'].lower() not in STABLECOINS:
             requests.append([
                 txn_dict['date'],
                 txn_dict['chain'],
@@ -174,16 +181,19 @@ def process_batch(txn_dicts, do_overrides=True):
         nonzero_sends = sum([1 for i in send_amounts if i > 0])
         nonzero_recvs = sum([1 for i in recv_amounts if i > 0])
 
+        # TODO Need to add token_id to this logic!!!
         if nonzero_sends == 1 and nonzero_recvs == len(txn_dicts):
             # One token was sent, multiple were received back
             for td in txn_dicts:
                 td['sends.token.symbol'] = txn_dicts[0]['sends.token.symbol']
+                td['sends.token_id'] = txn_dicts[0]['sends.token_id']
                 td['sends.amount'] = sum(send_amounts) / float(len(send_amounts))
 
         if nonzero_recvs == 1 and nonzero_sends == len(txn_dicts):
             # Multiple tokens were sent, one was received back
             for td in txn_dicts:
                 td['receives.token.symbol'] = txn_dicts[0]['receives.token.symbol']
+                td['receives.token_id'] = txn_dicts[0]['receives.token_id']
                 td['receives.amount'] = sum(recv_amounts) / float(len(recv_amounts))
 
     # Generate transaction line(s) for each transaction in batch

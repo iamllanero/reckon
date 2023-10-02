@@ -60,4 +60,4 @@ if __name__ == '__main__':
         token = sys.argv[1]
         main(token)
     else:
-        print("Usage: python3 tokenlog.py <token>")
+        print(f"Usage: python3 {sys.argv[0].split('/')[-1]} <token>")

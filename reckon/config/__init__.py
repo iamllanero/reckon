@@ -86,9 +86,16 @@ with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
 PRICE_MANUAL_FILE = 'config/price_manual.csv'
 
 # Key output for price.py
+PRICE_REQ_OUTPUT = 'output/price_req.csv'
 PRICE_OUTPUT = 'output/price.csv'
-PRICE_CACHE_OUTPUT = 'output/price_cache.csv'
-PRICE_MISSING_OUTPUT = 'output/price_missing.csv'
+
+# Key output for coingecko.py
+COINGECKO_CACHE_OUTPUT = 'output/coingecko_cache.csv'
+COINGECKO_MISSING_OUTPUT = 'output/coingecko_missing.csv'
+
+# Key output for defillama.py
+DEFILLAMA_CACHE_OUTPUT = 'output/defillama_cache.csv'
+DEFILLAMA_MISSING_OUTPUT = 'output/defillama_missing.csv'
 
 # Output of pf
 PF_OUTPUT = 'output/pf.csv'
@@ -110,6 +117,7 @@ with open(STABLECOINS_TOML, 'rb') as f:
 # another token (i.e. WETH) and tokens with multiple matches.
 COINGECKO_ID_EXPLICIT = {
     "aave": "aave",
+    "ada": "cardano",
     "abccvx-gauge": "convex-finance",
     "abccvx": "convex-finance",
     "acrv": "aladdin-cvxcrv",
@@ -263,4 +271,8 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "ZPR NFT",
     "ZRO",
     "ZT.WTF",
+    "PGold",
+    "DEV",
+    "MEV",
+    
 ]

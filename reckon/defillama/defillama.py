@@ -1,7 +1,15 @@
-import requests
-from urllib.parse import quote
+from config import DEFILLAMA_CACHE_OUTPUT, DEFILLAMA_MISSING_OUTPUT
 from datetime import datetime
-from collections import defaultdict
+import csv
+import os
+import requests
+import sys
+
+
+PRICE_CACHE = []
+MISSING_CACHE = []
+HEADERS = ["date", "chain", "symbol", "token_id", "price"]
+
 
 def get_timestamp_from_date(date_str, date_format="%Y-%m-%d %H:%M:%S"):
     """Convert a date string to a timestamp."""
@@ -17,135 +25,135 @@ def get_date_from_timestamp(timestamp, date_format="%Y-%m-%d %H:%M:%S"):
     return date_str
 
 
-def get_price(chain, token_id, date=None):
+def check_cache(date, chain, symbol, token_id):
+    """Check the cache for a price."""
+    for price in PRICE_CACHE:
+        if price[0] == date and \
+            price[1] == chain and \
+            price[3] == token_id:
+            return price[4]
+    return None
+
+
+def is_known_missing(date, chain, symbol, token_id) -> bool:
+    """Check the missing cache for a price."""
+    for price in MISSING_CACHE:
+        if price[0] == date and \
+            price[1] == chain and \
+            price[3] == token_id:
+            return True
+    return False
+
+
+def clean_cache(file_path):
+    with open(file_path, 'r') as f:
+        reader = csv.reader(f)
+        data = list(reader)
+    
+    # If the CSV has headers, separate them from the data
+    headers = data[0]
+    data = data[1:]
+    
+    # De-duplicate by converting to a set of tuples and then back to a list of lists
+    data = [list(item) for item in set(tuple(row) for row in data)]
+    
+    # Sort by date, chain, symbol, and token_id
+    data.sort(key=lambda x: (x[0], x[1], x[2], x[3]))
+    
+    # Write the sorted list back to the CSV file
+    with open(file_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)  # Write the headers back
+        writer.writerows(data)
+
+
+def save_cache(date, chain, symbol, token_id, price):
+    """Save a price to the cache."""
+    PRICE_CACHE.append([
+        date,
+        chain,
+        symbol,
+        token_id,
+        price
+    ])
+    with open(DEFILLAMA_CACHE_OUTPUT, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(PRICE_CACHE[-1])
+
+
+def save_missing(date, chain, symbol, token_id):
+    """Save a missing price to the cache."""
+    MISSING_CACHE.append([
+        date,
+        chain,
+        symbol,
+        token_id,
+        ''
+    ])
+    with open(DEFILLAMA_MISSING_OUTPUT, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([date, chain, symbol, token_id, ''])
+
+
+def get_price(date, chain, symbol, token_id):
     """
-    Get current or historical prices.
+    Get historical prices.
 
     Chain can be:
     - ethereum
     - avax
     - fantom
     """
+    price = check_cache(date, chain, symbol, token_id)
+    if price is None and \
+        not is_known_missing(date, chain, symbol, token_id):
 
-    # If no date, then get the latest price
-    if date is None:
-        url = f"https://coins.llama.fi/prices/current/{chain}:{token_id}"
-        response = requests.get(url)
-        print(response.status_code)
-        print(response.text)
-
-    # Otherwise, get the price at the specified date
-    else:
-        timestamp = get_timestamp_from_date(date)
-        url = f"https://coins.llama.fi/prices/historical/{timestamp}/{chain}:{token_id}"
-        response = requests.get(url)
-        print(response.status_code)
-        print(response.text)
-
-
-def get_prices(request_list):
-    """
-    Get a list of prices for a list of requests.
-
-    The expected format for the request list is a list of
-    [chain, token_id, date_str]. For example:
-
-    [['avax', '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e', '2021-09-01 12:58:23'],
-    ['ethereum', '0xD533a949740bb3306d119CC777fa900bA034cd52', '2021-08-04 14:58:23'],
-    ['fantom', '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e', '2021-12-09 01:18:45']]
-    """
-    request_dict = defaultdict(list)
-    for request in request_list:
-        chain = request[0]
-        token_id = request[1]
-        timestamp = get_timestamp_from_date(request[2])
-        request_dict[f'{chain}:{token_id}'].append(timestamp)
-    request = str(dict(request_dict))
-    request = request.replace("'", '"')
-    # print(request)
-    url = f"https://coins.llama.fi/batchHistorical?coins={quote(request)}&searchWidth=600"
-    # print(url)
-    response = requests.get(url)
-    json = response.json()
-    prices_response = []
-    if 'coins' in json:
-        coins_dict = json['coins']
-        for coin, coin_data in coins_dict.items():
-            chain, token_id = coin.split(':')
-            # print(coin_data)
-            for prices in coin_data['prices']:
-                timestamp = prices['timestamp']
-                date = get_date_from_timestamp(timestamp)
-                price = prices['price']
-                confidence = prices['confidence'] if 'confidence' in prices else ''
-                print(f"{date} {chain} {token_id} {price} {confidence}")
-                prices_response.append([
-                    date,
-                    chain,
-                    token_id,
-                    price,
-                    confidence
-                ])
-
-    return prices_response
-    # priced = []
-    # unpriced = []
-
-    # prices_set = {(date, chain, token_id) for date, chain, token_id, _, _ in prices_response}
-
-    # print(prices_set)
-    # for req in request_list:
-    #     print(req)
-    #     chain, token_id, date = req
-    #     if (date, chain, token_id) in prices_set:
-    #         # Find the matching response to get the price
-    #         matching_response = next(price for price in prices_response if (price[0], price[1], price[2]) == (date, chain, token_id))
-    #         priced.append(req + [matching_response[3]])  # Append the price to the request
-    #     else:
-    #         unpriced.append(req)
-
-    # print(priced)
-    # print(unpriced)
-
-
-if __name__ == "__main__":
-    crv_token_id = "0xD533a949740bb3306d119CC777fa900bA034cd52"
-    clev_token_id = "0x72953a5C32413614d24C29c84a66AE4B59581Bbf"
-    beets_token_id = "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e"
-    time_token_id = "0xb54f16fb19478766a268f172c9480f8da1a7c9c3"
-    # reqs = [
-    #     ['ethereum', crv_token_id, get_timestamp_from_date("2021-08-04 14:58:23")],
-    #     ['ethereum', clev_token_id, get_timestamp_from_date("2023-09-01 12:58:23")],
-    #     ['fantom', beets_token_id, get_timestamp_from_date("2021-12-09 01:18:45")],
-    #     ['avax', time_token_id, get_timestamp_from_date("2021-12-13 04:05:12")],
-
-    # ]
-    # for req in reqs:
-    #     get_price_historical(req[0], req[1], req[2])
-
-    # get_prices([
-    #     ['ethereum', crv_token_id, '2021-08-04 14:58:23'],
-    #     ['ethereum', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '2021-08-04 14:58:23'], # WETH
-    #     ['ethereum', '0xaa0c3f5f7dfd688c6e646f66cd2a6b66acdbe434', '2023-10-01 11:51:11'],
-    #     ['ethereum', crv_token_id, '2022-09-04 14:58:23'],
-    #     ['ethereum', clev_token_id, '2023-09-01 12:58:23'],
-    #     ['fantom', beets_token_id, '2021-12-09 01:18:45'],
-    #     ['avax', time_token_id, '2021-12-13 04:05:12'],
-    # ])
-
-    price_reqs = [
-        ['ethereum', crv_token_id, '2021-08-04 14:58:23'],
-        ['ethereum', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '2021-08-04 14:58:23'], # WETH
-        ['ethereum', '0xaa0c3f5f7dfd688c6e646f66cd2a6b66acdbe434', '2023-10-01 11:51:11'],
-        ['ethereum', crv_token_id, '2022-09-04 14:58:23'],
-        ['ethereum', clev_token_id, '2023-09-01 12:58:23'],
-        ['fantom', beets_token_id, '2021-12-09 01:18:45'],
-        ['avax', time_token_id, '2021-12-13 04:05:12'],
-        ['ethereum', crv_token_id],
-    ]
-
-    for req in price_reqs:
-        if len(req) == 3:
-            get_price(req[0], req[1], req[2])
+        price = _get_price(date, chain, symbol, token_id)
+        if price is not None:
+            save_cache(date, chain, symbol, token_id, price)
         else:
-            get_price(req[0], req[1])
+            save_missing(date, chain, symbol, token_id)
+
+    return price
+
+
+def _get_price(date, chain, symbol, token_id):
+
+    timestamp = get_timestamp_from_date(date)
+    url = f"https://coins.llama.fi/prices/historical/{timestamp}/{chain}:{token_id}"
+    print(f"GET {url} ({symbol})", end=" => ")
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(response.status_code)
+        sys.exit(1, f"ERROR: {response.status_code} for {date} {chain} {symbol} {token_id}")
+    if "coins" in response.json():
+        coins = response.json()["coins"]
+        for k,v in coins.items():
+            print(f"{response.status_code} / Price: {v['price']}")
+            return v["price"]
+    print(f"{response.status_code} / No price found")
+    return None
+
+if os.path.exists(DEFILLAMA_CACHE_OUTPUT):
+    clean_cache(DEFILLAMA_CACHE_OUTPUT)
+    with open(DEFILLAMA_CACHE_OUTPUT, "r") as f:
+        next(f)
+        reader = csv.reader(f)
+        for row in reader:
+            PRICE_CACHE.append(row)
+else:
+    with open(DEFILLAMA_CACHE_OUTPUT, "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(HEADERS)
+
+if os.path.exists(DEFILLAMA_MISSING_OUTPUT):
+    clean_cache(DEFILLAMA_MISSING_OUTPUT)
+    with open(DEFILLAMA_MISSING_OUTPUT, "r") as f:
+        next(f)
+        reader = csv.reader(f)
+        for row in reader:
+            MISSING_CACHE.append(row)
+else:
+    with open(DEFILLAMA_MISSING_OUTPUT, "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(HEADERS)

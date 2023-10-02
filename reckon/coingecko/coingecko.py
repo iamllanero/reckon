@@ -7,9 +7,9 @@ import time
 # import utils
 from config import (
     COINGECKO_ID_EXPLICIT,
-    PRICE_CACHE_OUTPUT,
+    COINGECKO_CACHE_OUTPUT,
     PRICE_MANUAL_FILE,
-    PRICE_MISSING_OUTPUT,
+    COINGECKO_MISSING_OUTPUT,
     COINGECKO_COINS_LIST_FILE
 )
 
@@ -82,8 +82,8 @@ def get_cached_historical_price(symbol: str, date: datetime):
                         lprice != '':
                     return float(lprice)
 
-    if os.path.isfile(PRICE_CACHE_OUTPUT):
-        with open(PRICE_CACHE_OUTPUT, 'r') as f:
+    if os.path.isfile(COINGECKO_CACHE_OUTPUT):
+        with open(COINGECKO_CACHE_OUTPUT, 'r') as f:
             for line in f:
                 ldate, lsymbol, lprice, ldate_added, lsource = line.rstrip().split(',')
                 if ldate == date.strftime("%Y-%m-%d") and \
@@ -111,7 +111,7 @@ def save_historical_price(symbol: str,
     cached_price = get_cached_historical_price(symbol, date)
 
     if cached_price == None:
-        with open(PRICE_CACHE_OUTPUT, 'a') as f:
+        with open(COINGECKO_CACHE_OUTPUT, 'a') as f:
             date_added = datetime.datetime.now().strftime('%Y-%m-%d')
             f.write(
                 f"{date.strftime('%Y-%m-%d')},{symbol},{price},{date_added},{source}\n")
@@ -129,7 +129,7 @@ def save_missing_price(symbol: str, date: datetime):
         date (datetime): Date of the price
     """
     # print(f"Saving {symbol} price for {date} to {PRICE_MISSING_OUTPUT}")
-    with open(PRICE_MISSING_OUTPUT, 'a') as f:
+    with open(COINGECKO_MISSING_OUTPUT, 'a') as f:
         date_added = datetime.datetime.now().strftime('%Y-%m-%d')
         f.write(f"{date.strftime('%Y-%m-%d')},{symbol},?,{date_added},Missing\n")
 
@@ -173,20 +173,21 @@ def get_historical_price(symbol: str, date: datetime):
     fetched = False
     while not fetched:
         print(
-            f"Fetching /{coin_id}/history?date={date.strftime('%d-%m-%Y')}", end=" => ")
+            f"GET https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}", end=" => ")
         response = requests.get(url)
         if response.status_code == 200:
             fetched = True
             try:
                 # price = float(utils.get_nested_dict(
                 #     response.json(), 'market_data.current_price.usd'))
-                price = response.json['market_data']['current_price']['usd']
+                price = response.json()['market_data']['current_price']['usd']
                 save_historical_price(symbol, date, price)
                 print(f"200 OK")
                 time.sleep(3)
                 return price
             except:
                 print(f"200 OK / ERROR: No price for {date} | {symbol}")
+                # print(response.json['market_data']['current_price'])
                 save_missing_price(symbol, date)
                 time.sleep(3)
                 return None
@@ -229,8 +230,8 @@ def clean_cache(file_path):
 
 
 def clean_caches():
-    clean_cache(PRICE_CACHE_OUTPUT)
-    clean_cache(PRICE_MISSING_OUTPUT)
+    clean_cache(COINGECKO_CACHE_OUTPUT)
+    clean_cache(COINGECKO_MISSING_OUTPUT)
 
 
 clean_caches()
