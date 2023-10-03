@@ -87,7 +87,9 @@ PRICE_MANUAL_FILE = 'config/price_manual.csv'
 
 # Key output for price.py
 PRICE_REQ_OUTPUT = 'output/price_req.csv'
+PRICE_INFERRED_OUTPUT = 'output/price_inferred.csv'
 PRICE_OUTPUT = 'output/price.csv'
+PRICEV2_OUTPUT = 'output/price-v2.csv'
 
 # Key output for coingecko.py
 COINGECKO_CACHE_OUTPUT = 'output/coingecko_cache.csv'
@@ -115,6 +117,7 @@ with open(STABLECOINS_TOML, 'rb') as f:
 
 # Dict to cache token symbols. Needed for tokens without symbols that can use
 # another token (i.e. WETH) and tokens with multiple matches.
+# TODO Move to config data
 COINGECKO_ID_EXPLICIT = {
     "aave": "aave",
     "ada": "cardano",
@@ -170,17 +173,20 @@ COINGECKO_ID_EXPLICIT = {
     "xald": "aladdin-dao",
 }
 
+# TODO Move to config data
 DEBANK_ALLOW_LIST = [
     "9b9854c53b5aca16cdbf5f25f9245ea5",           # veDEUS
     "0x10720a029a5e5281391be3181477e48d47d0ff91", # SDOG
     "0x8e2549225e21b1da105563d419d5689b80343e01", # sSPA
 ]
 
+# TODO Move to config data
 DEBANK_SPAM_TOKEN_IDS = [
     "0x2dbed4d7a843796c6e985db5368f2bbcaa785cda", # PEPE (FAKE VERSION)
     "0x5b942470df39cfcad4348585fb5507d4c333a91f", # BALD (FAKE VERSION)
 ]
 
+# TODO Move to config data
 DEBANK_SPAM_TOKEN_NAMES = [
     "(BNB)",
     "# Visit UrgentDT.com to secure your funds ASAP. A hacker has access to your funds.",
@@ -208,6 +214,7 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "CONNECT",
     "CYBER",
     "CyberX",
+    "DEV",
     "DogeX",
     "EGOD",
     "FIGHT",
@@ -218,6 +225,7 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "LOOKSDROP.COM",
     "LPUniV3.com",
     "M32",
+    "MEV",
     "moaAVXMVT",
     "mScDAIMVT",
     "mScWETHMVT",
@@ -226,6 +234,7 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "Noox Distribution Protocol",
     "NOTIONAL_BETA",
     "NUDES",
+    "PGold",
     "PHY",
     "PNDC",
     "PPND",
@@ -271,8 +280,4 @@ DEBANK_SPAM_TOKEN_NAMES = [
     "ZPR NFT",
     "ZRO",
     "ZT.WTF",
-    "PGold",
-    "DEV",
-    "MEV",
-    
 ]

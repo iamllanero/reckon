@@ -2,7 +2,14 @@ import csv
 import defillama as dl
 import coingecko as cg
 from datetime import datetime
-from config import TXNS_PRICE_REQ_OUTPUT, PRICE_REQ_OUTPUT
+from config import (
+    TXNS_PRICE_REQ_OUTPUT, 
+    TXNS_OUTPUT,
+    PRICE_REQ_OUTPUT, 
+    PRICE_INFERRED_OUTPUT,
+    PRICEV2_OUTPUT,
+    STABLECOINS,
+)
 
 TOKEN_SYMBOL_ID = {
     'ada': '',
@@ -66,12 +73,19 @@ def get_prices():
 
     # Iterate through txns and get price for each
     for req in price_reqs:
-        date = req[0]
-        chain = req[1]
-        symbol = req[2]
-        token_id = req[3]
+        (
+            date,
+            chain,
+            qty,
+            symbol,
+            token_id,
+            txn_type,
+            purchase_token_cost,
+            purchase_token,
+            purchase_token_id,
+        ) = req
 
-        # Deal with items to just plain skip
+        # Ignore certain tokens
         if symbol.lower() in [
             'bchsv'
         ]:
@@ -112,15 +126,180 @@ def get_prices():
                 continue
 
         price = dl.get_price(date, dl_chain, symbol, token_id)
+
         with open(PRICE_REQ_OUTPUT, "a", newline="") as csvfile:
+
             writer = csv.writer(csvfile)
             writer.writerow([date, chain, symbol, token_id, price, "defillama"])
+
+        # Infer prices if data is available and qquanitities are significant
+        if price != None and \
+            not purchase_token.lower() in STABLECOINS and \
+            purchase_token != None and \
+            purchase_token != '' and \
+            purchase_token_cost != None and \
+            purchase_token_cost != '' and \
+            float(qty) > 0.1 and \
+            float(purchase_token_cost) > 0.1:
+
+            inferred_price = float(qty) * float(price) / float(purchase_token_cost)
+            print(f"INFO: Inferred price {date} {purchase_token} {inferred_price:,.4f}")
+            with open(PRICE_INFERRED_OUTPUT, "a", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([date, chain, symbol, token_id, inferred_price, "inferred"])
+                
+
+# TODO SHould optimize this to be a global variable rather than reading the
+# file each time.
+def get_price(date, chain, symbol, token_id):
+    """
+    Get price for a single token using the PRICE_REQ_OUTPUT file.
+
+    Note that assumes get_prices() has been run which creates the file based
+    on DefiLlama or Coingecko data.
+    """
+    with open(PRICE_REQ_OUTPUT, "r") as csvfile:
+        next(csvfile)
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if row[0] == date and row[1] == chain and row[2] == symbol and row[3] == token_id:
+                return row[4]
+    return None
+
+
+def create_priced_txns():
+    """
+    Create PRICEV2_OUTPUT based on buy, sell, income txns with pricing data.
+    """
+    with open(TXNS_OUTPUT, "r", newline="") as csvfile:
+        count_total = 0
+        count_stablecoin = 0
+        count_dlcg = 0
+        count_missing = 0
+
+        price_txns = []
+        headers = next(csvfile).split(",")
+        reader = csv.reader(csvfile)
+        for row in reader:
+            count_total += 1
+            date = row[headers.index("date")]
+            txn_type = row[headers.index("txn_type")]
+            qty = row[headers.index("qty")]
+            symbol = row[headers.index("symbol")]
+            purchase_token = row[headers.index("purchase_token")]
+            purchase_token_id = row[headers.index("purchase_token_id")]
+            purchase_token_cost = row[headers.index("purchase_token_cost")]
+            txn_name = row[headers.index("txn_name")]
+            chain = row[headers.index("chain")]
+            project = row[headers.index("project")]
+            wallet = row[headers.index("wallet")]
+            token_id = row[headers.index("token_id")]
+            id = row[headers.index("id")]
+
+            # Skip non-buy, sell, income txns
+            if txn_type.lower() not in ['buy', 'sell', 'income']:
+                continue
+
+            # Handle stablecoins
+            if purchase_token.lower() in STABLECOINS:
+                usd_value = purchase_token_cost
+                price_txns.append([
+                    date, 
+                    txn_type, 
+                    qty, 
+                    symbol, 
+                    usd_value,
+                    purchase_token, 
+                    purchase_token_id, 
+                    purchase_token_cost, 
+                    txn_name, 
+                    chain, 
+                    project, 
+                    wallet, 
+                    token_id, 
+                    id, 
+                    'stablecoin',
+                ])
+                count_stablecoin += 1
+                continue
+
+            price = get_price(date, chain, symbol, token_id)
+
+            if price != None and price != '':
+                if qty != None and qty != '':
+                    usd_value = float(qty) * float(price)
+                else:
+                    print(f"WARN: Missing qty {date} {chain} {symbol} {token_id}")
+                    usd_value = '0.00'
+                price_txns.append([
+                    date, 
+                    txn_type, 
+                    qty, 
+                    symbol, 
+                    usd_value,
+                    purchase_token, 
+                    purchase_token_id, 
+                    purchase_token_cost, 
+                    txn_name, 
+                    chain, 
+                    project, 
+                    wallet, 
+                    token_id, 
+                    id, 
+                    'dlcg',
+                ])
+                count_dlcg += 1
+            else:
+                price_txns.append([
+                    date, 
+                    txn_type, 
+                    qty, 
+                    symbol, 
+                    'MISSING',
+                    purchase_token, 
+                    purchase_token_id, 
+                    purchase_token_cost, 
+                    txn_name, 
+                    chain, 
+                    project, 
+                    wallet, 
+                    token_id, 
+                    id, 
+                    'MISSING',
+                ])
+                count_missing += 1
+
+        print(f"Total txns: {count_total}")
+        print(f"Stablecoin txns: {count_stablecoin}")
+        print(f"DLCG txns: {count_dlcg}")
+        print(f"Missing txns: {count_missing}")
+
+        with open(PRICEV2_OUTPUT, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                "date", 
+                "txn_type", 
+                "qty", 
+                "symbol", 
+                "usd_value",
+                "purchase_token", 
+                "purchase_token_id", 
+                "purchase_token_cost", 
+                "txn_name", 
+                "chain", 
+                "project", 
+                "wallet", 
+                "token_id", 
+                "id", 
+                "source",
+            ])
+            writer.writerows(price_txns)
 
 
 def main():
     reset_prices_file()
     get_prices()
-    # merge_prices_with_txns()
+    create_priced_txns()
 
 if __name__ == "__main__":
     main()
