@@ -88,6 +88,8 @@ PRICE_MANUAL_FILE = 'config/price_manual.csv'
 # Key output for price.py
 PRICE_REQ_OUTPUT = 'output/price_req.csv'
 PRICE_INFERRED_OUTPUT = 'output/price_inferred.csv'
+PRICE_MERGED_OUTPUT = 'output/price_merged.csv'
+PRICE_MISSING_OUTPUT = 'output/price_missing.csv'
 PRICE_OUTPUT = 'output/price.csv'
 PRICEV2_OUTPUT = 'output/price-v2.csv'
 
