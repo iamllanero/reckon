@@ -64,8 +64,8 @@ FLAT_HEADERS = [
             'tx.usd_gas_fee',
             'tx.value',
             'tx.params',
+            'spam',
             'url',
-            'spam'
         ]
 
 
@@ -298,7 +298,6 @@ class HistoryList:
                 ])                
             else:
                 row.extend(['' for x in range(10)])
-            row.append(get_id_url(entry['id'], self.get_chain_id()))
             row.append(is_spam(receive_token_id,
                                receive_token_is_verified,
                                receive_token_symbol,
@@ -306,6 +305,7 @@ class HistoryList:
                                sends_token_symbol,
                                sends_token_id,
                                tx_name))
+            row.append(get_id_url(entry['id'], self.get_chain_id()))
 
             entries.append(row)
 
