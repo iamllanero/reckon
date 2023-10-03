@@ -19,6 +19,7 @@ STABLECOINS = [
     "hmim",
     "lusd",
     "lusd3crv-f",
+    "lusdc",
     "mai",
     "mim",
     "mimatic",
