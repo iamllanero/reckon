@@ -8,10 +8,6 @@
 file = "data/reports/manual.csv"
 parser = "default"
 
-[reports.manual-2]
-file = "data/reports/test.csv"
-parser = "default"
-
 [reports.coinbase-1]
 file = "data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv"
 parser = "coinbase_us"
