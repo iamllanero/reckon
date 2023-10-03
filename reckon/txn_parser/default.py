@@ -25,17 +25,14 @@ def parse(fn):
                         'buy',
                         qty, 
                         token,
+                        '', # token_id
                         purchase_token_qty, 
                         purchase_token,
-                        # float(purchase_token_qty) / float(qty), 
-                        # purchase_token_qty,
-                        tx_type, 
-                        location, 
-                        location, 
-                        location, 
-                        '', # token_id
                         '', # purchase_token_id
+                        location, 
+                        location, 
+                        tx_type, 
+                        fn,
                         id,
-                        fn
                     ])
     return txns

@@ -6,21 +6,21 @@ import os.path
 
 # import tomlkit
 from config import (
-    APPROVALS_OUTPUT, 
-    FLATTEN_OUTPUT, 
+    APPROVALS_OUTPUT,
+    FLATTEN_OUTPUT,
     SPAM_OUTPUT,
     STABLECOINS_OUTPUT,
     EQUIVALENTS_OUTPUT,
     EMPTY_OUTPUT,
-    STABLECOINS, 
-    TXNS_OUTPUT, 
+    STABLECOINS,
+    TXNS_OUTPUT,
     TXNS_PRICE_REQ_OUTPUT,
     TXNS_TOML,
-    TXNS_CONFIG, 
-    TAGS, 
-    TXN_OVERRIDES, 
+    TXNS_CONFIG,
+    TAGS,
+    TXN_OVERRIDES,
     # TRANSACTION_OVERRIDES_FILE
-    )
+)
 from debank import FLAT_HEADERS
 # from utils import list_to_csv
 
@@ -29,17 +29,17 @@ HEADERS = [
     'txn_type',
     'qty',
     'symbol',
+    'token_id',
     'purchase_token_cost',
     'purchase_token',
-    'txn_name',
+    'purchase_token_id',
     'chain',
     'project',
+    'txn_name',
     'wallet',
-    'token_id',
-    'purchase_token_id',
     'id',
-    'url',
 ]
+
 
 def parse_report(fn, parser):
     if not os.path.isfile(fn):
@@ -47,14 +47,16 @@ def parse_report(fn, parser):
         return []
 
     module = importlib.import_module(f'txn_parser.{parser}')
-    method = getattr (module, "parse")
+    method = getattr(module, "parse")
     return method(fn)
 
 # TODO Change report processing to use tx_line (and maybe externalize)
 
+
 def sort_except(list, ignore):
     temp = list.pop(ignore)
-    list.sort(key= lambda x: datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S'))
+    list.sort(key=lambda x: datetime.datetime.strptime(
+        x[0], '%Y-%m-%d %H:%M:%S'))
     list.insert(ignore, temp)
 
 
@@ -79,8 +81,8 @@ def create_price_requests(txns):
     for txn in txns:
         txn_dict = dict(zip(HEADERS, txn))
         if txn_dict['txn_type'] in ['buy', 'sell', 'income'] and \
-            txn_dict['symbol'].lower() not in STABLECOINS and \
-            txn_dict['purchase_token'].lower() not in STABLECOINS:
+                txn_dict['symbol'].lower() not in STABLECOINS and \
+                txn_dict['purchase_token'].lower() not in STABLECOINS:
             requests.append([
                 txn_dict['date'],
                 txn_dict['chain'],
@@ -96,71 +98,34 @@ def create_price_requests(txns):
     write_csv(requests, TXNS_PRICE_REQ_OUTPUT)
 
 
-def main():
-    txns = [HEADERS]
-
-    (consolidated, 
-     approval_txns, 
-     spam_txns, 
-     stable_txns, 
-     equivalent_txns,
-     empty_txns) = consolidated_txns()
-    
-    txns.extend(consolidated)
-
-    reports = TXNS_CONFIG['reports']
-    for key in reports.keys():
-        print(f'Processing {reports[key]}')
-        no_lines = len(txns)
-        txns.extend(
-            parse_report(
-                reports[key]['file'],
-                reports[key]['parser'],
-                )
-        )
-        print(f'Added {len(txns) - no_lines} entries')
-   
-    # Sort output data for easier reading
-    sort_except(txns, 0)
-
-    print(f"Created {len(txns)} transactions")
-    
-    write_csv(txns, TXNS_OUTPUT)
-    write_csv(approval_txns, APPROVALS_OUTPUT)
-    write_csv(spam_txns, SPAM_OUTPUT)
-    write_csv(stable_txns, STABLECOINS_OUTPUT)
-    write_csv(equivalent_txns, EQUIVALENTS_OUTPUT)
-    write_csv(empty_txns, EMPTY_OUTPUT)
-
-    create_price_requests(txns)
-
-
 def txline(txn_type, txn_dict):
     show_tags = TXNS_CONFIG['output'].get("show_tags", False)
-    
+
     date = datetime.datetime.fromtimestamp(
         float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
-    # print(txn_dict)
-    return [
-        date, 
+    # print(f"txn_dict=>{txn_dict}")
+    line = [
+        date,
         txn_type,
         txn_dict['receives.amount'],
         txn_dict['receives.token.symbol'],
+        txn_dict['receives.token_id'] if 'receives.token_id' in txn_dict else '',
         txn_dict['sends.amount'],
         txn_dict['sends.token.symbol'],
-        txn_dict['tx.name'], 
+        txn_dict['sends.token_id'] if 'sends.token_id' in txn_dict else '',
         txn_dict['project.chain'],
-        txn_dict['project.name'], 
-        txn_dict['tx.from_addr'] if not show_tags else \
-            TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']), 
-        txn_dict['receives.token_id'] if 'receives.token_id' in txn_dict else '',
-        txn_dict['sends.token_id'] if 'send.token_id' in txn_dict else '',
+        txn_dict['project.name'],
+        txn_dict['tx.name'],
+        txn_dict['tx.from_addr'] if not show_tags else
+        TAGS.get(txn_dict['tx.from_addr'], txn_dict['tx.from_addr']),
         txn_dict['id'],
-        txn_dict['url'],
     ]
+    return line
 
 # TODO Remove the optionality to include overrides as well as unknown receives
 #      and sends
+
+
 def process_batch(txn_dicts, do_overrides=True):
     """
     Process a transaction batch, creating sell and buy transactions as needed.
@@ -184,11 +149,11 @@ def process_batch(txn_dicts, do_overrides=True):
 
     # If multi-line txn, use average to calculate deposit and withdrawals
     if len(txn_dicts) > 1:
-    
-        send_amounts = [float(i['sends.amount']) if i['sends.amount'] else 0.0 \
-            for i in txn_dicts]
-        recv_amounts = [float(i['receives.amount']) if i['receives.amount'] else 0.0 \
-            for i in txn_dicts]
+
+        send_amounts = [float(i['sends.amount']) if i['sends.amount'] else 0.0
+                        for i in txn_dicts]
+        recv_amounts = [float(i['receives.amount']) if i['receives.amount'] else 0.0
+                        for i in txn_dicts]
 
         nonzero_sends = sum([1 for i in send_amounts if i > 0])
         nonzero_recvs = sum([1 for i in recv_amounts if i > 0])
@@ -199,17 +164,20 @@ def process_batch(txn_dicts, do_overrides=True):
             for td in txn_dicts:
                 td['sends.token.symbol'] = txn_dicts[0]['sends.token.symbol']
                 td['sends.token_id'] = txn_dicts[0]['sends.token_id']
-                td['sends.amount'] = sum(send_amounts) / float(len(send_amounts))
+                td['sends.amount'] = sum(
+                    send_amounts) / float(len(send_amounts))
 
         if nonzero_recvs == 1 and nonzero_sends == len(txn_dicts):
             # Multiple tokens were sent, one was received back
             for td in txn_dicts:
                 td['receives.token.symbol'] = txn_dicts[0]['receives.token.symbol']
                 td['receives.token_id'] = txn_dicts[0]['receives.token_id']
-                td['receives.amount'] = sum(recv_amounts) / float(len(recv_amounts))
+                td['receives.amount'] = sum(
+                    recv_amounts) / float(len(recv_amounts))
 
     # Generate transaction line(s) for each transaction in batch
     for td in txn_dicts:
+        # print(f"td=> {td}")
         sends_token = td['sends.token.symbol'].lower()
         receives_token = td['receives.token.symbol'].lower()
 
@@ -248,19 +216,20 @@ def process_batch(txn_dicts, do_overrides=True):
                 'claimReward',
                 'claimRewards',
                 'getReward',
-                'harvest', 
+                'harvest',
                 'redeem'
-                ]:
+            ]:
                 # Income
                 txns.append(txline('income', td))
 
             elif receives_token != '' and \
-                TXNS_CONFIG['output']['include_receive']:
+                    TXNS_CONFIG['output']['include_receive']:
                 txns.append(txline('receive', td))
 
             elif TXNS_CONFIG['output']['include_send']:
                 txns.append(txline('send', td))
 
+    # print(f"txns=>{txns}")
     return txns
 
 
@@ -270,14 +239,16 @@ def consolidated_txns():
 
     This main loop iterates through each line in the flatten output making
     decisions about how to process each line.
-    
+
     Lines for approvals, spam, stablecoin swaps, and equivalent swaps are 
     stored in separate lists for reference but not used in subsequent
     processing.
-    
+
     Lines for other transactions are stored as a transaction batch and
     processed in a batch since they may need to reference each other.
     """
+
+    print(f"Processing {FLATTEN_OUTPUT}")
 
     txns = []
     approval_txns = []
@@ -285,7 +256,7 @@ def consolidated_txns():
     stablecoin_txns = []
     equivalent_txns = []
     empty_txns = []
-    
+
     with open(FLATTEN_OUTPUT, 'r') as f:
 
         headers = next(f)
@@ -325,8 +296,8 @@ def consolidated_txns():
                     TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
 
             if txn_dict['sends.token.symbol'] == '' and \
-                txn_dict['receives.token.symbol'] == '':
-                empty_txns.append(row)                
+                    txn_dict['receives.token.symbol'] == '':
+                empty_txns.append(row)
                 continue
 
             # Is it a stablecoin swap?
@@ -336,8 +307,8 @@ def consolidated_txns():
                 continue
 
             # Is it a swap between equivalent tokens?
-            if sorted([txn_dict['sends.token.symbol'].lower(), 
-                txn_dict['receives.token.symbol'].lower()]) in \
+            if sorted([txn_dict['sends.token.symbol'].lower(),
+                       txn_dict['receives.token.symbol'].lower()]) in \
                     TXNS_CONFIG['consolidated_parser']['equivalents']:
                 equivalent_txns.append(row)
                 continue  # Equivalents swap
@@ -365,21 +336,21 @@ def consolidated_txns():
         # This handles the last unprocessed batch
         txns.extend(process_batch(txn_batch))
 
-
-    print(f'{processed_lines} / {lines}')
+    print(f"- Lines: {lines}")
+    print(f"- Processed: {processed_lines}")
     return (
-        txns, 
-        approval_txns, 
-        spam_txns, 
-        stablecoin_txns, 
-        equivalent_txns, 
+        txns,
+        approval_txns,
+        spam_txns,
+        stablecoin_txns,
+        equivalent_txns,
         empty_txns
     )
 
 
 # def cmd_init_override(ids_to_override):
 #     for _id in ids_to_override:
-        
+
 #         # Retrieve relevant lines from consolidated
 #         with open(CONSOLIDATED_FILE, 'r') as f:
 #             next(f)
@@ -420,19 +391,59 @@ def consolidated_txns():
 
 #             for entry in std_txlines_d:
 #                 toml = tomlkit.table()
-                
+
 #                 for k,v in entry.items():
 #                     toml.add(k, v)
 #                     toml[k].comment(v)
 
 #                 # toml.append(_id, toml)
 #                 container.append(toml)
-            
+
 #             overrides.append(_id, container)
-            
+
 #         with open(TRANSACTION_OVERRIDES_FILE, "wt") as f:
 #             tomlkit.dump(overrides, f)
 #             print(f"Updated {TRANSACTION_OVERRIDES_FILE}")
+
+
+def main():
+    txns = [HEADERS]
+
+    (consolidated,
+     approval_txns,
+     spam_txns,
+     stable_txns,
+     equivalent_txns,
+     empty_txns) = consolidated_txns()
+
+    txns.extend(consolidated)
+
+    print("Processing reports")
+    reports = TXNS_CONFIG['reports']
+    for key in reports.keys():
+        no_lines = len(txns)
+        txns.extend(
+            parse_report(
+                reports[key]['file'],
+                reports[key]['parser'],
+            )
+        )
+        print(f'- {reports[key]["file"]} => Added {len(txns) - no_lines} entries')
+
+    # Sort output data for easier reading
+    sort_except(txns, 0)
+
+    print(f"Created {len(txns)} transactions")
+
+    write_csv(txns, TXNS_OUTPUT)
+    write_csv(approval_txns, APPROVALS_OUTPUT)
+    write_csv(spam_txns, SPAM_OUTPUT)
+    write_csv(stable_txns, STABLECOINS_OUTPUT)
+    write_csv(equivalent_txns, EQUIVALENTS_OUTPUT)
+    write_csv(empty_txns, EMPTY_OUTPUT)
+
+    create_price_requests(txns)
+
 
 if __name__ == '__main__':
 

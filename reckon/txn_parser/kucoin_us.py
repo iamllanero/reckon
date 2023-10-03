@@ -7,7 +7,6 @@ def parse(fn):
     Parser for KuCoin US reports. Note that KuCoin reports may come in Excel
     format. Be sure to export as CSV to use with this parser.
     """
-    print(f"processing {fn} in kucoin_us")
     txns = []
     with open(fn, 'r') as f:
         next(f)
@@ -36,14 +35,15 @@ def parse(fn):
                 'time_at': datetime.strptime(order_time, '%Y-%m-%d %H:%M:%S').timestamp(),
                 'receives.amount': order_amount,
                 'receives.token.symbol': symbol.split('-')[0],
+                'receives.token.id': '',
                 'sends.amount': filled_volume_usd,
                 'sends.token.symbol': symbol.split('-')[1],
-                'tx.name': f'{side}-{order_type}',
+                'sends.token.id': '',
                 'project.chain': 'kucoin_us',
                 'project.name': 'kucoin_us' ,
+                'tx.name': f'{side}-{order_type}',
                 'tx.from_addr': f'kucoin_us-{uid[4:]}',
                 'id': order_id,
-                'url': '',
             }))
 
     return txns
