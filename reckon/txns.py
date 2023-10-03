@@ -68,21 +68,31 @@ def create_price_requests(txns):
     requests = [[
         'date',
         'chain',
+        'qty',
         'symbol',
         'token_id',
-        'txn_type'
+        'txn_type',
+        'purchase_token_cost',
+        'purchase_token',
+        'purchase_token_id',
     ]]
     for txn in txns:
         txn_dict = dict(zip(HEADERS, txn))
         if txn_dict['txn_type'] in ['buy', 'sell', 'income'] and \
-            txn_dict['symbol'].lower() not in STABLECOINS:
+            txn_dict['symbol'].lower() not in STABLECOINS and \
+            txn_dict['purchase_token'].lower() not in STABLECOINS:
             requests.append([
                 txn_dict['date'],
                 txn_dict['chain'],
+                txn_dict['qty'],
                 txn_dict['symbol'],
                 txn_dict['token_id'],
                 txn_dict['txn_type'],
+                txn_dict['purchase_token_cost'],
+                txn_dict['purchase_token'],
+                txn_dict['purchase_token_id'],
             ])
+    print(f"Created {len(requests)} price requests")
     write_csv(requests, TXNS_PRICE_REQ_OUTPUT)
 
 
@@ -100,7 +110,7 @@ def main():
 
     reports = TXNS_CONFIG['reports']
     for key in reports.keys():
-        print(f'Processing {key} with {reports[key]}')
+        print(f'Processing {reports[key]}')
         no_lines = len(txns)
         txns.extend(
             parse_report(
@@ -112,6 +122,8 @@ def main():
    
     # Sort output data for easier reading
     sort_except(txns, 0)
+
+    print(f"Created {len(txns)} transactions")
     
     write_csv(txns, TXNS_OUTPUT)
     write_csv(approval_txns, APPROVALS_OUTPUT)
