@@ -121,7 +121,7 @@ def get_prices():
         
         # Deal with other items using DefiLlama
         else:
-            # Fix differences in chain names for defillama API
+            # Get chain names for defillama API
             dl_chain = 'ethereum'
             if chain == 'ftm':
                 dl_chain = 'fantom'
@@ -302,6 +302,7 @@ def create_priced_txns():
     """
     Create PRICEV2_OUTPUT based on buy, sell, income txns with pricing data.
     """
+
     print("Creating priced txns file...")
     with open(TXNS_OUTPUT, "r", newline="") as csvfile:
         count_total = 0
@@ -432,6 +433,7 @@ def create_priced_txns():
 
 
 def main():
+
     reset_prices_file()
     get_prices()
     merge_inferred_prices()
