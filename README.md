@@ -7,15 +7,16 @@
 
 This is not ready for prime time yet! Although this project does not do
 anything destructive on the blockchain, it does consume Debank credits and
-uses the CoinGecko API.
+uses the DefiLlama and CoinGecko API.
 
 Use at your own peril.
 
 ## DESCRIPTION
 
 Reckon is a series of Python scripts to perform various calculations on
-cryptocurrency. Rather than a monolithich app, I've opted to keep it as
-a series of different scripts for now.
+cryptocurrency. Rather than one monolithic app, reckon uses a series of
+different, focused scripts with intermediate outputs to provide transparency
+into how calculations are performed.
 
 Here are the main scripts (in order of intended use):
 
