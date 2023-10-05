@@ -4,7 +4,6 @@ __pycache__
 venv/
 output/*
 data/reports/*
-config/debank.toml
 config/wallets.toml
 config/tags_local.toml
 config/txoverride.toml
