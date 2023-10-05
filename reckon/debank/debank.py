@@ -4,7 +4,6 @@ import tomllib
 import os
 import sys
 from config import (
-    DEBANK_FILE, 
     DEBANK_SPAM_TOKEN_IDS, 
     DEBANK_SPAM_TOKEN_NAMES, 
     # TAGS_FILE, 
@@ -13,8 +12,6 @@ from config import (
     TAGS
     )
 from utils import list_to_csv
-
-# DEBANK_ACCESSKEY = tomllib.load(open(DEBANK_FILE, 'rb'))['DEBANK_ACCESSKEY']
 
 DEBANK_ACCESSKEY = os.getenv('DEBANK_ACCESSKEY')
 # Check if the environment variable is set
