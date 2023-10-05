@@ -1,44 +1,146 @@
 import csv
 import defillama as dl
 import coingecko as cg
+import sys
+import tomllib
 from datetime import datetime
 from config import (
-    TXNS_PRICE_REQ_OUTPUT, 
-    TXNS_OUTPUT,
-    PRICE_REQ_OUTPUT, 
+    PRICE_CONFIG,
     PRICE_INFERRED_OUTPUT,
     PRICE_MERGED_OUTPUT,
     PRICE_MISSING_OUTPUT,
+    PRICE_REQ_OUTPUT,
     PRICEV2_OUTPUT,
     STABLECOINS,
+    TXNS_OUTPUT,
+    TXNS_PRICE_REQ_OUTPUT,
 )
 
-TOKEN_SYMBOL_ID = {
-    'ada': '',
-    'arbitrum:arb': '0x912CE59144191C1204E64559FE8253a0e49E6548',
-    'arbitrum:eth': '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', # weth
-    'algo': '',
-    'avax:avax': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', # wavax
-    'bch': '',
-    'bchsv': '',
-    'bsv': '',
-    'ethereum:aave': '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
-    'ethereum:avax': '0x85f138bfEE4ef8e540890CFb48F620571d67Eda3', # wavax
-    'ethereum:bnb': '0x418D75f65a02b3D53B2418FB8E1fe493759c7605', # wbnb
-    'ethereum:btc': '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', # wbtc
-    'ethereum:crv': '0xD533a949740bb3306d119CC777fa900bA034cd52',
-    'ethereum:eth': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', # weth
-    'ethereum:forth': '0x77FbA179C79De5B7653F68b5039Af940AdA60ce0',
-    'ethereum:ftm': '0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
-    'ethereum:grt': '0xc944E90C64B2c07662A292be6244BDf05Cda44a7',
-    'ethereum:link': '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-    'ethereum:luna': '0xbd31EA8212119f94A611FA969881CBa3EA06Fa3d', # wluna
-    'ethereum:nu': '0x4fE83213D56308330EC302a8BD641f1d0113A4Cc',
-    'ethereum:shib': '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-    'ethereum:spell': '0x090185f2135308BaD17527004364eBcC2D37e5F6',
-    'fantom:ftm': '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83', #wftm
-    'xlm': '',
-}
+
+class PriceRule:
+
+
+    def __init__(self, entry):
+
+        self.chain = entry['chain'] if 'chain' in entry else '*'
+        self.symbol = entry['symbol'] if 'symbol' in entry else '*'
+        self.token_id = entry['token_id'] if 'token_id' in entry else '*'
+        self.action = entry['action'] if 'action' in entry else 'defillama'
+        self.params = {k: v for k, v in entry.items() if k not in [
+            "symbol",
+            "action",
+            "chain",
+            "token_id"
+        ]}
+
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.chain}, {self.symbol}, {self.token_id}, {self.action}, {self.params})"
+
+
+    def _matches_pattern(self, pattern, value):
+        if pattern is None or pattern == "*":
+            return True
+        return pattern.lower() == value.lower()
+
+
+    def match(self, chain, symbol, token_id):
+        return (self._matches_pattern(self.chain, chain) and
+                self._matches_pattern(self.symbol, symbol) and
+                self._matches_pattern(self.token_id, token_id))
+
+
+    def get_price(self, date, chain, symbol, token_id):
+        return (None, None)
+
+
+    def ignore(self):
+        return self.action == "ignore"
+
+
+class CoinGeckoPriceRule(PriceRule):
+
+
+    def get_price(self, date, chain, symbol, token_id):
+        source = "coingecko"
+        date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        price = cg.get_historical_price(symbol, date_obj)
+        if price == None or price == '':
+            source += " / price not found"
+        return (price, source)
+
+
+class DefiLlamaPriceRule(PriceRule):
+
+    def get_price(self, date, chain, symbol, token_id):
+        source = "defillama"
+
+        # Look up any params and use them
+        if 'map_chain_to' in self.params:
+            chain = self.params['map_chain_to']
+        if 'map_symbol_to' in self.params:
+            symbol = self.params['map_symbol_to']
+        if 'map_token_id_to' in self.params:
+            token_id = self.params['map_token_id_to'] 
+
+        # Map chain names to defillama API
+        dl_chain = None
+        if chain.lower() == 'eth':
+            dl_chain = 'ethereum'
+        elif chain.lower() == 'ftm':
+            dl_chain = 'fantom'
+        elif chain.lower() == 'arb':
+            dl_chain = 'arbitrum'
+        elif chain.lower() == 'avax':
+            dl_chain = 'avax'
+        else:
+            print(
+                f"WARN: No chain mapping for {date} {chain} {symbol} {token_id}")
+            source += " / no chain mapping"
+
+        # Fix missing token ids
+        if token_id == None:
+            print(
+                f"WARN: No token id found for {chain.lower()}:{symbol.lower()}")
+            source += " / no token_id"
+
+        # Get the price
+        price = dl.get_price(date, dl_chain, symbol, token_id)
+        if price == None or price == '':
+            source += " / price not found"
+
+        return (price, source)
+
+
+class PriceRulesConfig:
+
+    def __init__(self):
+        print('Loading price rules config...')
+        # Read in the price config rules
+        self.rules = []
+        with open(PRICE_CONFIG, "rb") as f:
+            rules_toml = tomllib.load(f)["rules"]
+            for entry in rules_toml:
+                action = entry['action'] if 'action' in entry else 'defillama'
+
+                if action == 'defillama':
+                    rule = DefiLlamaPriceRule(entry)
+                elif action == 'coingecko':
+                    rule = CoinGeckoPriceRule(entry)
+                elif action == 'ignore':
+                    rule = PriceRule(entry)
+                else:
+                    print(f"WARN: Unknown action {action} in price config")
+                    sys.exit(1)
+                print(f"- {rule}")
+                self.rules.append(rule)
+
+
+    def find_rule(self, chain, symbol, token_id):
+        for rule in self.rules:
+            if rule.match(chain, symbol, token_id):
+                return rule
+        return None
 
 
 def reset_prices_file():
@@ -46,28 +148,27 @@ def reset_prices_file():
     Reset the prices file to just the header.
     """
 
+    print("Resetting prices file...")
+
     with open(PRICE_REQ_OUTPUT, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["date", "chain", "symbol", "token_id", "price", "source"])
+        writer.writerow(["date", "chain", "symbol",
+                        "token_id", "price", "source"])
 
     with open(PRICE_INFERRED_OUTPUT, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["date", "chain", "symbol", "token_id", "price", "source"])
-
-
-def lookup_token_id(chain, symbol):
-
-    lookup = f"{chain.lower()}:{symbol.lower()}"
-    if lookup in TOKEN_SYMBOL_ID:
-        return TOKEN_SYMBOL_ID[lookup]
-    else:
-        return None
+        writer.writerow(["date", "chain", "symbol",
+                        "token_id", "price", "source"])
 
 
 def get_prices():
     """
     Get prices for tokens in TXNS_PRICE_REQ_OUTPUT and save to PRICE_REQ_OUTPUT.
     """
+
+    print("Getting prices...")
+
+    price_rules_config = PriceRulesConfig()
 
     # Read in txns from TXNS_PRICE_REQ_OUTPUT
     price_reqs = []
@@ -91,95 +192,56 @@ def get_prices():
             purchase_token_id,
         ) = req
 
-        # Ignore certain tokens
-        if symbol.lower() in [
-            'bchsv'
-        ]:
-            continue
-
         # Let's try to get the price!
         price = None
         source = None
 
-        # Deal with items that need Coingecko first
-        if symbol.lower() in [
-            'ada',
-            'algo',
-            'bch',
-            'bnb',
-            'bsv',
-            'btc',
-            'xlm',
-        ]:
-            date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-            price = cg.get_historical_price(symbol, date_obj)
-            source = "coingecko"
-            # with open(PRICE_REQ_OUTPUT, "a", newline="") as csvfile:
-            #     writer = csv.writer(csvfile)
-            #     writer.writerow([date, chain, symbol, token_id, price, "coingecko"])
-            # continue
-        
-        # Deal with other items using DefiLlama
-        else:
-            # Get chain names for defillama API
-            dl_chain = 'ethereum'
-            if chain == 'ftm':
-                dl_chain = 'fantom'
-            elif chain == 'arb':
-                dl_chain = 'arbitrum'
-            elif chain == 'avax':
-                dl_chain = 'avax'
+        # Get the action for this token request based on the price rules config
+        rule = price_rules_config.find_rule(chain, symbol, token_id)
+        # print(f"- Match {date} {symbol} {token_id} => {rule}")
 
-            # Fix missing token ids
-            if token_id is None or token_id == '' or \
-                token_id in ['eth', 'ftm', 'avax', 'arb']:
-                token_id = lookup_token_id(dl_chain, symbol)
-                if token_id == None:
-                    print(f"WARN: No token id found for {chain.lower()}:{symbol.lower()}")
-                    continue
+        if rule.action == "ignore":
+            print(f"- INFO: Ignoring {date} {chain} {symbol} {token_id}")
+            continue
 
-            price = dl.get_price(date, dl_chain, symbol, token_id)
-
-            if price != None and price != '':
-                source = "defillama"
-            else:
-                source = "not found"
+        (price, source) = rule.get_price(date, chain, symbol, token_id)
 
         # Save price to file
         with open(PRICE_REQ_OUTPUT, "a", newline="") as csvfile:
 
             writer = csv.writer(csvfile)
             writer.writerow([
-                date, 
-                chain, 
-                symbol, 
-                token_id, 
-                price, 
+                date,
+                chain,
+                symbol,
+                token_id,
+                price,
                 source
             ])
 
         # Infer prices if data is available and qquanitities are significant
         if price != None and \
-            not purchase_token.lower() in STABLECOINS and \
-            purchase_token != None and \
-            purchase_token != '' and \
-            purchase_token_cost != None and \
-            purchase_token_cost != '' and \
-            float(qty) > 0.1 and \
-            float(purchase_token_cost) > 0.1:
+                not purchase_token.lower() in STABLECOINS and \
+                purchase_token != None and \
+                purchase_token != '' and \
+                purchase_token_cost != None and \
+                purchase_token_cost != '' and \
+                float(qty) > 0.1 and \
+                float(purchase_token_cost) > 0.1:
 
-            inferred_price = float(qty) * float(price) / float(purchase_token_cost)
+            inferred_price = float(qty) * float(price) / \
+                float(purchase_token_cost)
             with open(PRICE_INFERRED_OUTPUT, "a", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow([
-                    date, 
-                    chain, 
-                    purchase_token, 
-                    purchase_token_id, 
-                    inferred_price, 
+                    date,
+                    chain,
+                    purchase_token,
+                    purchase_token_id,
+                    inferred_price,
                     "inferred"
                 ])
-                
+
 
 # TODO SHould optimize this to be a global variable rather than reading the
 # file each time.
@@ -202,7 +264,7 @@ def get_price(date, chain, symbol, token_id):
 def merge_inferred_prices():
     """
     Merge inferred prices into requested prices.
-    
+
     Favor prices that were requested over inferred prices.
     """
 
@@ -216,13 +278,13 @@ def merge_inferred_prices():
     total_count = 0
     inferred_count = 0
     missing_count = 0
-    
+
     with open(PRICE_REQ_OUTPUT, "r") as csvfile:
         next(csvfile)
         reader = csv.reader(csvfile)
         for row in reader:
             price_reqs.append(row)
-    
+
     with open(PRICE_INFERRED_OUTPUT, "r") as csvfile:
         next(csvfile)
         reader = csv.reader(csvfile)
@@ -238,7 +300,7 @@ def merge_inferred_prices():
          source
          ) = req
         total_count += 1
-        if source == 'not found':
+        if "not found" in source:
             for row in inferred_prices:
                 (inferred_date,
                  inferred_chain,
@@ -248,9 +310,9 @@ def merge_inferred_prices():
                  inferred_source
                  ) = row
                 if inferred_date == date and \
-                    inferred_chain.lower() == chain.lower() and \
-                    inferred_symbol.lower() == symbol.lower() and \
-                    inferred_token_id.lower() == token_id.lower():
+                        inferred_chain.lower() == chain.lower() and \
+                        inferred_symbol.lower() == symbol.lower() and \
+                        inferred_token_id.lower() == token_id.lower():
 
                     inferred_count += 1
                     merged_prices.append([
@@ -285,12 +347,14 @@ def merge_inferred_prices():
 
     with open(PRICE_MERGED_OUTPUT, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["date", "chain", "symbol", "token_id", "price", "source"])
+        writer.writerow(["date", "chain", "symbol",
+                        "token_id", "price", "source"])
         writer.writerows(merged_prices)
-    
+
     with open(PRICE_MISSING_OUTPUT, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["date", "chain", "symbol", "token_id", "price", "source"])
+        writer.writerow(["date", "chain", "symbol",
+                        "token_id", "price", "source"])
         writer.writerows(missing_prices)
 
     print(f"- Total: {total_count}")
@@ -339,20 +403,20 @@ def create_priced_txns():
             if purchase_token.lower() in STABLECOINS:
                 usd_value = purchase_token_cost
                 price_txns.append([
-                    date, 
-                    txn_type, 
-                    qty, 
-                    symbol, 
-                    token_id, 
+                    date,
+                    txn_type,
+                    qty,
+                    symbol,
+                    token_id,
                     usd_value,
-                    purchase_token_cost, 
-                    purchase_token, 
-                    purchase_token_id, 
-                    chain, 
-                    project, 
-                    txn_name, 
-                    wallet, 
-                    id, 
+                    purchase_token_cost,
+                    purchase_token,
+                    purchase_token_id,
+                    chain,
+                    project,
+                    txn_name,
+                    wallet,
+                    id,
                     'stablecoin',
                 ])
                 count_stablecoin += 1
@@ -364,42 +428,43 @@ def create_priced_txns():
                 if qty != None and qty != '':
                     usd_value = float(qty) * float(price)
                 else:
-                    print(f"WARN: Missing qty {date} {chain} {symbol} {token_id}")
+                    print(
+                        f"WARN: Missing qty {date} {chain} {symbol} {token_id}")
                     usd_value = '0.00'
                 price_txns.append([
-                    date, 
-                    txn_type, 
-                    qty, 
-                    symbol, 
-                    token_id, 
+                    date,
+                    txn_type,
+                    qty,
+                    symbol,
+                    token_id,
                     usd_value,
-                    purchase_token_cost, 
-                    purchase_token, 
-                    purchase_token_id, 
-                    chain, 
-                    project, 
-                    txn_name, 
-                    wallet, 
-                    id, 
+                    purchase_token_cost,
+                    purchase_token,
+                    purchase_token_id,
+                    chain,
+                    project,
+                    txn_name,
+                    wallet,
+                    id,
                     'dlcg',
                 ])
                 count_dlcg += 1
             else:
                 price_txns.append([
-                    date, 
-                    txn_type, 
-                    qty, 
-                    symbol, 
-                    token_id, 
+                    date,
+                    txn_type,
+                    qty,
+                    symbol,
+                    token_id,
                     'MISSING',
-                    purchase_token_cost, 
-                    purchase_token, 
-                    purchase_token_id, 
-                    chain, 
-                    project, 
-                    txn_name, 
-                    wallet, 
-                    id, 
+                    purchase_token_cost,
+                    purchase_token,
+                    purchase_token_id,
+                    chain,
+                    project,
+                    txn_name,
+                    wallet,
+                    id,
                     'MISSING',
                 ])
                 count_missing += 1
@@ -413,20 +478,20 @@ def create_priced_txns():
         with open(PRICEV2_OUTPUT, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
-                "date", 
-                "txn_type", 
-                "qty", 
-                "symbol", 
-                "token_id", 
+                "date",
+                "txn_type",
+                "qty",
+                "symbol",
+                "token_id",
                 "usd_value",
-                "purchase_token_cost", 
-                "purchase_token", 
-                "purchase_token_id", 
-                "chain", 
-                "project", 
-                "txn_name", 
-                "wallet", 
-                "id", 
+                "purchase_token_cost",
+                "purchase_token",
+                "purchase_token_id",
+                "chain",
+                "project",
+                "txn_name",
+                "wallet",
+                "id",
                 "source",
             ])
             writer.writerows(price_txns)
@@ -438,6 +503,7 @@ def main():
     get_prices()
     merge_inferred_prices()
     create_priced_txns()
+
 
 if __name__ == "__main__":
     main()

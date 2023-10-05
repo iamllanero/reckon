@@ -1,0 +1,75 @@
+# Rules:
+# chain can be a regex, or if excluded will be assumed to be "*"
+# symbol can be a regex and must be included
+# token_id can be a regex, or if excluded will be assumed to be "*"
+# action can be one of ignore, coingecko, defillama
+# dl_remap, if included, will be used as defillama lookup
+# cg_remap, if included, will be used as coingecko coin_id (NOT IMPLEMENTED)
+#
+# NOTE: Order matters as it is first match wins
+
+[[rules]]
+symbol = "bchsv"
+action = "ignore"
+
+[[rules]]
+symbol = "ada"
+action = "coingecko"
+
+[[rules]]
+symbol = "algo"
+action = "coingecko"
+
+[[rules]]
+symbol = "bch"
+action = "coingecko"
+
+[[rules]]
+symbol = "bnb"
+action = "coingecko"
+
+[[rules]]
+symbol = "bsv"
+action = "coingecko"
+
+[[rules]]
+symbol = "btc"
+action = "coingecko"
+
+[[rules]]
+symbol = "xlm"
+action = "coingecko"
+
+[[rules]]
+symbol = "avax"
+action = "defillama"
+map_chain_to = "avax"
+map_token_id_to = "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7" # WAVAX
+
+[[rules]]
+symbol = "arb"
+action = "defillama"
+map_chain_to = "arb"
+map_token_id_to = "0x912CE59144191C1204E64559FE8253a0e49E6548"
+
+[[rules]]
+symbol = "ftm"
+action = "defillama"
+map_chain_to = "ftm"
+map_token_id_to = "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83" # WFTM
+
+[[rules]]
+symbol = "eth"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" # WETH
+
+[[rules]]
+chain = "coinbase"
+action = "defillama"
+map_chain_to = "eth"
+
+# This is the default action
+# Do not delete unless you know what you are doing
+[[rules]]
+action = "defillama"

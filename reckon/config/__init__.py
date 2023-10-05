@@ -84,6 +84,7 @@ with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
 
 # File that stores the price overrides
 PRICE_MANUAL_FILE = 'config/price_manual.csv'
+PRICE_CONFIG = 'config/price.toml'
 
 # Key output for price.py
 PRICE_REQ_OUTPUT = 'output/price_req.csv'
