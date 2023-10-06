@@ -1,1 +1,1 @@
-from .defillama import get_price
+from .defillama import get_price, get_date_from_timestamp, get_timestamp_from_date

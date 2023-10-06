@@ -6,11 +6,12 @@ import requests
 import time
 # import utils
 from config import (
-    COINGECKO_ID_EXPLICIT,
     COINGECKO_CACHE_OUTPUT,
-    PRICE_MANUAL_FILE,
+    COINGECKO_COINS_LIST_FILE,
+    COINGECKO_ID_EXPLICIT,
     COINGECKO_MISSING_OUTPUT,
-    COINGECKO_COINS_LIST_FILE
+    COINGECKO_TOML,
+    PRICE_MANUAL_FILE,
 )
 
 COINGECKO_ID_LIST = json.load(open(COINGECKO_COINS_LIST_FILE))
@@ -48,7 +49,7 @@ def get_coin_id(symbol):
     else:
         print(f'ERROR: NO COIN ID FOUND FOR {symbol}')
         print(
-            f'  You can manually set an entry for {symbol} in reckon.constants.COINGECKO_ID_EXPLICIT')
+            f'  You can manually set an entry for {symbol} in {COINGECKO_TOML}')
         print(f'  "{symbol}": "<<VALID COIN ID>>",')
     # print(f'Lookup {coin_id}')
     return None
@@ -73,14 +74,14 @@ def get_cached_historical_price(symbol: str, date: datetime):
     if type(date) != datetime.datetime:
         raise Exception("Date is not a valid datetime object")
 
-    if os.path.isfile(PRICE_MANUAL_FILE):
-        with open(PRICE_MANUAL_FILE, 'r') as f:
-            for line in f:
-                ldate, lsymbol, lprice, ldate_added, lsource = line.rstrip().split(',')
-                if ldate == date.strftime("%Y-%m-%d") and \
-                        lsymbol.lower() == symbol.lower() and \
-                        lprice != '':
-                    return float(lprice)
+    # if os.path.isfile(PRICE_MANUAL_FILE):
+    #     with open(PRICE_MANUAL_FILE, 'r') as f:
+    #         for line in f:
+    #             ldate, lsymbol, lprice, ldate_added, lsource = line.rstrip().split(',')
+    #             if ldate == date.strftime("%Y-%m-%d") and \
+    #                     lsymbol.lower() == symbol.lower() and \
+    #                     lprice != '':
+    #                 return float(lprice)
 
     if os.path.isfile(COINGECKO_CACHE_OUTPUT):
         with open(COINGECKO_CACHE_OUTPUT, 'r') as f:
