@@ -105,6 +105,58 @@ symbol = "xALD"
 action = "defillama"
 map_token_id_to = "0xb26C4B3Ca601136Daf98593feAeff9E0CA702a8D" # ALD
 
+[[rules]]
+chain = "eth"
+symbol = "cvxFXSFXS-f"
+action = "defillama"
+map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
+
+[[rules]]
+chain = "eth"
+symbol = "ucvxFXSFXS-f"
+action = "defillama"
+map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
+
+[[rules]]
+chain = "ftm"
+symbol = "gETH"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" # WETH
+
+[[rules]]
+chain = "ftm"
+symbol = "mooTombTOMB-FTM"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "mooBasedBASED-TOMB"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "TOMB-V2-LP"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "moo2omb2OMB-2SHARE"
+action = "defillama"
+map_token_id_to = "0x7a6e4E3CC2ac9924605DCa4bA31d1831c84b44aE" # 2OMB
+
+# Incorrect symbol of JLP but only used for TIME
+
+[[rules]]
+chain = "avax"
+token_id = "0x113f413371fc4cc4c9d6416cf1de9dfd7bf747df"
+action = "defillama"
+map_symbol_to = "time"
+map_token_id_to = "0xb54f16fB19478766A268F172C9480f8da1a7c9C3" # TIME
+
 # Set token_id for Coinbase tokens
 
 [[rules]]

@@ -7,6 +7,7 @@ from datetime import datetime
 from config import (
     PRICE_CONFIG,
     PRICE_INFERRED_OUTPUT,
+    PRICE_MANUAL_FILE,
     PRICE_MERGED_OUTPUT,
     PRICE_MISSING_OUTPUT,
     PRICE_REQ_OUTPUT,
@@ -369,8 +370,18 @@ def create_priced_txns():
     """
 
     print("Creating priced txns file...")
+
+    # Read in manual prices
+    manual_prices = []
+    with open(PRICE_MANUAL_FILE, "r") as csvfile:
+        next(csvfile)
+        reader = csv.reader(csvfile)
+        for row in reader:
+            manual_prices.append(row)
+
     with open(TXNS_OUTPUT, "r", newline="") as csvfile:
         count_total = 0
+        count_manual = 0
         count_ignored = 0
         count_stablecoin = 0
         count_dlcg = 0
@@ -380,7 +391,9 @@ def create_priced_txns():
         headers = next(csvfile).strip().split(",")
         reader = csv.reader(csvfile)
         for row in reader:
+
             count_total += 1
+
             date = row[headers.index("date")]
             txn_type = row[headers.index("txn_type")]
             qty = row[headers.index("qty")]
@@ -394,6 +407,46 @@ def create_priced_txns():
             txn_name = row[headers.index("txn_name")]
             wallet = row[headers.index("wallet")]
             id = row[headers.index("id")]
+
+            # Handle manual prices
+            continue_outer_loop = False
+            for manual_price in manual_prices:
+                (
+                    manual_date,
+                    manual_symbol,
+                    manual_chain,
+                    manual_token_id,
+                    manual_timestamp,
+                    manual_price,
+                    manual_comment,
+                ) = manual_price
+                if manual_date == date and \
+                        manual_symbol.lower() == symbol.lower() and \
+                        manual_chain.lower() == chain.lower() and \
+                        manual_token_id.lower() == token_id.lower():
+                    print(f"- INFO: Using manual price for {date} {chain} {symbol} {token_id}")
+                    price_txns.append([
+                        date,
+                        txn_type,
+                        qty,
+                        symbol,
+                        token_id,
+                        manual_price,
+                        purchase_token_cost,
+                        purchase_token,
+                        purchase_token_id,
+                        chain,
+                        project,
+                        txn_name,
+                        wallet,
+                        id,
+                        f'manual / {manual_comment}',
+                    ])
+                    count_manual += 1
+                    continue_outer_loop = True
+                    break
+            if continue_outer_loop:
+                continue
 
             # Skip non-buy, sell, income txns
             if txn_type.lower() not in ['buy', 'sell', 'income']:
@@ -494,6 +547,7 @@ def create_priced_txns():
                 count_missing += 1
 
         print(f"- Total txns: {count_total}")
+        print(f"- Manual txns: {count_manual}")
         print(f"- Ignored txns: {count_ignored}")
         print(f"- Stablecoin txns: {count_stablecoin}")
         print(f"- DLCG txns: {count_dlcg}")
@@ -539,6 +593,8 @@ def create_worksheet():
             'chain',
             'token_id',
             'timestamp',
+            'price',
+            'comment',
         ])
         for row in missing:
             writer.writerow([
