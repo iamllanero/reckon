@@ -131,9 +131,10 @@ with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
 # PRICE.PY CONFIGURATION OPTIONS
 ###############################################################################
 
+PRICE_CONFIG = 'config/price.toml'
+
 # File that stores the price overrides
 PRICE_MANUAL_FILE = 'config/price_manual.csv'
-PRICE_CONFIG = 'config/price.toml'
 
 # Key output for price.py work products
 PRICE_REQ_OUTPUT = 'output/work/price_req.csv'
@@ -184,6 +185,14 @@ PF_OUTPUT = 'output/pf.csv'
 
 # Output of hifo8949
 HIFO8949_OUTPUT = 'output/hifo8949.csv'
+
+###############################################################################
+# TAXES_HIFO.PY CONFIGURATION OPTIONS
+###############################################################################
+
+# Output of hifo8949
+TAX_HIFO_OUTPUT = 'output/tax_hifo.csv'
+TAX_HIFO_SOLD_OUTPUT = 'output/work/tax_hifo_sold.csv'
 
 
 
