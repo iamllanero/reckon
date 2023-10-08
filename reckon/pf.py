@@ -9,20 +9,22 @@ def main():
 
     df = pd.read_csv(PRICE_OUTPUT)
     df = df.astype({
-            'date': 'datetime64[ns]',
-            'txn_type': 'string',
-            'qty': 'float64',
-            'symbol': 'string',
-            'purchase_token_cost': 'float64',
-            'purchase_token': 'string',
-            'txn_name': 'string',
-            'chain': 'string',
-            'project': 'string',
-            'wallet': 'string',
-            'url': 'string',
-            'id': 'string',
-            'usd_value': 'float64',
-        })
+        'date': 'datetime64[ns]',
+        'txn_type': 'string',
+        'qty': 'float64',
+        'symbol': 'string',
+        'token_id': 'string',
+        'usd_value': 'float64',
+        'purchase_token_cost': 'float64',
+        'purchase_token': 'string',
+        'purchase_token_id': 'string',
+        'chain': 'string',
+        'project': 'string',
+        'txn_name': 'string',
+        'wallet': 'string',
+        'id': 'string',
+        'source': 'string',
+    })
 
     pf = [[
         'symbol',
