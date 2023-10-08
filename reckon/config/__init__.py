@@ -22,8 +22,6 @@ import sys
 # CHECK AND MAKE OUTPUT DIRS
 #############################
 
-if not os.path.isdir('output'):
-    os.makedirs('output')
 if not os.path.isdir('output/cache'):
     os.makedirs('output/cache')
 if not os.path.isdir('output/flatten'):
@@ -32,6 +30,8 @@ if not os.path.isdir('output/wallets'):
     os.makedirs('output/wallets')
 if not os.path.isdir('output/work'):
     os.makedirs('output/work')
+if not os.path.isdir('output/tax_hifo/reports'):
+    os.makedirs('output/tax_hifo/reports')
 
 ###############################################################################
 # GENERAL CONFIGURATION OPTIONS
@@ -192,7 +192,6 @@ HIFO8949_OUTPUT = 'output/hifo8949.csv'
 
 # Output of hifo8949
 TAX_HIFO_OUTPUT = 'output/tax_hifo.csv'
+TAX_HIFO_PIVOT_OUTPUT = 'output/tax_hifo_pivot.txt'
 TAX_HIFO_SOLD_OUTPUT = 'output/work/tax_hifo_sold.csv'
-
-
-
+TAX_HIFO_DIR = 'output/tax_hifo/reports'
