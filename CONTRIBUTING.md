@@ -19,10 +19,10 @@ experiencing. But I will try to merge changes reasonably fast.
 ## TODO
 
 - [x] Consolidate the configuration options and settings. Right now they are spread across multiple toml and py files.
+- [x] setup.py to create directories and sample files (DID IN config/__init__.py)
+- [x] Add to txns.csv - token id (for defillama pricing)
 - [ ] Custom designation of income, buy, sell in the txns.py file
 - [ ] Ability to manually mark / handle transactions known to be weird
-- [ ] setup.py to create directories and sample files
-- [ ] Add to txns.csv - token id (for defillama pricing)
 
 ## GITHUB SETUP
 
