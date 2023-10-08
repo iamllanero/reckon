@@ -431,7 +431,7 @@ def create_priced_txns():
                         qty,
                         symbol,
                         token_id,
-                        manual_price,
+                        float(manual_price) * float(qty),
                         purchase_token_cost,
                         purchase_token,
                         purchase_token_id,
