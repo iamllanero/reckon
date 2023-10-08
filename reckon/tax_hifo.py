@@ -1,6 +1,7 @@
 from config import (
     PRICE_OUTPUT, 
     TAX_HIFO_OUTPUT, 
+    TAX_HIFO_DETAIL_OUTPUT,
     TAX_HIFO_PIVOT_GAINLOSS_OUTPUT,
     TAX_HIFO_PIVOT_INCOME_OUTPUT,
     TAX_HIFO_DIR,
@@ -8,6 +9,20 @@ from config import (
 from datetime import datetime
 import csv
 import re
+
+def init_files():
+    with open(TAX_HIFO_DETAIL_OUTPUT, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['symbol', 
+                         'buy_date', 
+                         'sell_date', 
+                         'qty', 
+                         'gain_loss', 
+                         'duration_held',
+                         'sell_year',
+                         'tax',
+                         'st_lt',
+                         ])
 
 
 def get_transactions() -> list:
@@ -287,9 +302,10 @@ def clean_pivot_data(pivot_data):
     # 1. Sort the columns
     sorted_columns = sorted(pivot_data.keys())
 
-    # 2. Sort the rows (ignoring case)
+    # 2. Sort the rows (ignoring case) and filter out rows where the total is 0
     all_rows = set(row for col_data in pivot_data.values() for row in col_data.keys())
-    sorted_rows = sorted(all_rows, key=lambda x: x.lower())
+    row_totals = {row: sum(pivot_data[col].get(row, 0) for col in sorted_columns) for row in all_rows}
+    sorted_rows = sorted([row for row in all_rows if row_totals[row] != 0], key=lambda x: x.lower())
 
     # 3. Filter out columns that add up to zero
     filtered_columns = {col: pivot_data[col] for col in sorted_columns if sum(pivot_data[col].values()) != 0}
@@ -306,6 +322,8 @@ def clean_pivot_data(pivot_data):
 
 
 def main():
+    init_files()
+
     transactions = get_transactions()
 
     #Find duplicates and all symbols
@@ -314,7 +332,6 @@ def main():
     #     for symbol, token_ids in duplicates.items():
     #         print(f"Symbol: {symbol}, Token IDs: {token_ids}")
     
-
     # Create a summary report for: year, symbol, total gain/loss, total income
     summary = [['year', 'symbol', 'total_gain_loss', 'total_income']]
 
@@ -322,11 +339,27 @@ def main():
     for symbol in symbols:
         buy_sell_pairs, unsold = calculate_buy_sell_pairs(transactions, symbol)
         incomes = [txn for txn in transactions if txn['symbol'].lower() == symbol.lower() and txn['txn_type'] == 'income']
+
         create_report(symbol, 
                       buy_sell_pairs, 
                       unsold,
                       incomes
         )
+
+        # Append to the detail file
+        with open(TAX_HIFO_DETAIL_OUTPUT, 'a', newline='') as file:
+            writer = csv.writer(file)
+            for row in buy_sell_pairs:
+                writer.writerow([
+                    symbol,
+                    row['buy_date'][:10],
+                    row['sell_date'][:10], 
+                    row['qty'], 
+                    f"{float(row['gain_loss']):.2f}",
+                    row['duration_held'],
+                    row['sell_date'][:4],
+                    'ST' if int(row['duration_held']) < 365 else 'LT',
+                ])
 
         years = set()
         years.update([datetime.strptime(buy_sell_pair['sell_date'], '%Y-%m-%d %H:%M:%S').year for buy_sell_pair in buy_sell_pairs])
@@ -344,10 +377,9 @@ def main():
         writer = csv.writer(file)
         writer.writerows(summary)
 
+    # Write the pivot for gain/loss
     gain_loss_pivot = pivot_table('year', 'symbol', 'total_gain_loss', summary)
-    # print(gain_loss_pivot)
     gain_loss_pivot = clean_pivot_data(gain_loss_pivot)
-    # print(gain_loss_pivot)
     write_pivot(gain_loss_pivot, TAX_HIFO_PIVOT_GAINLOSS_OUTPUT)
 
     # Write a pivot for income
