@@ -42,7 +42,6 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
 
     for sell in sells:
         sell_qty = float(sell['qty'])
-        sell_usd_value = float(sell['usd_value'])
         sell_unit_price = float(sell['usd_value']) / float(sell['qty'])
         sell_date = datetime.strptime(sell['date'], '%Y-%m-%d %H:%M:%S')
 
@@ -60,7 +59,6 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
 
             # Sell as much as possible from the buy transaction
             sold_qty = min(buy_qty_available, sell_qty)
-            sold_usd_value = sold_qty * buy_unit_price
             gain_loss = (sold_qty * sell_unit_price) - (sold_qty * buy_unit_price)
             duration_held = (sell_date - buy_date).days
 
