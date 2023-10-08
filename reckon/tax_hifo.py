@@ -1,4 +1,10 @@
-from config import PRICE_OUTPUT, TAX_HIFO_OUTPUT, TAX_HIFO_PIVOT_OUTPUT
+from config import (
+    PRICE_OUTPUT, 
+    TAX_HIFO_OUTPUT, 
+    TAX_HIFO_PIVOT_GAINLOSS_OUTPUT,
+    TAX_HIFO_PIVOT_INCOME_OUTPUT,
+    TAX_HIFO_DIR,
+)
 from datetime import datetime
 import csv
 import re
@@ -156,7 +162,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
         return
 
     # Create the report
-    with open(f'output/tax_hifo/reports/{make_filename_safe(symbol)}.txt', 'w') as file:
+    with open(f'{TAX_HIFO_DIR}/{make_filename_safe(symbol)}.txt', 'w') as file:
         print(f"Creating report for {symbol}")
         file.write(f"Tax HIFO Report for {symbol}\n\n")
         remaining_qty = sum([float(asset['buy_qty']) for asset in unsold_assets])
@@ -232,9 +238,9 @@ def pivot_table(col, row, value, lines):
     return pivot_data
 
 
-def write_pivot(pivot_data):
+def write_pivot(pivot_data, file_path):
    
-    with open(TAX_HIFO_PIVOT_OUTPUT, 'w') as f:
+    with open(file_path, 'w') as f:
         f.write("Tax HIFO Pivot Table\n\n")
 
         # Determine unique rows
@@ -242,44 +248,63 @@ def write_pivot(pivot_data):
         for row_data in pivot_data.values():
             for row in row_data.keys():
                 unique_rows.add(row)
-        unique_rows = sorted(list(unique_rows))
+        unique_rows = sorted(list(unique_rows), key=lambda x: x.lower())
 
         # Calculate grand totals for columns
         col_totals = {}
         for col, row_data in pivot_data.items():
             col_totals[col] = sum(row_data.values())
 
-        # Filter out columns that sum up to zero
-        valid_cols = [col for col, total in col_totals.items() if total != 0]
-
         # Print header
         f.write(f"{'':25}")  # Empty space for the top-left corner of the table
-        for col in sorted(valid_cols):
+        for col in pivot_data.keys():
             f.write(f"{col:14}")
         f.write(f"{'   Grand Total':14}\n")  # Header for grand total column
-        f.write("-" * (25 + 14 * (len(valid_cols) + 1)))  # Line under the header
+        f.write("-" * (25 + 14 * (len(pivot_data.keys()) + 1)))  # Line under the header
         f.write("\n")
 
         # Print each row
         for row in unique_rows:
             f.write(f"{row:25}")
             row_total = 0  # Initialize row total
-            for col in valid_cols:  # Iterate only over valid columns
+            for col in pivot_data.keys():
                 value = pivot_data[col].get(row, 0)  # Default to 0 if the row doesn't exist for this column
                 f.write(f"{value:14,.2f}")
                 row_total += value
             f.write(f"{row_total:14,.2f}\n")  # Print row total
 
-        f.write("-" * (25 + 14 * (len(valid_cols) + 1)))  # Line under the rows
+        f.write("-" * (25 + 14 * (len(pivot_data.keys()) + 1)))  # Line under the rows
         f.write("\n")
 
         # Print grand totals for columns
         f.write(f"{'Grand Total':25}")
-        for col in valid_cols:  # Iterate only over valid columns
+        for col in pivot_data.keys():
             f.write(f"{col_totals[col]:14,.2f}")
         f.write(f"{sum(col_totals.values()):14,.2f}\n")  # Grand total of grand totals
 
         f.write(f"\n\nGenerated at {datetime.now()}\n")
+
+
+def clean_pivot_data(pivot_data):
+    # 1. Sort the columns
+    sorted_columns = sorted(pivot_data.keys())
+
+    # 2. Sort the rows (ignoring case)
+    all_rows = set(row for col_data in pivot_data.values() for row in col_data.keys())
+    sorted_rows = sorted(all_rows, key=lambda x: x.lower())
+
+    # 3. Filter out columns that add up to zero
+    filtered_columns = {col: pivot_data[col] for col in sorted_columns if sum(pivot_data[col].values()) != 0}
+
+    # Create the modified pivot_data
+    clean_data = {}
+    for col in filtered_columns:
+        clean_data[col] = {}
+        for row in sorted_rows:
+            if row in pivot_data[col]:
+                clean_data[col][row] = pivot_data[col][row]
+
+    return clean_data
 
 
 def main():
@@ -322,7 +347,15 @@ def main():
         writer.writerows(summary)
 
     gain_loss_pivot = pivot_table('year', 'symbol', 'total_gain_loss', summary)
-    write_pivot(gain_loss_pivot)
+    # print(gain_loss_pivot)
+    gain_loss_pivot = clean_pivot_data(gain_loss_pivot)
+    # print(gain_loss_pivot)
+    write_pivot(gain_loss_pivot, TAX_HIFO_PIVOT_GAINLOSS_OUTPUT)
+
+    # Write a pivot for income
+    income_pivot = pivot_table('year', 'symbol', 'total_income', summary)
+    income_pivot = clean_pivot_data(income_pivot)
+    write_pivot(income_pivot, TAX_HIFO_PIVOT_INCOME_OUTPUT)
 
 
 
