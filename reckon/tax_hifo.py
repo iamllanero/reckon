@@ -211,7 +211,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
 
         if unsold_assets:
             file.write("\nRemaining (Unsold) Assets\n")
-            file.write(f"Buy Date    Qty             USD Value      Unit Cost\n")
+            file.write(f"Buy Date    Qty             USD Cost        Unit Cost\n")
             file.write( "----------  --------------  --------------  ------------\n")
             for asset in unsold_assets:
                 file.write(f"{asset['buy_date'][:10]}  ")
