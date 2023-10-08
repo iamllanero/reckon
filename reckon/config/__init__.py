@@ -30,8 +30,8 @@ if not os.path.isdir('output/wallets'):
     os.makedirs('output/wallets')
 if not os.path.isdir('output/work'):
     os.makedirs('output/work')
-if not os.path.isdir('output/tax_hifo/reports'):
-    os.makedirs('output/tax_hifo/reports')
+if not os.path.isdir('output/tax_hifo'):
+    os.makedirs('output/tax_hifo')
 
 ###############################################################################
 # GENERAL CONFIGURATION OPTIONS
@@ -185,6 +185,7 @@ PF_OUTPUT = 'output/pf.csv'
 
 # Output of hifo8949
 TAX_HIFO_OUTPUT = 'output/tax_hifo.csv'
-TAX_HIFO_PIVOT_OUTPUT = 'output/tax_hifo_pivot.txt'
-TAX_HIFO_SOLD_OUTPUT = 'output/work/tax_hifo_sold.csv'
-TAX_HIFO_DIR = 'output/tax_hifo/reports'
+TAX_HIFO_DETAIL_OUTPUT = 'output/tax_hifo_detailed.csv'
+TAX_HIFO_PIVOT_GAINLOSS_OUTPUT = 'output/tax_hifo_pivot_gainloss.txt'
+TAX_HIFO_PIVOT_INCOME_OUTPUT = 'output/tax_hifo_pivot_income.txt'
+TAX_HIFO_DIR = 'output/tax_hifo/'

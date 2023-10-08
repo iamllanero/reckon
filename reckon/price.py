@@ -377,6 +377,9 @@ def create_priced_txns():
         next(csvfile)
         reader = csv.reader(csvfile)
         for row in reader:
+            # Check if the row (line) starts with a hash (#)
+            if row[0].strip().startswith("#"):
+                continue
             manual_prices.append(row)
 
     with open(TXNS_OUTPUT, "r", newline="") as csvfile:
@@ -418,6 +421,7 @@ def create_priced_txns():
                     manual_token_id,
                     manual_timestamp,
                     manual_price,
+                    manual_txn_type,
                     manual_comment,
                 ) = manual_price
                 if manual_date == date and \
@@ -425,6 +429,9 @@ def create_priced_txns():
                         manual_chain.lower() == chain.lower() and \
                         manual_token_id.lower() == token_id.lower():
                     print(f"- INFO: Using manual price for {date} {chain} {symbol} {token_id}")
+                    if manual_txn_type != None and manual_txn_type != '':
+                        print(f"-- INFO: Using manual txn type {manual_txn_type} for {id}")
+                        txn_type = manual_txn_type
                     price_txns.append([
                         date,
                         txn_type,
@@ -594,6 +601,7 @@ def create_worksheet():
             'token_id',
             'timestamp',
             'price',
+            'txn_type',
             'comment',
         ])
         for row in missing:
@@ -603,6 +611,9 @@ def create_worksheet():
                 row[int(headers.index("chain"))],
                 row[int(headers.index("token_id"))],
                 dl.get_timestamp_from_date(row[int(headers.index("date"))]),
+                '',
+                '',
+                '',
             ])
 
 

@@ -23,55 +23,57 @@ Here are the main scripts (in order of intended use):
 `build.py`
 
 - Responsible for obtaining onchain wallet data
-- Uses `wallets.toml` for wallet addresses
-- Depends on `constants.py` and `utils.py`
-- Depends on `debank.py` for working with the API and object model
-- Builds and refreshes wallets using Debank API (and debank.py)
-- Stores data as JSON files for each wallet
+- Uses `config/wallets.toml` for wallet addresses
+- Depends on `debank` module for working with the API and object model
+- Builds and refreshes wallets using Debank API
+- Stores data as JSON files for each wallet in the `output/wallets` dir
 
 `flatten.py`
 
-- Creates CSV versions of wallet JSON files
-= Consolidates to `consolidated.csv`
-- Uses `wallets.toml` for wallet addresses
-- Uses `tags.toml` for address tagging
-- Depends on `constants.py` and `utils.py`
-- Depends on `debank.py` for working with the API and object model
-- Creates a denormalized CSV of the JSON wallets
-- Augments with spam detection, address tags, and transaction URLs
+- Creates a denormalized CSV of the JSON wallets in the `output/flatten` dir
+- Augments data with spam detection, address tags, and transaction URLs
+- Consolidates to `output/flatten.csv`
+- Provides a number of work outputs in `output/work`
+- Uses `config/wallets.toml` for wallet addresses
+- Uses `config/tags.toml` for address tagging
+- Depends on `debank` module for working with the API and object model
 
 `txns.py`
 
 - Responsible for compilling meaningful transactions from:
-  - The `wallets.py` `consolidated.csv` output
-  - Reports from coinbase, binance, blockfi
-  - Manual reports
+  - `output/flatten.csv`
+  - Reports as listed in `config/txns.toml`
 - Output is a single `txns.csv` file of all transactions
-- Uses `txns.toml` to get reports and some configuration options
-- Depends on `constants.py` and `utils.py`
+- Uses `config/txns.toml` to get reports and some configuration options
 
 `price.py`
 
 - Responsible for adding USD value to transactions from `txns.csv` through a
-  combination of inference, CoinGecko API, and caching
-- Output is `priced.csv` which adds an additional column, 'usd_value'
-- Uses `price_cache.csv` as a cache for pricing data and manually entered
-  price information.
-- Depends on `coingecko.py` to handle all API calls and caching
-- Requires manual maintenance of the `coingecko_coins_list.json`
+  combination of DefiLlama, CoinGecko API, inference, and overrides.
+- Uses `config/price.toml` to determine pricing rules.
+- Uses `config/price_manual.csv` allowing final overrides. Note that the price
+  column should be UNIT price (not total USD value).
+- Output is `output/price.csv` and `output/price_worksheet.csv` if there are
+  any missing prices
+- Price rules defaults to defillama, but uses coingecko for non-EVM chains
+  as well as problematic tokens. Refer to `config/price.toml` for more info
+  on configuring the price rules.
+- Depends on `defillama` and `coingecko` modules to handle API calls and
+  caching.
 
-`8949-hifo.py`
+`tax_hifo.py`
 
-- Responsible for generating a IRS 8949-like report that shows the following
-  columns:
-  - Symbol
-  - Date acquired
-  - Date sold
-  - Proceeds
-  - Cost basis
-  - Gain or loss
+- Responsible for generating data for IRS 8949-like reporting
 - Uses the HIFO (highest in, first out) strategy which will take the least
   gains (or highest losses)
+- Output is a combination of the following:
+  - `output/tax_hifo.csv` that provides capital gains and income on a per-year,
+    per-token basis
+  - `output/tax_hifo_pivot_gainloss.txt` that contains a summary table of
+    capital gains and losses
+  - `output/tax_hifo_pivot_income.txt` that contains a summary table of
+    all income transactions
+  - `output/tax_hifo/` contains detailed reporting for every taxable token
 
 `pf.py`
 
@@ -89,35 +91,28 @@ Here are the main scripts (in order of intended use):
   - Income Qty
   - Income USD
   
-## HIFO Algorithm
-
-- Sort dataframe (df) by date
-- Go through row by row, when hit a sell transaction:
-  - Scan backward to the highest not fully sold (qty-qty_sold > 0) transaction
-  - Compute how much of the qty to sell and enter amount into qty_sold
-  - If all sold is accounted for, stop; else repeat with scan
 
 ## SETUP
 
 You will need an access key and credits from Debank Cloud. You can get them
 at <https://cloud.debank.com/>.
 
-Be sure to configure the following files in the config directory:
+Be sure to configure the following file in the config directory:
 
-- `wallets.toml` (see `wallets_sample.toml`)
-- `debank.toml`
-- `txns.toml` - reports from CEX and trade equivalents
+- `config/wallets.toml` (see `wallets_sample.toml`)
 
 Other files with configuration type items that don't need to be changed:
 
-- `tags.toml` - list of address tags
-- `constants.py` - file locations, stablecoins
-- `data/price_cache.csv` - price cache and also manual entries
+- `config/coingecko.toml`
+- `config/debank.toml`
+- `config/stablecoins.toml`
+- `config/tags.toml` - list of address tags
+- `config/txns.toml` - reports from CEX and trade equivalents
 
 Consider getting an updated version of the `coingecko_coins_list.json` from
 <https://www.coingecko.com/en/api/documentation> under /coins/list. You can just
 click on "Try it out" and cut/paste the resulting content to replace the current
-`coingecko_coins_list.json`.
+`data/coingecko_coins_list.json`.
 
 ## USAGE
 
@@ -126,32 +121,18 @@ click on "Try it out" and cut/paste the resulting content to replace the current
 export DEBANK_ACCESSKEY="mykey"
 
 # First build the local cache of wallets.
-# Be aware that this script uses Debank credits. It does cache aggressively
-# to conserve credits. Run this script any time your wallets will have onchain
-# transactions that are not yet cached. This script, via the debank module, 
-# is responsible for flagging likely spam transactions.
-
 python3 reckon/build.py
 
 # Flatten the wallets into CSV files and consolidates into a single file.
-
 python3 reckon/flat.py
 
-# Calculates taxable transactions based on flatten output, generating a
-# transactions file txns.csv from wallets and CEX reports into a single. Also
-# generates a number of additional txns_xyz.csv files to show processing
-# results.
-
+# Calculates taxable transactions
 python3 reckon/txns.py
 
-# Fill in the gaps for prices using the CoinGecko API and any manually 
-# entered prices in the "price_cache.csv" file creating a new file "priced.csv"
-
+# Gets the pricing data
 python3 reckon/price.py
 
-# WIP
 # Create a close to an IRS 8949 list based on the HIFO cost basis
-
-python3 reckon/8949-hifo.py
+python3 reckon/taxes_hifo.py
 ```
 

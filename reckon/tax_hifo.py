@@ -1,8 +1,28 @@
-from config import PRICE_OUTPUT, TAX_HIFO_OUTPUT, TAX_HIFO_PIVOT_OUTPUT
+from config import (
+    PRICE_OUTPUT, 
+    TAX_HIFO_OUTPUT, 
+    TAX_HIFO_DETAIL_OUTPUT,
+    TAX_HIFO_PIVOT_GAINLOSS_OUTPUT,
+    TAX_HIFO_PIVOT_INCOME_OUTPUT,
+    TAX_HIFO_DIR,
+)
 from datetime import datetime
 import csv
 import re
-import sys
+
+def init_files():
+    with open(TAX_HIFO_DETAIL_OUTPUT, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['symbol', 
+                         'buy_date', 
+                         'sell_date', 
+                         'qty', 
+                         'gain_loss', 
+                         'duration_held',
+                         'sell_year',
+                         'tax',
+                         'st_lt',
+                         ])
 
 
 def get_transactions() -> list:
@@ -37,7 +57,6 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
 
     for sell in sells:
         sell_qty = float(sell['qty'])
-        sell_usd_value = float(sell['usd_value'])
         sell_unit_price = float(sell['usd_value']) / float(sell['qty'])
         sell_date = datetime.strptime(sell['date'], '%Y-%m-%d %H:%M:%S')
 
@@ -55,7 +74,6 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
 
             # Sell as much as possible from the buy transaction
             sold_qty = min(buy_qty_available, sell_qty)
-            sold_usd_value = sold_qty * buy_unit_price
             gain_loss = (sold_qty * sell_unit_price) - (sold_qty * buy_unit_price)
             duration_held = (sell_date - buy_date).days
 
@@ -157,7 +175,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
         return
 
     # Create the report
-    with open(f'output/tax_hifo/reports/{make_filename_safe(symbol)}.txt', 'w') as file:
+    with open(f'{TAX_HIFO_DIR}/{make_filename_safe(symbol)}.txt', 'w') as file:
         print(f"Creating report for {symbol}")
         file.write(f"Tax HIFO Report for {symbol}\n\n")
         remaining_qty = sum([float(asset['buy_qty']) for asset in unsold_assets])
@@ -206,7 +224,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
 
         if unsold_assets:
             file.write("\nRemaining (Unsold) Assets\n")
-            file.write(f"Buy Date    Qty             USD Value      Unit Cost\n")
+            file.write(f"Buy Date    Qty             USD Cost        Unit Cost\n")
             file.write( "----------  --------------  --------------  ------------\n")
             for asset in unsold_assets:
                 file.write(f"{asset['buy_date'][:10]}  ")
@@ -215,6 +233,8 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
                 file.write(f"{float(asset['usd_value']) / float(asset['buy_qty']):12,.2f}  ")
                 file.write("\n")
         
+        file.write(f"\n\nGenerated at {datetime.now()}\n")
+
 
 def pivot_table(col, row, value, lines):
     pivot_data = {}
@@ -231,15 +251,17 @@ def pivot_table(col, row, value, lines):
     return pivot_data
 
 
-def print_pivot(pivot_data):
+def write_pivot(pivot_data, file_path):
    
-   with open(TAX_HIFO_PIVOT_OUTPUT, 'w') as f:
+    with open(file_path, 'w') as f:
+        f.write("Tax HIFO Pivot Table\n\n")
+
         # Determine unique rows
         unique_rows = set()
         for row_data in pivot_data.values():
             for row in row_data.keys():
                 unique_rows.add(row)
-        unique_rows = sorted(list(unique_rows))
+        unique_rows = sorted(list(unique_rows), key=lambda x: x.lower())
 
         # Calculate grand totals for columns
         col_totals = {}
@@ -248,28 +270,60 @@ def print_pivot(pivot_data):
 
         # Print header
         f.write(f"{'':25}")  # Empty space for the top-left corner of the table
-        for col in sorted(pivot_data.keys()):
+        for col in pivot_data.keys():
             f.write(f"{col:14}")
         f.write(f"{'   Grand Total':14}\n")  # Header for grand total column
+        f.write("-" * (25 + 14 * (len(pivot_data.keys()) + 1)))  # Line under the header
+        f.write("\n")
 
         # Print each row
         for row in unique_rows:
             f.write(f"{row:25}")
             row_total = 0  # Initialize row total
-            for col in sorted(pivot_data.keys()):  # Ensure columns are iterated in the same order as the header
+            for col in pivot_data.keys():
                 value = pivot_data[col].get(row, 0)  # Default to 0 if the row doesn't exist for this column
                 f.write(f"{value:14,.2f}")
                 row_total += value
             f.write(f"{row_total:14,.2f}\n")  # Print row total
 
+        f.write("-" * (25 + 14 * (len(pivot_data.keys()) + 1)))  # Line under the rows
+        f.write("\n")
+
         # Print grand totals for columns
         f.write(f"{'Grand Total':25}")
-        for col in sorted(pivot_data.keys()):  # Ensure columns are iterated in the same order as the header
+        for col in pivot_data.keys():
             f.write(f"{col_totals[col]:14,.2f}")
         f.write(f"{sum(col_totals.values()):14,.2f}\n")  # Grand total of grand totals
 
+        f.write(f"\n\nGenerated at {datetime.now()}\n")
+
+
+def clean_pivot_data(pivot_data):
+    # 1. Sort the columns
+    sorted_columns = sorted(pivot_data.keys())
+
+    # 2. Sort the rows (ignoring case) and filter out rows where the total is 0
+    all_rows = set(row for col_data in pivot_data.values() for row in col_data.keys())
+    row_totals = {row: sum(pivot_data[col].get(row, 0) for col in sorted_columns) for row in all_rows}
+    sorted_rows = sorted([row for row in all_rows if row_totals[row] != 0], key=lambda x: x.lower())
+
+    # 3. Filter out columns that add up to zero
+    filtered_columns = {col: pivot_data[col] for col in sorted_columns if sum(pivot_data[col].values()) != 0}
+
+    # Create the modified pivot_data
+    clean_data = {}
+    for col in filtered_columns:
+        clean_data[col] = {}
+        for row in sorted_rows:
+            if row in pivot_data[col]:
+                clean_data[col][row] = pivot_data[col][row]
+
+    return clean_data
+
 
 def main():
+    init_files()
+
     transactions = get_transactions()
 
     #Find duplicates and all symbols
@@ -278,7 +332,6 @@ def main():
     #     for symbol, token_ids in duplicates.items():
     #         print(f"Symbol: {symbol}, Token IDs: {token_ids}")
     
-
     # Create a summary report for: year, symbol, total gain/loss, total income
     summary = [['year', 'symbol', 'total_gain_loss', 'total_income']]
 
@@ -286,11 +339,27 @@ def main():
     for symbol in symbols:
         buy_sell_pairs, unsold = calculate_buy_sell_pairs(transactions, symbol)
         incomes = [txn for txn in transactions if txn['symbol'].lower() == symbol.lower() and txn['txn_type'] == 'income']
+
         create_report(symbol, 
                       buy_sell_pairs, 
                       unsold,
                       incomes
         )
+
+        # Append to the detail file
+        with open(TAX_HIFO_DETAIL_OUTPUT, 'a', newline='') as file:
+            writer = csv.writer(file)
+            for row in buy_sell_pairs:
+                writer.writerow([
+                    symbol,
+                    row['buy_date'][:10],
+                    row['sell_date'][:10], 
+                    row['qty'], 
+                    f"{float(row['gain_loss']):.2f}",
+                    row['duration_held'],
+                    row['sell_date'][:4],
+                    'ST' if int(row['duration_held']) < 365 else 'LT',
+                ])
 
         years = set()
         years.update([datetime.strptime(buy_sell_pair['sell_date'], '%Y-%m-%d %H:%M:%S').year for buy_sell_pair in buy_sell_pairs])
@@ -308,8 +377,15 @@ def main():
         writer = csv.writer(file)
         writer.writerows(summary)
 
+    # Write the pivot for gain/loss
     gain_loss_pivot = pivot_table('year', 'symbol', 'total_gain_loss', summary)
-    print_pivot(gain_loss_pivot)
+    gain_loss_pivot = clean_pivot_data(gain_loss_pivot)
+    write_pivot(gain_loss_pivot, TAX_HIFO_PIVOT_GAINLOSS_OUTPUT)
+
+    # Write a pivot for income
+    income_pivot = pivot_table('year', 'symbol', 'total_income', summary)
+    income_pivot = clean_pivot_data(income_pivot)
+    write_pivot(income_pivot, TAX_HIFO_PIVOT_INCOME_OUTPUT)
 
 
 
