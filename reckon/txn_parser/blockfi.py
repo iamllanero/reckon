@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     txns = []
@@ -20,11 +20,12 @@ def parse(fn):
                         cryptocurrency,
                         '', 
                         '',
-                        # '', 
+                        '', 
+                        '',
+                        'blockfi', 
+                        'blockfi', 
                         txn_type, 
-                        'blockfi', 
-                        'blockfi', 
-                        'blockfi', 
+                        '',
                         fn
                     ])
             elif txn_type == 'Trade':
@@ -39,14 +40,14 @@ def parse(fn):
                             'buy',
                             f'{float(next_amount):.8f}', 
                             next_cryptocurrency,
+                            '', 
                             abs(float(amount)), 
                             cryptocurrency,
-                            # f'{abs(float(amount))/float(next_amount):.8f}', 
-                            # abs(float(amount)),
+                            '',
+                            'blockfi', 
+                            'blockfi', 
                             txn_type, 
-                            'blockfi', 
-                            'blockfi', 
-                            'blockfi', 
+                            '',
                             fn
                         ])
                 else:
@@ -56,14 +57,14 @@ def parse(fn):
                             'sell',
                             f'{float(amount):.8f}', 
                             cryptocurrency,
+                            '', 
                             next_amount, 
                             next_cryptocurrency,
-                            # f'{float(next_amount)/float(amount):.8f}', 
-                            # '',
+                            '',
+                            'blockfi', 
+                            'blockfi', 
                             txn_type,
-                            'blockfi', 
-                            'blockfi', 
-                            'blockfi', 
+                            '',
                             fn
                         ])
                     else:
@@ -72,14 +73,14 @@ def parse(fn):
                             'sell',
                             f'{float(amount):.8f}', 
                             cryptocurrency,
+                            '', 
                             next_amount, 
                             next_cryptocurrency,
-                            # f'{float(next_amount)/float(amount):.8f}', 
-                            # '',
+                            '',
+                            'blockfi', 
+                            'blockfi', 
                             txn_type, 
-                            'blockfi', 
-                            'blockfi', 
-                            'blockfi', 
+                            '',
                             fn
                         ])
                         txns.append([
@@ -87,17 +88,16 @@ def parse(fn):
                             'buy',
                             f'{float(next_amount):.8f}', 
                             next_cryptocurrency,
+                            '', 
                             amount, 
                             cryptocurrency,
-                            # f'{float(amount)/float(next_amount):.8f}', 
-                            # '',
+                            '',
+                            'blockfi', 
+                            'blockfi', 
                             txn_type, 
-                            'blockfi', 
-                            'blockfi', 
-                            'blockfi', 
+                            '',
                             fn
                         ])
             else:
-                # print(line.rstrip())
                 pass
     return txns

@@ -1,11 +1,26 @@
 import json
 import requests
 import tomllib
-from reckon.constants import TAGS_FILE, WALLETS_CACHE_DIR
-from reckon.secrets import DEBANK_ACCESSKEY
-from reckon.utils import list_to_csv
+import os
+import sys
+from config import (
+    DEBANK_SPAM_TOKEN_IDS, 
+    DEBANK_SPAM_TOKEN_NAMES, 
+    # TAGS_FILE, 
+    WALLETS_DIR,
+    FLATTEN_DIR,
+    TAGS
+    )
+from utils import list_to_csv
 
-TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
+DEBANK_ACCESSKEY = os.getenv('DEBANK_ACCESSKEY')
+# Check if the environment variable is set
+if DEBANK_ACCESSKEY is not None:
+    print('DEBANK_ACCESSKEY:', DEBANK_ACCESSKEY)
+else:
+    sys.exit('Environment variable DEBANK_ACCESSKEY is not set')
+
+# TAGS = tomllib.load(open(TAGS_FILE, 'rb'))
 
 FLAT_HEADERS = [
             'number',
@@ -46,8 +61,8 @@ FLAT_HEADERS = [
             'tx.usd_gas_fee',
             'tx.value',
             'tx.params',
+            'spam',
             'url',
-            'spam'
         ]
 
 
@@ -116,7 +131,7 @@ class HistoryList:
 
     def write(self):
         """Writes the HistoryList as a JSON to file"""
-        with open(f'{WALLETS_CACHE_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.json', "w") as f:
+        with open(f'{WALLETS_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.json', "w") as f:
             json.dump(self.data, f)
     
     def write_flat_csv(self):
@@ -124,7 +139,7 @@ class HistoryList:
         flat_hl = [FLAT_HEADERS]
         for i in range(self.get_size()):
             flat_hl.extend(self.get_history_entry_flat(i))
-            list_to_csv(flat_hl, f'{WALLETS_CACHE_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.csv')
+            list_to_csv(flat_hl, f'{FLATTEN_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.csv')
 
     def get_wallet_addr(self):
         return self.data['wallet_addr']
@@ -204,6 +219,7 @@ class HistoryList:
             ])
 
             receive_token_id = None
+            receive_token_symbol = None
             receive_token_is_verified = None
             if len(entry['receives']) > i:
                 row.extend([
@@ -217,13 +233,17 @@ class HistoryList:
                     token['is_verified']
                 ])
                 receive_token_id = entry['receives'][i]['token_id']
+                receive_token_symbol = token['symbol']
                 receive_token_is_verified = token['is_verified']
             else:
                 row.extend(['' for x in range(6)])
 
             sends_token_id = None
+            sends_token_symbol = None
             if len(entry['sends']) > i:
                 sends_token_id = entry['sends'][i]['token_id']
+                token = self.get_token(sends_token_id)
+                sends_token_symbol = token['symbol']
                 row.extend([
                     entry['sends'][i]['amount'],
                     entry['sends'][i]['to_addr'],
@@ -275,12 +295,14 @@ class HistoryList:
                 ])                
             else:
                 row.extend(['' for x in range(10)])
-            row.append(get_id_url(entry['id'], self.get_chain_id()))
             row.append(is_spam(receive_token_id,
                                receive_token_is_verified,
+                               receive_token_symbol,
                                project_id,
+                               sends_token_symbol,
                                sends_token_id,
                                tx_name))
+            row.append(get_id_url(entry['id'], self.get_chain_id()))
 
             entries.append(row)
 
@@ -288,7 +310,9 @@ class HistoryList:
     
 def is_spam(receives_token_id,
             receives_token_is_verfied,
+            receives_token_symbol,
             project_id,
+            sends_token_symbol,
             sends_token_id,
             tx_name
             ):
@@ -306,11 +330,23 @@ def is_spam(receives_token_id,
     has_sends = False if sends_token_id is None else True
     has_tx = False if tx_name is None else True
 
+    # if receives_token_id in DEBANK_SPAM_TOKEN_IDS:
+    #     return True
+
+    # if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES:
+    #     return True
+    if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
+        receives_token_id in DEBANK_SPAM_TOKEN_IDS or \
+        sends_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
+        sends_token_id in DEBANK_SPAM_TOKEN_IDS:
+        return True
+
     if has_receives and \
         not is_verified and \
         not has_project and \
         not has_sends and \
         not has_tx:
+        # print(f"SPAM: {receives_token_id} => {sends_token_id}")
         return True
 
     return False
@@ -320,7 +356,7 @@ def is_spam(receives_token_id,
 def load_history(wallet_addr, chain_id) -> HistoryList:
     """Creates a HistoryList based on an existing file."""
 
-    with open(f'{WALLETS_CACHE_DIR}/{wallet_addr}-{chain_id}.json', 'rb') as f:
+    with open(f'{WALLETS_DIR}/{wallet_addr}-{chain_id}.json', 'rb') as f:
         data = json.load(f)
     hlr = HistoryList(wallet_addr, chain_id, data)
     return hlr

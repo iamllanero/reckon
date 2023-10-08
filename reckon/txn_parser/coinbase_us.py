@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     txns = []
@@ -19,14 +19,14 @@ def parse(fn):
                         'income', 
                         qty, 
                         asset,
+                        '',
                         qty_disposed, 
                         asset_disposed,
-                        # '', 
-                        # cost_basis,
+                        '',
+                        'coinbase',
+                        'coinbase',
                         txn_type,
-                        'coinbase',
-                        'coinbase',
-                        'coinbase',
+                        '',
                         fn
                     ])
             elif txn_type == 'Buy':
@@ -36,14 +36,14 @@ def parse(fn):
                         'buy', 
                         qty, 
                         asset,
+                        '', 
                         cost_basis, 
                         'USD',
-                        # float(cost_basis) / float(qty), 
-                        # cost_basis,
+                        '',
+                        'coinbase', 
+                        'coinbase', 
                         txn_type,
-                        'coinbase', 
-                        'coinbase', 
-                        'coinbase', 
+                        '',
                         fn
                     ])
             elif txn_type == 'Converted from':
@@ -60,14 +60,14 @@ def parse(fn):
                         'buy', 
                         qty, 
                         asset,
+                        '', 
                         from_token_qty, 
                         from_token,
-                        # float(from_token_qty) / float(qty), 
-                        # cost_basis,
+                        '',
+                        'coinbase', 
+                        'coinbase', 
                         txn_type, 
-                        'coinbase', 
-                        'coinbase', 
-                        'coinbase', 
+                        '',
                         fn
                     ])
                 elif asset.lower() in STABLECOINS:
@@ -76,13 +76,14 @@ def parse(fn):
                         'sell', 
                         from_token_qty, 
                         from_token,
-                        qty, asset, 
-                        # float(qty) / float(from_token_qty), 
-                        # cost_basis,
+                        '', 
+                        qty,
+                        asset, 
+                        '',
+                        'coinbase', 
+                        'coinbase', 
                         txn_type, 
-                        'coinbase', 
-                        'coinbase', 
-                        'coinbase', 
+                        '',
                         fn
                     ])
                 else:
@@ -91,14 +92,14 @@ def parse(fn):
                         'sell', 
                         from_token_qty, 
                         from_token,
+                        '', 
                         qty, 
                         asset, 
-                        # float(qty) / float(from_token_qty), 
-                        # cost_basis,
+                        '',
+                        'coinbase', 
+                        'coinbase', 
                         'Converted from', 
-                        'coinbase', 
-                        'coinbase', 
-                        'coinbase', 
+                        '',
                         fn
                     ])
                     txns.append([
@@ -106,14 +107,14 @@ def parse(fn):
                         'buy', 
                         qty, 
                         asset,
+                        '', 
                         from_token_qty, 
                         from_token,  
-                        # float(from_token_qty) / float(qty), 
-                        # cost_basis,
+                        '',
+                        'coinbase', 
+                        'coinbase', 
                         txn_type, 
-                        'coinbase', 
-                        'coinbase', 
-                        'coinbase', 
+                        '',
                         fn
                     ])
             elif txn_type in ['Deposit', 'Incoming', 'Receive', 'Send', 'Withdrawal']:

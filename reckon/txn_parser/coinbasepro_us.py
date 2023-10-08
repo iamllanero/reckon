@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     """
@@ -28,14 +28,14 @@ def parse(fn):
                         'buy',
                         next_amount, 
                         next_unit,
+                        '', 
                         amount, 
                         unit,
-                        # float(amount) / float(next_amount), 
-                        # amount,
+                        '',
+                        'coinbasepro', 
+                        'coinbasepro', 
                         tx_type, 
-                        'coinbasepro', 
-                        'coinbasepro', 
-                        'coinbasepro', 
+                        '',
                         fn
                     ])
                 else:

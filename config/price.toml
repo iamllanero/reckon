@@ -1,0 +1,207 @@
+# Rules:
+# chain can be a regex, or if excluded will be assumed to be "*"
+# symbol can be a regex and must be included
+# token_id can be a regex, or if excluded will be assumed to be "*"
+# action can be one of ignore, coingecko, defillama
+# dl_remap, if included, will be used as defillama lookup
+# cg_remap, if included, will be used as coingecko coin_id (NOT IMPLEMENTED)
+#
+# NOTE: Order matters as it is first match wins
+
+# Token symbols to ignore
+[[rules]]
+symbol = "bchsv"
+action = "ignore"
+
+# Token symbols that need to use coingecko
+
+[[rules]]
+symbol = "ada"
+action = "coingecko"
+
+[[rules]]
+symbol = "algo"
+action = "coingecko"
+
+[[rules]]
+symbol = "bch"
+action = "coingecko"
+
+[[rules]]
+symbol = "bnb"
+action = "coingecko"
+
+[[rules]]
+symbol = "bsv"
+action = "coingecko"
+
+[[rules]]
+symbol = "btc"
+action = "coingecko"
+
+[[rules]]
+symbol = "memo"
+action = "coingecko"
+
+[[rules]]
+symbol = "xlm"
+action = "coingecko"
+
+# Token symbols that should be remapped to specific tokens
+
+[[rules]]
+symbol = "avax"
+action = "defillama"
+map_chain_to = "avax"
+map_token_id_to = "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7" # WAVAX
+
+[[rules]]
+symbol = "arb"
+action = "defillama"
+map_chain_to = "arb"
+map_token_id_to = "0x912CE59144191C1204E64559FE8253a0e49E6548"
+
+[[rules]]
+chain = "eth"
+symbol = "cvxFXS"
+action = "defillama"
+map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
+
+[[rules]]
+symbol = "ftm"
+action = "defillama"
+map_chain_to = "ftm"
+map_token_id_to = "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83" # WFTM
+
+[[rules]]
+symbol = "eth"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" # WETH
+
+# Substitutions for tokens that are not on defillama
+
+[[rules]]
+chain = "eth"
+symbol = "afrxeth"
+action = "defillama"
+map_token_id_to = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" # WETH
+
+[[rules]]
+chain = "eth"
+symbol = "ucvxCRV"
+action = "defillama"
+map_token_id_to = "0x62B9c7356A2Dc64a1969e19C23e4f579F9810Aa7" # cvxCRV
+
+[[rules]]
+chain = "eth"
+symbol = "uCRV"
+action = "defillama"
+map_token_id_to = "0x62B9c7356A2Dc64a1969e19C23e4f579F9810Aa7" # cvxCRV
+
+[[rules]]
+chain = "eth"
+symbol = "xALD"
+action = "defillama"
+map_token_id_to = "0xb26C4B3Ca601136Daf98593feAeff9E0CA702a8D" # ALD
+
+[[rules]]
+chain = "eth"
+symbol = "cvxFXSFXS-f"
+action = "defillama"
+map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
+
+[[rules]]
+chain = "eth"
+symbol = "ucvxFXSFXS-f"
+action = "defillama"
+map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
+
+[[rules]]
+chain = "ftm"
+symbol = "gETH"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" # WETH
+
+[[rules]]
+chain = "ftm"
+symbol = "mooTombTOMB-FTM"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "mooBasedBASED-TOMB"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "TOMB-V2-LP"
+action = "defillama"
+map_token_id_to = "0x6c021Ae822BEa943b2E66552bDe1D2696a53fbB7" # TOMB
+
+[[rules]]
+chain = "ftm"
+symbol = "moo2omb2OMB-2SHARE"
+action = "defillama"
+map_token_id_to = "0x7a6e4E3CC2ac9924605DCa4bA31d1831c84b44aE" # 2OMB
+
+# Incorrect symbol of JLP but only used for TIME
+
+[[rules]]
+chain = "avax"
+token_id = "0x113f413371fc4cc4c9d6416cf1de9dfd7bf747df"
+action = "defillama"
+map_symbol_to = "time"
+map_token_id_to = "0xb54f16fB19478766A268F172C9480f8da1a7c9C3" # TIME
+
+# Set token_id for Coinbase tokens
+
+[[rules]]
+chain = "coinbase"
+symbol = "aave"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
+
+[[rules]]
+chain = "coinbase"
+symbol = "forth"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x77FbA179C79De5B7653F68b5039Af940AdA60ce0"
+
+[[rules]]
+chain = "coinbase"
+symbol = "grt"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xc944E90C64B2c07662A292be6244BDf05Cda44a7"
+
+[[rules]]
+chain = "coinbase"
+symbol = "link"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x514910771AF9Ca656af840dff83E8264EcF986CA"
+
+[[rules]]
+chain = "coinbase"
+symbol = "shib"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
+
+[[rules]]
+chain = "coinbase"
+symbol = "nu"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc"
+
+# This is the default action
+# Do not delete unless you know what you are doing
+[[rules]]
+action = "defillama"

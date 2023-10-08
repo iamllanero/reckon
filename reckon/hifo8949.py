@@ -1,5 +1,6 @@
 import pandas as pd
-from reckon.utils import list_to_csv
+from utils import list_to_csv
+from config import HIFO8949_OUTPUT, PRICE_OUTPUT
 
 def calc_sell(df, symbol):
     """
@@ -61,6 +62,7 @@ def calc_sell(df, symbol):
                     symbol,
                     qty_sold,
                     row['date'],
+                    row['date'].year,
                     df.iloc[hi_row]['date'],
                     proceeds,
                     cost_basis,
@@ -82,22 +84,24 @@ def main():
     - Gain or loss
     """
 
-    df = pd.read_csv('data/priced.csv')
+    df = pd.read_csv(PRICE_OUTPUT)
 
     df = df.astype({
         'date': 'datetime64[ns]',
         'txn_type': 'string',
         'qty': 'float64',
         'symbol': 'string',
+        'token_id': 'string',
+        'usd_value': 'float64',
         'purchase_token_cost': 'float64',
         'purchase_token': 'string',
-        'txn_name': 'string',
+        'purchase_token_id': 'string',
         'chain': 'string',
         'project': 'string',
+        'txn_name': 'string',
         'wallet': 'string',
-        'url': 'string',
         'id': 'string',
-        'usd_value': 'float64',
+        'source': 'string',
     })
 
     # Create list for tracking the tokens sold
@@ -105,6 +109,7 @@ def main():
         'symbol',
         'qty',
         'date sold',
+        'year sold',
         'date acquired',
         'proceeds',
         'cost basis',
@@ -114,13 +119,14 @@ def main():
         ]]
 
     symbols = df['symbol'].unique()
+    print(symbols)
 
     for symbol in symbols:
         print(f"INFO: Calculating symbol {symbol}")
         sell_list.extend(calc_sell(df, symbol))
 
     # df.to_csv('data/8949-hifo-wip.csv')
-    list_to_csv(sell_list, 'data/8949-hifo.csv')
+    list_to_csv(sell_list, HIFO8949_OUTPUT)
 
 if __name__ == '__main__':
     main()

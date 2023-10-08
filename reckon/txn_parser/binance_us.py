@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     txns = []
@@ -49,14 +49,14 @@ def parse(fn):
                     'buy',
                     realized_amount_quote_asset, 
                     quote_asset,
+                    '',
                     realized_amount_base_asset, 
                     base_asset,
-                    # float(realized_amount_base_asset) / float(realized_amount_quote_asset),
-                    # realized_amount_base_asset,
+                    '',
+                    'binance', 
+                    'binance', 
                     f'{category}/{operation}',
-                    'binance', 
-                    'binance', 
-                    'binance',
+                    '',
                     fn
                 ])
             elif category in ['Sell']:
@@ -65,14 +65,14 @@ def parse(fn):
                     'sell',
                     realized_amount_base_asset, 
                     base_asset,
+                    '',
                     realized_amount_quote_asset, 
                     quote_asset,
-                    # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
-                    # realized_amount_quote_asset,
+                    '',
+                    'binance', 
+                    'binance', 
                     f'{category}/{operation}',
-                    'binance', 
-                    'binance', 
-                    'binance',
+                    '',
                     fn
                 ])
             elif category in ['Spot Trading']:
@@ -83,14 +83,14 @@ def parse(fn):
                             'buy',
                             realized_amount_base_asset, 
                             base_asset,
+                            '',
                             realized_amount_quote_asset, 
                             quote_asset,
-                            # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
-                            # realized_amount_quote_asset,
+                            '',
+                            'binance', 
+                            'binance', 
                             f'{category}/{operation}',
-                            'binance', 
-                            'binance', 
-                            'binance',
+                            '',
                             fn
                         ])
                 elif operation == 'Sell':
@@ -100,14 +100,14 @@ def parse(fn):
                             'sell',
                             realized_amount_base_asset, 
                             base_asset,
+                            '',
                             realized_amount_quote_asset, 
                             quote_asset,
-                            # float(realized_amount_quote_asset) / float(realized_amount_base_asset),
-                            # realized_amount_quote_asset,
+                            '',
+                            'binance', 
+                            'binance', 
                             f'{category}/{operation}',
-                            'binance', 
-                            'binance', 
-                            'binance',
+                            '',
                             fn
                         ])
                 else:

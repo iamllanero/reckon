@@ -1,27 +1,30 @@
 import pandas as pd
-from reckon.utils import list_to_csv
+from utils import list_to_csv
+from config import PRICE_OUTPUT, PF_OUTPUT
 
 def main():
     """
     Quick implementation of a rudimentary portfolio view.
     """
 
-    df = pd.read_csv('data/priced.csv')
+    df = pd.read_csv(PRICE_OUTPUT)
     df = df.astype({
-            'date': 'datetime64[ns]',
-            'txn_type': 'string',
-            'qty': 'float64',
-            'symbol': 'string',
-            'purchase_token_cost': 'float64',
-            'purchase_token': 'string',
-            'txn_name': 'string',
-            'chain': 'string',
-            'project': 'string',
-            'wallet': 'string',
-            'url': 'string',
-            'id': 'string',
-            'usd_value': 'float64',
-        })
+        'date': 'datetime64[ns]',
+        'txn_type': 'string',
+        'qty': 'float64',
+        'symbol': 'string',
+        'token_id': 'string',
+        'usd_value': 'float64',
+        'purchase_token_cost': 'float64',
+        'purchase_token': 'string',
+        'purchase_token_id': 'string',
+        'chain': 'string',
+        'project': 'string',
+        'txn_name': 'string',
+        'wallet': 'string',
+        'id': 'string',
+        'source': 'string',
+    })
 
     pf = [[
         'symbol',
@@ -65,7 +68,9 @@ def main():
             income_usd,
         ])
 
-    list_to_csv(pf, 'data/pf.csv')
+    sorted_pf = [pf[0]] + sorted(pf[1:], key=lambda x: x[0], reverse=False)
+
+    list_to_csv(sorted_pf, PF_OUTPUT)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 import csv
-from reckon.constants import STABLECOINS
+from config import STABLECOINS
 
 def parse(fn):
     """
@@ -25,15 +25,14 @@ def parse(fn):
                         'buy',
                         qty, 
                         token,
+                        '', # token_id
                         purchase_token_qty, 
                         purchase_token,
-                        # float(purchase_token_qty) / float(qty), 
-                        # purchase_token_qty,
+                        '', # purchase_token_id
+                        location, 
+                        location, 
                         tx_type, 
-                        location, 
-                        location, 
-                        location, 
+                        fn,
                         id,
-                        fn
                     ])
     return txns

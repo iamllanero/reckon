@@ -8,10 +8,6 @@
 file = "data/reports/manual.csv"
 parser = "default"
 
-[reports.manual-2]
-file = "data/reports/test.csv"
-parser = "default"
-
 [reports.coinbase-1]
 file = "data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv"
 parser = "coinbase_us"
@@ -47,33 +43,37 @@ show_tags = true
 
 # Equivalent pairs must be alphabetical
 equivalents = [
-    ["b-90clevcvx-10cvx", "b-90clevcvx-10cvx-gauge"],
-    ["b-98acrv-2ctr", "b-98acrv-2ctr-gauge"],
-    ["blusdlusd3-f", "blusdlusd3-f-gauge"],
-    ["bpt-beets-ftm", "fbeets"],
-    ["clevcvx-f", "clevcvx-f-gauge"],
-    ["clevcvx", "clevcvx-f"],
-    ["cleveth-f", "cleveth-f-gauge"],
-    ["cmumami", "mumami"],
-    ["crv", "sdcrv-gauge"],
-    ["ctreth-f", "ctreth-f-gauge"],
-    ["cvxfraxbp-f", "fraxbp-f"],
-    ["eth", "geth"],
-    ["eth", "steth"],
-    ["eth", "weth"],
-    ["fmootombtomb-ftm-3", "mootombtomb-ftm"],
-    ["fmootombtomb-ftm", "mootombtomb-ftm"],
-    ["ftm", "wftm"],
-    ["gmx", "sbfgmx"],
-    ["hmim", "hmim-gauge"],
-    ["jxjoe", "xjoe"],
-    ["matic", "wmatic"],
-    ["memo", "time"],
-    ["mumami", "umami"],
-    ["pxcvx", "ucvx"],
-    ["sdog", "ssdog"],
-    ["spa", "sspa"],
-    ["tbond", "tomb"],
+    # ["abccvx", "abccvx-gauge"],
+    # ["b-90clevcvx-10cvx", "b-90clevcvx-10cvx-gauge"],
+    # ["b-98acrv-2ctr", "b-98acrv-2ctr-gauge"],
+    # ["blusdlusd3-f", "blusdlusd3-f-gauge"],
+    # ["bpt-beets-ftm", "fbeets"],
+    # ["clevcvx-f", "clevcvx-f-gauge"],
+    # ["clevcvx", "clevcvx-f"],
+    # ["cleveth-f", "cleveth-f-gauge"],
+    # ["clevusd", "clevusd3crv-f"],
+    # ["cmumami", "mumami"],
+    # ["crv", "sdcrv-gauge"],
+    # ["crvusdusdc-f", "crvusdusdc-f-gauge"],
+    # ["ctreth-f", "ctreth-f-gauge"],
+    # ["cvxfraxbp-f", "fraxbp-f"],
+    # ["eth", "geth"],
+    # ["eth", "steth"],
+    # ["eth", "weth"],
+    # ["fmootombtomb-ftm-3", "mootombtomb-ftm"],
+    # ["fmootombtomb-ftm", "mootombtomb-ftm"],
+    # ["ftm", "wftm"],
+    # ["gmx", "sbfgmx"],
+    # ["hmim", "hmim-gauge"],
+    # ["jxjoe", "xjoe"],
+    # ["matic", "wmatic"],
+    # ["memo", "time"],
+    # ["mumami", "umami"],
+    # ["pxcvx", "ucvx"],
+    # ["sdCRV", "sdCRV-gauge"],
+    # ["sdog", "ssdog"],
+    # ["spa", "sspa"],
+    # ["tbond", "tomb"],
 ]
 
 [token_name_overrides]
