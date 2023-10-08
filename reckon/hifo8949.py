@@ -91,15 +91,17 @@ def main():
         'txn_type': 'string',
         'qty': 'float64',
         'symbol': 'string',
+        'token_id': 'string',
+        'usd_value': 'float64',
         'purchase_token_cost': 'float64',
         'purchase_token': 'string',
-        'txn_name': 'string',
+        'purchase_token_id': 'string',
         'chain': 'string',
         'project': 'string',
+        'txn_name': 'string',
         'wallet': 'string',
-        'url': 'string',
         'id': 'string',
-        'usd_value': 'float64',
+        'source': 'string',
     })
 
     # Create list for tracking the tokens sold
@@ -117,6 +119,7 @@ def main():
         ]]
 
     symbols = df['symbol'].unique()
+    print(symbols)
 
     for symbol in symbols:
         print(f"INFO: Calculating symbol {symbol}")
