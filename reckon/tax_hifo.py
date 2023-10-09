@@ -5,10 +5,12 @@ from config import (
     TAX_HIFO_PIVOT_GAINLOSS_OUTPUT,
     TAX_HIFO_PIVOT_INCOME_OUTPUT,
     TAX_HIFO_DIR,
+    TAX_HIFO_WARN_THRESHOLD,
 )
 from datetime import datetime
 import csv
 import re
+
 
 def init_files():
     with open(TAX_HIFO_DETAIL_OUTPUT, 'w', newline='') as file:
@@ -17,10 +19,11 @@ def init_files():
                          'buy_date', 
                          'sell_date', 
                          'qty', 
+                         'cost_basis',
+                         'proceeds',
                          'gain_loss', 
                          'duration_held',
                          'sell_year',
-                         'tax',
                          'st_lt',
                          ])
 
@@ -81,9 +84,14 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
                 'buy_date': buy['date'],
                 'sell_date': sell['date'],
                 'qty': sold_qty,
+                'cost_basis': sold_qty * buy_unit_price,
+                'proceeds': sold_qty * sell_unit_price,
                 'gain_loss': gain_loss,
                 'duration_held': duration_held
             })
+
+            if gain_loss > TAX_HIFO_WARN_THRESHOLD:
+                print(f"WARN: Gain/loss of {gain_loss:,.2f} for {sold_qty:.4f} {target_symbol} sold on {sell_date} after {duration_held} days")
 
             # print(f"- Matched {buy_date} {sold_qty:.4f} for ${sold_usd_value:,.2f} (${buy_unit_price:,.2f} per), Gain/loss: ${gain_loss:,.2f}, Held: {duration_held} days, Qty still to Sell: {sell_qty - sold_qty:.4f}")
 
@@ -188,9 +196,11 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
         for year in sorted(years):
             yearly_buy_pairs = [buy_sell_pair for buy_sell_pair in buy_sell_pairs if datetime.strptime(buy_sell_pair['sell_date'], '%Y-%m-%d %H:%M:%S').year == year]
             yearly_incomes = [income for income in incomes if datetime.strptime(income['date'], '%Y-%m-%d %H:%M:%S').year == year]
-            file.write("-------------------------------------------------------------------------------\n")
+            file.write("-" * 92)
+            file.write("\n")
             file.write(f"Year {year}\n")
-            file.write("-------------------------------------------------------------------------------\n")
+            file.write("-" * 92)
+            file.write("\n")
             file.write(f"Number of Transactions: {len(yearly_buy_pairs)}\n")
             file.write(f"Quantity Sold: {sum([float(buy_sell_pair['qty']) for buy_sell_pair in yearly_buy_pairs]):,.4f}\n")
             file.write(f"Capital Gains/Loss: ${sum([float(buy_sell_pair['gain_loss']) for buy_sell_pair in yearly_buy_pairs]):,.2f}\n")
@@ -198,14 +208,16 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
 
             if yearly_buy_pairs:
                 file.write("\nBuy/Sell Pairs\n")
-                file.write(f"Buy Date    Sell Date   Qty             Gain/Loss       Held\n")
-                file.write( "----------  ----------  --------------  --------------  ----\n")
+                file.write(f"Buy Date    Sell Date   Qty             Cost Basis      Proceeds        Gain/Loss       Held\n")
+                file.write( "----------  ----------  --------------  --------------  --------------  --------------  ----\n")
                 for buy_sell_pair in yearly_buy_pairs:
                     sell_date = datetime.strptime(buy_sell_pair['sell_date'], '%Y-%m-%d %H:%M:%S')
                     if sell_date.year == year:
                         file.write(f"{buy_sell_pair['buy_date'][:10]}  ")
                         file.write(f"{buy_sell_pair['sell_date'][:10]}  ")
                         file.write(f"{buy_sell_pair['qty']:14,.4f}  ")
+                        file.write(f"{buy_sell_pair['cost_basis']:14,.2f}  ")
+                        file.write(f"{buy_sell_pair['proceeds']:14,.2f}  ")
                         file.write(f"{buy_sell_pair['gain_loss']:14,.2f}  ")
                         file.write(f"{int(buy_sell_pair['duration_held']):>4}")
                         file.write("\n")
@@ -355,6 +367,8 @@ def main():
                     row['buy_date'][:10],
                     row['sell_date'][:10], 
                     row['qty'], 
+                    f"{float(row['cost_basis']):.2f}",
+                    f"{float(row['proceeds']):.2f}",
                     f"{float(row['gain_loss']):.2f}",
                     row['duration_held'],
                     row['sell_date'][:4],
