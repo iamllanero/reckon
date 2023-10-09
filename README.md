@@ -136,3 +136,51 @@ python3 reckon/price.py
 python3 reckon/taxes_hifo.py
 ```
 
+## HOW TO FIX DATA
+
+Issues can typically be found by looking at the following files:
+
+- `output/flatten.csv`
+- `output/txns.csv`
+- `output/price.csv`
+
+However, Reckon also provides a lot of visibility in intermediate work files to
+help make track down potential issues. Look in the `output/work` directory.
+
+There is also a flag in the `reckon/config/__init__.py` called
+TAX_HIFO_WARN_THRESHOLD that can be adjusted to help show high gain/loss values
+in the console when running `tax_hifo.py`.
+
+### Missing prices
+
+Reckon tries to use defillama API by default and infers prices when possible.
+However, if it can't figure out the price, you have a few options:
+
+- Create price rules in `config/price.toml` to address systemic issues such as
+  remapping a token symbol to another (i.e. eth to weth). Options include:
+  - Changing the action to "ignore"
+  - Changing the action to use "coingecko"
+  - Remapping the chain, symbol, or token_id
+- Create an entry in `config/price_manual.csv` to address problems in a single
+  transaction. Options include:
+  - Providing a manual price
+  - Changing the transaction type
+
+Reckon provides a handy `output/price_worksheet.csv` to use to figure out the
+what's missing.
+
+### Incorrect prices
+
+- If a token is consistently showing the incorrect price, most likely solution
+  is to create a price rule.
+- If a single transaction is showing the incorrect price, look at creating a
+  manual price entry in `config/price_manual.csv`
+
+### Showing up as income instead of a buy
+
+- Some transactions show up incorrectly due to the way the protocol mechanism
+  works. For example, a purchase that requires a subsequent claim may show up
+  as income.
+- Bridging is usually excluded but could also show up as income.
+- The fix will likely require making an entry in `config/price_manual.csv` to
+  remap the entry to a "buy" txn_type.
