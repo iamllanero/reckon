@@ -12,6 +12,10 @@ parser = "default"
 file = "data/reports/2015-2021-coinbase/Coinbase-2021-CB-RAWTX_.csv"
 parser = "coinbase_us"
 
+[reports.coinbase-2]
+file = "data/reports/2022-coinbase/Coinbase-54bf32440c6950491100003f-TransactionsHistoryReport-2023-10-10-09-32-59.csv"
+parser = "coinbase_us_2022"
+
 [reports.coinbase-pro-1]
 file = "data/reports/2022-coinbasepro/account.csv"
 parser = "coinbasepro_us"
