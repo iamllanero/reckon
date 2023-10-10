@@ -133,6 +133,7 @@ python3 reckon/txns.py
 python3 reckon/price.py
 
 # Create a close to an IRS 8949 list based on the HIFO cost basis
+# WARNING: This will not run as long as there are missing prices in price.csv
 python3 reckon/taxes_hifo.py
 ```
 
