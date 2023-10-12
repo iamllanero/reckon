@@ -62,6 +62,7 @@ equivalents = [
     # ["ctreth-f", "ctreth-f-gauge"],
     # ["cvxfraxbp-f", "fraxbp-f"],
     # ["eth", "geth"],
+    ["eth", "leth"],
     # ["eth", "steth"],
     ["eth", "weth"],
     # ["fmootombtomb-ftm-3", "mootombtomb-ftm"],
