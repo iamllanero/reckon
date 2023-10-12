@@ -47,6 +47,57 @@ action = "coingecko"
 symbol = "xlm"
 action = "coingecko"
 
+# Set token_id for Coinbase tokens
+
+[[rules]]
+chain = "coinbase"
+symbol = "aave"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
+
+[[rules]]
+chain = "coinbase"
+symbol = "crv"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xD533a949740bb3306d119CC777fa900bA034cd52"
+
+[[rules]]
+chain = "coinbase"
+symbol = "forth"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x77FbA179C79De5B7653F68b5039Af940AdA60ce0"
+
+[[rules]]
+chain = "coinbase"
+symbol = "grt"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0xc944E90C64B2c07662A292be6244BDf05Cda44a7"
+
+[[rules]]
+chain = "coinbase"
+symbol = "link"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x514910771AF9Ca656af840dff83E8264EcF986CA"
+
+[[rules]]
+chain = "coinbase"
+symbol = "shib"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
+
+[[rules]]
+chain = "coinbase"
+symbol = "nu"
+action = "defillama"
+map_chain_to = "eth"
+map_token_id_to = "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc"
+
 # Token symbols that should be remapped to specific tokens
 
 [[rules]]
@@ -148,6 +199,45 @@ symbol = "moo2omb2OMB-2SHARE"
 action = "defillama"
 map_token_id_to = "0x7a6e4E3CC2ac9924605DCa4bA31d1831c84b44aE" # 2OMB
 
+# Incorrect symbols
+# NOTE: THIS DOES NOT CURRENLTY WORK / MAPPED SYMBOLS ARE IGNORED
+
+[[rules]]
+chain = "ftm"
+token_id = "0x2a651563c9d3af67ae0388a5c8f89b867038089e"
+action = "defillama"
+map_symbol_to = "spLP-tomb-wftm"
+
+[[rules]]
+chain = "ftm"
+token_id = "0xd9b5f00d183df52d717046521152303129f088dd"
+action = "defillama"
+map_symbol_to = "spLP-2omb-2share"
+
+[[rules]]
+chain = "ftm"
+token_id = "0xbdc7dfb7b88183e87f003ca6b5a2f81202343478"
+action = "defillama"
+map_symbol_to = "spLP-2omb-wftm"
+
+[[rules]]
+chain = "ftm"
+token_id = "0xab2ddcbb346327bbdf97120b0dd5ee172a9c8f9e"
+action = "defillama"
+map_symbol_to = "spLP-tomb-based"
+
+[[rules]]
+chain = "ftm"
+token_id = "0xd9b5f00d183df52d717046521152303129f088dd"
+action = "defillama"
+map_symbol_to = "spLP-2omb-2share"
+
+[[rules]]
+chain = "ftm"
+token_id = "0xec7178f4c41f346b2721907f5cf7628e388a7a58"
+action = "defillama"
+map_symbol_to = "spLP-wftm-boo"
+
 # Incorrect symbol of JLP but only used for TIME
 
 [[rules]]
@@ -156,57 +246,6 @@ token_id = "0x113f413371fc4cc4c9d6416cf1de9dfd7bf747df"
 action = "defillama"
 map_symbol_to = "time"
 map_token_id_to = "0xb54f16fB19478766A268F172C9480f8da1a7c9C3" # TIME
-
-# Set token_id for Coinbase tokens
-
-[[rules]]
-chain = "coinbase"
-symbol = "aave"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
-
-[[rules]]
-chain = "coinbase"
-symbol = "crv"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0xD533a949740bb3306d119CC777fa900bA034cd52"
-
-[[rules]]
-chain = "coinbase"
-symbol = "forth"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0x77FbA179C79De5B7653F68b5039Af940AdA60ce0"
-
-[[rules]]
-chain = "coinbase"
-symbol = "grt"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0xc944E90C64B2c07662A292be6244BDf05Cda44a7"
-
-[[rules]]
-chain = "coinbase"
-symbol = "link"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0x514910771AF9Ca656af840dff83E8264EcF986CA"
-
-[[rules]]
-chain = "coinbase"
-symbol = "shib"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"
-
-[[rules]]
-chain = "coinbase"
-symbol = "nu"
-action = "defillama"
-map_chain_to = "eth"
-map_token_id_to = "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc"
 
 # This is the default action
 # Do not delete unless you know what you are doing
