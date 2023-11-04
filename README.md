@@ -124,7 +124,7 @@ export DEBANK_ACCESSKEY="mykey"
 python3 reckon/build.py
 
 # Flatten the wallets into CSV files and consolidates into a single file.
-python3 reckon/flat.py
+python3 reckon/flatten.py
 
 # Calculates taxable transactions
 python3 reckon/txns.py
