@@ -124,8 +124,9 @@ def _get_price(date, chain, symbol, token_id):
     print(f"GET {url} ({symbol})", end=" => ")
     response = requests.get(url)
     if response.status_code != 200:
-        print(response.status_code)
-        sys.exit(1, f"ERROR: {response.status_code} for {date} {chain} {symbol} {token_id}")
+        print(f"ERROR: {response.status_code} for {date} {chain} {symbol} {token_id}")
+        print(response.text)
+        return None
     if "coins" in response.json():
         coins = response.json()["coins"]
         for k,v in coins.items():
