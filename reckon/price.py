@@ -3,7 +3,7 @@ import defillama as dl
 import coingecko as cg
 import sys
 import tomllib
-from datetime import datetime
+from datetime import datetime, timezone
 from config import (
     PRICE_CONFIG,
     PRICE_INFERRED_OUTPUT,
@@ -52,8 +52,21 @@ class PriceRule:
                 self._matches_pattern(self.token_id, token_id))
 
 
+    def get_info(self, chain, symbol, token_id):
+
+        # Look up any params and use them
+        if 'map_chain_to' in self.params:
+            chain = self.params['map_chain_to']
+        if 'map_symbol_to' in self.params:
+            symbol = self.params['map_symbol_to']
+        if 'map_token_id_to' in self.params:
+            token_id = self.params['map_token_id_to'] 
+        return (chain, symbol, token_id)
+
+
     def get_price(self, date, chain, symbol, token_id):
-        return (None, None)
+        print(f"WARN: Using default price rule for {date} {chain} {symbol} {token_id}")
+        return (chain, symbol, token_id, None, None)
 
 
     def ignore(self):
@@ -66,10 +79,11 @@ class CoinGeckoPriceRule(PriceRule):
     def get_price(self, date, chain, symbol, token_id):
         source = "coingecko"
         date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        date_obj = date_obj.replace(tzinfo=timezone.utc)
         price = cg.get_historical_price(symbol, date_obj)
         if price == None or price == '':
             source += " / price not found"
-        return (price, source)
+        return (chain, symbol, token_id, price, source)
 
 
 class DefiLlamaPriceRule(PriceRule):
@@ -111,7 +125,7 @@ class DefiLlamaPriceRule(PriceRule):
         if price == None or price == '':
             source += " / price not found"
 
-        return (price, source)
+        return (chain, symbol, token_id, price, source)
 
 
 class PriceRulesConfig:
@@ -206,7 +220,7 @@ def get_prices():
             print(f"- INFO: Ignoring {date} {chain} {symbol} {token_id}")
             continue
 
-        (price, source) = rule.get_price(date, chain, symbol, token_id)
+        (chain, symbol, token_id, price, source) = rule.get_price(date, chain, symbol, token_id)
 
         # Save price to file
         with open(PRICE_REQ_OUTPUT, "a", newline="") as csvfile:
@@ -272,9 +286,13 @@ def merge_inferred_prices():
 
     print("Merging requested and inferred prices...")
 
+    # The txns_price_req.csv file with pricing information (incl. missing)
     price_reqs = []
+    # The inferred prices from every txn that was missing a price
     inferred_prices = []
+    # The merged prices with inferred prices replacing missing prices
     merged_prices = []
+    # The missing prices that were not gotten from an api, inferred, or manual
     missing_prices = []
 
     total_count = 0
@@ -371,6 +389,8 @@ def create_priced_txns():
 
     print("Creating priced txns file...")
 
+    price_rules_config = PriceRulesConfig()
+
     # Read in manual prices
     manual_prices = []
     with open(PRICE_MANUAL_FILE, "r") as csvfile:
@@ -381,6 +401,7 @@ def create_priced_txns():
             if row[0].strip().startswith("#"):
                 continue
             manual_prices.append(row)
+
 
     with open(TXNS_OUTPUT, "r", newline="") as csvfile:
         count_total = 0
@@ -410,6 +431,11 @@ def create_priced_txns():
             txn_name = row[headers.index("txn_name")]
             wallet = row[headers.index("wallet")]
             id = row[headers.index("id")]
+
+            # Get the action for this token request based on the price rules config
+            rule = price_rules_config.find_rule(chain, symbol, token_id)
+            # Remap the chain, symbol, token_id if needed
+            (chain, symbol, token_id) = rule.get_info(chain, symbol, token_id)
 
             # Handle manual prices
             continue_outer_loop = False

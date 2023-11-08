@@ -1,5 +1,5 @@
 from config import DEFILLAMA_CACHE_OUTPUT, DEFILLAMA_MISSING_OUTPUT
-from datetime import datetime
+from datetime import datetime, timezone
 import csv
 import os
 import requests
@@ -12,15 +12,17 @@ HEADERS = ["date", "chain", "symbol", "token_id", "price"]
 
 
 def get_timestamp_from_date(date_str, date_format="%Y-%m-%d %H:%M:%S"):
-    """Convert a date string to a timestamp."""
+    """Convert a date string (it assumes UTC) to a timestamp."""
     dt = datetime.strptime(date_str, date_format)
+    # Make the datetime object timezone-aware, assuming it's in UTC
+    dt = dt.replace(tzinfo=timezone.utc)
     timestamp = int(dt.timestamp())
     return timestamp
 
 
 def get_date_from_timestamp(timestamp, date_format="%Y-%m-%d %H:%M:%S"):
-    """Convert a timestamp to a date string."""
-    dt = datetime.fromtimestamp(timestamp)
+    """Convert a timestamp to a UTC date string."""
+    dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     date_str = dt.strftime(date_format)
     return date_str
 
@@ -124,8 +126,9 @@ def _get_price(date, chain, symbol, token_id):
     print(f"GET {url} ({symbol})", end=" => ")
     response = requests.get(url)
     if response.status_code != 200:
-        print(response.status_code)
-        sys.exit(1, f"ERROR: {response.status_code} for {date} {chain} {symbol} {token_id}")
+        print(f"ERROR: {response.status_code} for {date} {chain} {symbol} {token_id}")
+        print(response.text)
+        return None
     if "coins" in response.json():
         coins = response.json()["coins"]
         for k,v in coins.items():

@@ -1,5 +1,5 @@
 import csv
-import datetime
+from datetime import datetime, timezone
 import json
 import os
 import requests
@@ -71,8 +71,9 @@ def get_cached_historical_price(symbol: str, date: datetime):
         float: Price
     """
     # Verify parameters
-    if type(date) != datetime.datetime:
+    if type(date) != datetime:
         raise Exception("Date is not a valid datetime object")
+    date = date.replace(tzinfo=timezone.utc)
 
     # if os.path.isfile(PRICE_MANUAL_FILE):
     #     with open(PRICE_MANUAL_FILE, 'r') as f:
@@ -109,11 +110,12 @@ def save_historical_price(symbol: str,
         price (float): Price at close of the date
         source (str): Optional; default is Coingecko; source of the price quote
     """
+    date = date.replace(tzinfo=timezone.utc)
     cached_price = get_cached_historical_price(symbol, date)
 
     if cached_price == None:
         with open(COINGECKO_CACHE_OUTPUT, 'a') as f:
-            date_added = datetime.datetime.now().strftime('%Y-%m-%d')
+            date_added = datetime.utcnow().strftime('%Y-%m-%d')
             f.write(
                 f"{date.strftime('%Y-%m-%d')},{symbol},{price},{date_added},{source}\n")
     else:
@@ -129,9 +131,10 @@ def save_missing_price(symbol: str, date: datetime):
         symbol (str): ERC-20 token symbol
         date (datetime): Date of the price
     """
+    date = date.replace(tzinfo=timezone.utc)
     # print(f"Saving {symbol} price for {date} to {PRICE_MISSING_OUTPUT}")
     with open(COINGECKO_MISSING_OUTPUT, 'a') as f:
-        date_added = datetime.datetime.now().strftime('%Y-%m-%d')
+        date_added = datetime.utcnow().strftime('%Y-%m-%d')
         f.write(f"{date.strftime('%Y-%m-%d')},{symbol},?,{date_added},Missing\n")
 
 
@@ -154,8 +157,9 @@ def get_historical_price(symbol: str, date: datetime):
     """
 
     # Verify parameters
-    if type(date) != datetime.datetime:
+    if type(date) != datetime:
         raise Exception("Date is not a valid datetime object")
+    date = date.replace(tzinfo=timezone.utc)
 
     # Check for cached price and if present return it
     price = get_cached_historical_price(symbol, date)
@@ -215,16 +219,16 @@ def clean_cache(file_path):
     Cleans cache by: 1) Removing duplicates, 2) Sorting
     """
     cache = []
-    with open(file_path, 'r') as f:
-        for line in f:
-            date, symbol, price, date_added, source = line.rstrip().split(',')
-            if [date, symbol] not in cache:
-                cache.append([date, symbol, price, date_added, source])
-            else:
-                print(
-                    f'ERROR: {file_path}: Discarding duplicate cache result for {date}|{symbol}|{price}|{source}')
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            for line in f:
+                date, symbol, price, date_added, source = line.rstrip().split(',')
+                if [date, symbol] not in cache:
+                    cache.append([date, symbol, price, date_added, source])
+                else:
+                    print(
+                        f'ERROR: {file_path}: Discarding duplicate cache result for {date}|{symbol}|{price}|{source}')
     cache.sort()
-    # utils.list_to_csv(cache, file_path)
     with open(file_path, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(cache)

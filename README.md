@@ -124,7 +124,7 @@ export DEBANK_ACCESSKEY="mykey"
 python3 reckon/build.py
 
 # Flatten the wallets into CSV files and consolidates into a single file.
-python3 reckon/flat.py
+python3 reckon/flatten.py
 
 # Calculates taxable transactions
 python3 reckon/txns.py
@@ -133,6 +133,7 @@ python3 reckon/txns.py
 python3 reckon/price.py
 
 # Create a close to an IRS 8949 list based on the HIFO cost basis
+# WARNING: This will not run as long as there are missing prices in price.csv
 python3 reckon/taxes_hifo.py
 ```
 

@@ -101,7 +101,7 @@ def create_price_requests(txns):
 def txline(txn_type, txn_dict):
     show_tags = TXNS_CONFIG['output'].get("show_tags", False)
 
-    date = datetime.datetime.fromtimestamp(
+    date = datetime.datetime.utcfromtimestamp(
         float(txn_dict['time_at'])).strftime('%Y-%m-%d %H:%M:%S')
     # print(f"txn_dict=>{txn_dict}")
     line = [
