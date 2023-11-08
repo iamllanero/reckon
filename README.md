@@ -60,6 +60,11 @@ Here are the main scripts (in order of intended use):
   on configuring the price rules.
 - Depends on `defillama` and `coingecko` modules to handle API calls and
   caching.
+- Price generates a number of intermediate working files to help debug and
+  reconcile data. One such file is `output/work/price_manual_used.csv` which
+  shows a list of all of the entries in `output/price_manual.csv` that have
+  been used. This can be a drop-in replacement to keep the csv file clean or
+  used to do a side-by-side comparison.
 
 `tax_hifo.py`
 
@@ -167,6 +172,11 @@ However, if it can't figure out the price, you have a few options:
   - Providing a manual price
   - Changing the transaction type
 
+```csv
+date,symbol,chain,token_id,timestamp,price,txn_type,comment
+2021-11-29 01:03:21,fBEETS,ftm,0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1,1638147801,0.54,,debank
+```
+
 Reckon provides a handy `output/price_worksheet.csv` to use to figure out the
 what's missing.
 
@@ -175,7 +185,8 @@ what's missing.
 - If a token is consistently showing the incorrect price, most likely solution
   is to create a price rule.
 - If a single transaction is showing the incorrect price, look at creating a
-  manual price entry in `config/price_manual.csv`
+  manual price entry in `config/price_manual.csv` in the same format as for
+  missing prices.
 
 ### Showing up as income instead of a buy
 
@@ -185,3 +196,9 @@ what's missing.
 - Bridging is usually excluded but could also show up as income.
 - The fix will likely require making an entry in `config/price_manual.csv` to
   remap the entry to a "buy" txn_type.
+- An example entry is:
+
+```csv
+date,symbol,chain,token_id,timestamp,price,txn_type,comment
+2023-09-28 13:08:23,FXN,eth,0x365accfca291e7d3914637abf1f7635db165bb09,1695906503,9.30,buy,0.005626406602 ETH each
+```
