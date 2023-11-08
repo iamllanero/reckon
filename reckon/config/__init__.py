@@ -145,8 +145,11 @@ PRICE_MISSING_OUTPUT = 'output/work/price_missing.csv'
 # Key output for price.py main file
 PRICE_OUTPUT = 'output/price.csv'
 
-# Key output for price.py worksheet to enter manual prices
+# Key output for price.py worksheet to enter manual prices needed
 PRICE_WORKSHEET_OUTPUT = 'output/price_worksheet.csv'
+
+# Key output for price.py to store the manual prices that were used
+PRICE_MANUAL_USED_OUTPUT = 'output/work/price_manual_used.csv'
 
 ###############################################################################
 # COINGECKO.PY CONFIGURATION OPTIONS

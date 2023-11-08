@@ -8,6 +8,7 @@ from config import (
     PRICE_CONFIG,
     PRICE_INFERRED_OUTPUT,
     PRICE_MANUAL_FILE,
+    PRICE_MANUAL_USED_OUTPUT,
     PRICE_MERGED_OUTPUT,
     PRICE_MISSING_OUTPUT,
     PRICE_REQ_OUTPUT,
@@ -411,6 +412,9 @@ def create_priced_txns():
         count_dlcg = 0
         count_missing = 0
 
+        # List to store all manual prices used
+        manual_used_list = []
+
         price_txns = []
         headers = next(csvfile).strip().split(",")
         reader = csv.reader(csvfile)
@@ -439,7 +443,7 @@ def create_priced_txns():
 
             # Handle manual prices
             continue_outer_loop = False
-            for manual_price in manual_prices:
+            for manual_price_row in manual_prices:
                 (
                     manual_date,
                     manual_symbol,
@@ -449,7 +453,7 @@ def create_priced_txns():
                     manual_price,
                     manual_txn_type,
                     manual_comment,
-                ) = manual_price
+                ) = manual_price_row
                 if manual_date == date and \
                         manual_symbol.lower() == symbol.lower() and \
                         manual_chain.lower() == chain.lower() and \
@@ -475,6 +479,8 @@ def create_priced_txns():
                         id,
                         f'manual / {manual_comment}',
                     ])
+
+                    manual_used_list.append(manual_price_row)
                     count_manual += 1
                     continue_outer_loop = True
                     break
@@ -606,6 +612,25 @@ def create_priced_txns():
                 "source",
             ])
             writer.writerows(price_txns)
+
+        # Write out a file for the manual prices that were used
+        # to help in finding unused manual prices
+        manual_used_list = list(set(tuple(item) for item in manual_used_list))
+        manual_used_list = sorted(manual_used_list, key=lambda x: x[0])
+
+        with open(PRICE_MANUAL_USED_OUTPUT, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                "date",
+                "symbol",
+                "chain",
+                "token_id",
+                "timestamp",
+                "price",
+                "txn_type",
+                "comment",
+            ])
+            writer.writerows(manual_used_list)
 
 
 def create_worksheet():
