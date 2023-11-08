@@ -3,7 +3,7 @@ import defillama as dl
 import coingecko as cg
 import sys
 import tomllib
-from datetime import datetime
+from datetime import datetime, timezone
 from config import (
     PRICE_CONFIG,
     PRICE_INFERRED_OUTPUT,
@@ -79,6 +79,7 @@ class CoinGeckoPriceRule(PriceRule):
     def get_price(self, date, chain, symbol, token_id):
         source = "coingecko"
         date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        date_obj = date_obj.replace(tzinfo=timezone.utc)
         price = cg.get_historical_price(symbol, date_obj)
         if price == None or price == '':
             source += " / price not found"
