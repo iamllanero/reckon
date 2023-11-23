@@ -38,20 +38,15 @@ def get_transactions() -> list:
 
 def calculate_buy_sell_pairs(transactions, target_symbol):
     # Filter transactions by the target symbol
-    transactions = [txn for txn in transactions if txn['symbol'].lower() == target_symbol.lower()]
+    buys = [
+        txn for txn in transactions 
+        if txn['txn_type'] in ['buy', 'income'] and txn['symbol'].lower() == target_symbol.lower()
+    ]
 
-    # Separate buys/incomes and sells
-    buys = [txn for txn in transactions if txn['txn_type'] in ['buy', 'income']]
-    # print()
-    # print(f"Number of buy/income transactions: {len(buys)}")
-    # print(f"Qty of buy/income transactions: {sum(float(txn['qty']) for txn in buys):,.8f}")
-
-    sells = [txn for txn in transactions if txn['txn_type'] == 'sell']
-    # print(f"Number of sell transactions: {len(sells)}")
-    # print(f"Qty of sell transactions: {sum(float(txn['qty']) for txn in sells):,.8f}")
-    # print()
-    # print(f"Remaining {target_symbol}: {sum(float(txn['qty']) for txn in buys) - sum(float(txn['qty']) for txn in sells):,.8f}")
-    # print()
+    sells = [
+        txn for txn in transactions
+        if txn['txn_type'] == 'sell' and txn['symbol'].lower() == target_symbol.lower()
+    ]
 
     # Sort buys/incomes by unit value in descending order (HIFO)
     buys.sort(key=lambda x: float(x['usd_value']) / float(x['qty']), reverse=True)
@@ -337,6 +332,9 @@ def main():
     init_files()
 
     transactions = get_transactions()
+
+    # TESTING FOR ONE TOKEN ONLY
+    # transactions = [txn for txn in transactions if txn['symbol'].lower() == 'btc' or txn['purchase_token'].lower() == 'btc']
 
     #Find duplicates and all symbols
     symbols, duplicates = find_symbols(transactions)

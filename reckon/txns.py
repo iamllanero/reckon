@@ -193,13 +193,20 @@ def process_batch(txn_dicts, do_overrides=True):
             if sends_token not in STABLECOINS:
 
                 # If neither is a stablecoin (swap), invert send/recv for sell txn
-                if receives_token not in STABLECOINS:
-                    td['receives.amount'], td['sends.amount'] = \
-                        td['sends.amount'], td['receives.amount']
-                    td['receives.token.symbol'], td['sends.token.symbol'] = \
-                        td['sends.token.symbol'], td['receives.token.symbol']
-                    td['receives.token_id'], td['sends.token_id'] = \
-                        td['sends.token_id'], td['receives.token_id']
+                # if receives_token not in STABLECOINS:
+                #     td['receives.amount'], td['sends.amount'] = \
+                #         td['sends.amount'], td['receives.amount']
+                #     td['receives.token.symbol'], td['sends.token.symbol'] = \
+                #         td['sends.token.symbol'], td['receives.token.symbol']
+                #     td['receives.token_id'], td['sends.token_id'] = \
+                #         td['sends.token_id'], td['receives.token_id']
+
+                td['receives.amount'], td['sends.amount'] = \
+                    td['sends.amount'], td['receives.amount']
+                td['receives.token.symbol'], td['sends.token.symbol'] = \
+                    td['sends.token.symbol'], td['receives.token.symbol']
+                td['receives.token_id'], td['sends.token_id'] = \
+                    td['sends.token_id'], td['receives.token_id']
 
                 txns.append(txline('sell', td))
 
