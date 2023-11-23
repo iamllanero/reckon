@@ -244,7 +244,7 @@ map_symbol_to = "spLP-wftm-boo"
 chain = "avax"
 token_id = "0x113f413371fc4cc4c9d6416cf1de9dfd7bf747df"
 action = "defillama"
-map_symbol_to = "time"
+map_symbol_to = "TIME"
 map_token_id_to = "0xb54f16fB19478766A268F172C9480f8da1a7c9C3" # TIME
 
 # This is the default action
