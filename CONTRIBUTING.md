@@ -21,8 +21,11 @@ experiencing. But I will try to merge changes reasonably fast.
 - [x] Consolidate the configuration options and settings. Right now they are spread across multiple toml and py files.
 - [x] setup.py to create directories and sample files (DID IN config/__init__.py)
 - [x] Add to txns.csv - token id (for defillama pricing)
-- [ ] Custom designation of income, buy, sell in the txns.py file
-- [ ] Ability to manually mark / handle transactions known to be weird
+- [x] Custom designation of income, buy, sell in the txns.py file
+- [x] Ability to manually mark / handle transactions known to be weird
+- [x] Something may be broken on selling for USDC
+- [ ] flatten should incorporate prices from debank json files
+- [ ] flatten should cache token address to symbol look up
 
 ## GITHUB SETUP
 
