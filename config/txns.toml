@@ -16,6 +16,10 @@ parser = "coinbase_us"
 file = "data/reports/2022-coinbase/Coinbase-54bf32440c6950491100003f-TransactionsHistoryReport-2023-10-10-09-32-59.csv"
 parser = "coinbase_us_2022"
 
+[reports.coinbase-3]
+file = "data/reports/2023-coinbase/b2cc0a0e-74da-5fec-9c59-87c675c788cc_transactions_history.csv"
+parser = "coinbase_us_2023"
+
 [reports.coinbase-pro-1]
 file = "data/reports/2022-coinbasepro/account.csv"
 parser = "coinbasepro_us"
