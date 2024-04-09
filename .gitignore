@@ -9,3 +9,4 @@ config/tags_local.toml
 config/txoverride.toml
 config/price_manual.csv
 wip.py
+pyrightconfig.json
