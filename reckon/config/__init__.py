@@ -85,6 +85,10 @@ if not os.path.isdir(FLATTEN_DIR):
 FLATTEN_OUTPUT = 'output/flatten.csv'
 FLATTEN_PROJ_OUTPUT = 'output/work/flatten_proj.csv'
 FLATTEN_TXNAMES_OUTPUT = 'output/work/flatten_txnames.csv'
+FLATTEN_RECEIVE_TOKENS_OUTPUT = 'output/work/flatten_receive_tokens.csv'
+FLATTEN_SEND_TOKENS_OUTPUT = 'output/work/flatten_send_tokens.csv'
+FLATTEN_RECSEND_TOKENS_OUTPUT = 'output/work/flatten_recsend_tokens.csv'
+FLATTEN_NOWALLET_OUTPUT = 'output/work/flatten_nowallet.csv'
 
 ###############################################################################
 # TXNS.PY CONFIGURATION OPTIONS
