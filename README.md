@@ -16,7 +16,9 @@ Use at your own peril.
 Reckon is a series of Python scripts to perform various calculations on
 cryptocurrency. Rather than one monolithic app, reckon uses a series of
 different, focused scripts with intermediate outputs to provide transparency
-into how calculations are performed.
+into how calculations are performed. The overall data pipeline is as follows:
+
+`build.py` -> `flatten.py` -> `txns.py` -> `price.py` -> `tax_hifo.py`
 
 Here are the main scripts (in order of intended use):
 
@@ -95,7 +97,6 @@ Here are the main scripts (in order of intended use):
   - Sell Unit Price
   - Income Qty
   - Income USD
-  
 
 ## SETUP
 
@@ -202,3 +203,11 @@ what's missing.
 date,symbol,chain,token_id,timestamp,price,txn_type,comment
 2023-09-28 13:08:23,FXN,eth,0x365accfca291e7d3914637abf1f7635db165bb09,1695906503,9.30,buy,0.005626406602 ETH each
 ```
+
+## TODO
+
+- Modify the flatten script to generate a file showing all tokens detected in
+  the form of: chain, token_id, symbol, name, project.id, project.name, project.site_url, frequency
+- Make it easy to copy items from the above list to a block list
+- Modify the spam detection to use the block list instead of the current
+  spam list
