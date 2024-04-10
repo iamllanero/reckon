@@ -11,6 +11,11 @@ uses the DefiLlama and CoinGecko API.
 
 Use at your own peril.
 
+2024-04-10: This project is undergoing major changes right now for the 2023
+tax season. I'm adjusting the code to be more chain aware and am currently
+moving on from flatten.py to txns.py (which I expect will be a pretty hefty
+lift). So I haven't verified any output beyond flatten.csv.
+
 ## DESCRIPTION
 
 Reckon is a series of Python scripts to perform various calculations on
@@ -36,6 +41,8 @@ Here are the main scripts (in order of intended use):
 - Augments data with spam detection, address tags, and transaction URLs
 - Consolidates to `output/flatten.csv`
 - Provides a number of work outputs in `output/work`
+- The most important output is `output/work/flatten_receive_tokens.toml` which
+  shows how the spam detection is working (or not working)
 - Uses `config/wallets.toml` for wallet addresses
 - Uses `config/tags.toml` for address tagging
 - Depends on `debank` module for working with the API and object model

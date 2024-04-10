@@ -68,8 +68,6 @@ with open(DEBANK_FILE, 'rb') as f:
     debank_toml = tomllib.load(f)
     DEBANK_ALLOW_LIST = debank_toml['DEBANK_ALLOW_LIST']
     DEBANK_BLOCK_LIST = debank_toml['DEBANK_BLOCK_LIST']
-    DEBANK_SPAM_TOKEN_IDS = debank_toml['DEBANK_SPAM_TOKEN_IDS']
-    DEBANK_SPAM_TOKEN_NAMES = debank_toml['DEBANK_SPAM_TOKEN_NAMES']
 
 ###############################################################################
 # FLATTEN.PY CONFIGURATION OPTIONS

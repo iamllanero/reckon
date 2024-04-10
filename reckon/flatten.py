@@ -132,6 +132,13 @@ def write_receive_tokens_toml():
     sorted_combinations = sorted(count_dict.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[0][4]))
 
     with open(FLATTEN_RECEIVE_TOKENS_TOML, 'w', newline='') as file:
+
+        file.write("# This list is for tokens that are currently marked as spam because they are either:\n")
+        file.write("#   - Listed in the DEBANK_BLOCK_LIST in debank.toml\n")
+        file.write("#   - Marked as a Debank unverified token and not in the DEBANK_ALLOW_LIST\n")
+        file.write("# If any of the tokens are NOT spam, either:\n")
+        file.write("#   - Remove them from the DEBANK_BLOCK_LIST if they are marked as Verified\n")
+        file.write("#   - Add them to the DEBANK_ALLOW_LIST if they are marked as Unverified\n")
         file.write("SPAM_LIST = [\n")
         for (
             project_chain,
@@ -144,6 +151,8 @@ def write_receive_tokens_toml():
                 file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
         file.write("]\n\n")
 
+        file.write("# This list is for tokens that are Debank verified tokens and are assumed NOT TO BE spam.\n")
+        file.write("# If any of the tokens are spam, copy the line to the DEBANK_BLOCK_LIST in debank.toml.\n")
         file.write("NOT_SPAM_VERIFIED_LIST = [\n")
         for (
             project_chain,
@@ -156,18 +165,8 @@ def write_receive_tokens_toml():
                 file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
         file.write("]\n\n")
 
-        file.write("NOT_SPAM_UNVERIFIED_NOSYMBOL_LIST = [\n")
-        for (
-            project_chain,
-            receives_token_symbol,
-            receives_token_id,
-            receives_token_is_verified,
-            spam
-        ), count in sorted_combinations:
-            if spam == 'False' and receives_token_is_verified == 'False' and receives_token_symbol == '':
-                file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
-        file.write("]\n\n")
-
+        file.write("# This list is for tokens that are Debank unverified tokens and are assumed TO BE spam.\n")
+        file.write("# If any of the tokens are spam, copy the line to the DEBANK_ALLOW_LIST in debank.toml.\n")
         file.write("NOT_SPAM_UNVERIFIED_LIST = [\n")
         for (
             project_chain,

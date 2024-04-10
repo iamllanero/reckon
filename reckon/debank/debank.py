@@ -6,8 +6,6 @@ import sys
 from config import (
     DEBANK_ALLOW_LIST,
     DEBANK_BLOCK_LIST,
-    DEBANK_SPAM_TOKEN_IDS,
-    DEBANK_SPAM_TOKEN_NAMES,
     # TAGS_FILE,
     WALLETS_DIR,
     FLATTEN_DIR,
