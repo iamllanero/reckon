@@ -67,6 +67,7 @@ DEBANK_FILE = 'config/debank.toml'
 with open(DEBANK_FILE, 'rb') as f:
     debank_toml = tomllib.load(f)
     DEBANK_ALLOW_LIST = debank_toml['DEBANK_ALLOW_LIST']
+    DEBANK_BLOCK_LIST = debank_toml['DEBANK_BLOCK_LIST']
     DEBANK_SPAM_TOKEN_IDS = debank_toml['DEBANK_SPAM_TOKEN_IDS']
     DEBANK_SPAM_TOKEN_NAMES = debank_toml['DEBANK_SPAM_TOKEN_NAMES']
 
@@ -86,6 +87,7 @@ FLATTEN_OUTPUT = 'output/flatten.csv'
 FLATTEN_PROJ_OUTPUT = 'output/work/flatten_proj.csv'
 FLATTEN_TXNAMES_OUTPUT = 'output/work/flatten_txnames.csv'
 FLATTEN_RECEIVE_TOKENS_OUTPUT = 'output/work/flatten_receive_tokens.csv'
+FLATTEN_RECEIVE_TOKENS_TOML = 'output/work/flatten_receive_tokens.toml'
 FLATTEN_SEND_TOKENS_OUTPUT = 'output/work/flatten_send_tokens.csv'
 FLATTEN_RECSEND_TOKENS_OUTPUT = 'output/work/flatten_recsend_tokens.csv'
 FLATTEN_NOWALLET_OUTPUT = 'output/work/flatten_nowallet.csv'

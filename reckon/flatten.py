@@ -6,6 +6,7 @@ from config import (
     FLATTEN_PROJ_OUTPUT,
     FLATTEN_TXNAMES_OUTPUT,
     FLATTEN_RECEIVE_TOKENS_OUTPUT,
+    FLATTEN_RECEIVE_TOKENS_TOML,
     FLATTEN_SEND_TOKENS_OUTPUT,
     FLATTEN_RECSEND_TOKENS_OUTPUT,
     FLATTEN_NOWALLET_OUTPUT,
@@ -111,6 +112,73 @@ def write_receive_tokens():
                 receives_token_is_verified,
                 count
             ])
+
+
+def write_receive_tokens_toml():
+
+    count_dict = defaultdict(int)
+    with open(FLATTEN_OUTPUT, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row['receives.token.symbol'] != '' and row['receives.token_id'] != '':
+                count_dict[(
+                    row['project.chain'],
+                    row['receives.token.symbol'],
+                    row['receives.token_id'],
+                    row['receives.token.is_verified'],
+                    row['spam']
+                )] += 1
+
+    sorted_combinations = sorted(count_dict.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[0][4]))
+
+    with open(FLATTEN_RECEIVE_TOKENS_TOML, 'w', newline='') as file:
+        file.write("SPAM_LIST = [\n")
+        for (
+            project_chain,
+            receives_token_symbol,
+            receives_token_id,
+            receives_token_is_verified,
+            spam
+        ), count in sorted_combinations:
+            if spam == 'True':
+                file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
+        file.write("]\n\n")
+
+        file.write("NOT_SPAM_VERIFIED_LIST = [\n")
+        for (
+            project_chain,
+            receives_token_symbol,
+            receives_token_id,
+            receives_token_is_verified,
+            spam
+        ), count in sorted_combinations:
+            if spam == 'False' and receives_token_is_verified == 'True':
+                file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
+        file.write("]\n\n")
+
+        file.write("NOT_SPAM_UNVERIFIED_NOSYMBOL_LIST = [\n")
+        for (
+            project_chain,
+            receives_token_symbol,
+            receives_token_id,
+            receives_token_is_verified,
+            spam
+        ), count in sorted_combinations:
+            if spam == 'False' and receives_token_is_verified == 'False' and receives_token_symbol == '':
+                file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
+        file.write("]\n\n")
+
+        file.write("NOT_SPAM_UNVERIFIED_LIST = [\n")
+        for (
+            project_chain,
+            receives_token_symbol,
+            receives_token_id,
+            receives_token_is_verified,
+            spam
+        ), count in sorted_combinations:
+            if spam == 'False' and receives_token_is_verified == 'False':
+                file.write(f'    "{project_chain}:{receives_token_id}", # {receives_token_symbol} | {"Verified" if receives_token_is_verified == "True" else "Not Verified"} | {"Spam" if spam == "True" else "Not Spam"} | {count}\n')
+        file.write("]\n")
 
 
 def write_send_tokens():
@@ -244,6 +312,9 @@ def main():
     # Create a file with chain, receives.token.symbol, receives.token_id, count
     print(f'Writing receive token names output to {FLATTEN_RECEIVE_TOKENS_OUTPUT}')
     write_receive_tokens()
+
+    print(f'Writing receive token names output to {FLATTEN_RECEIVE_TOKENS_TOML}')
+    write_receive_tokens_toml()
 
     # Create a file with chain, sends.token.symbol, sends.token_id, count
     print(f'Writing send token names output to {FLATTEN_SEND_TOKENS_OUTPUT}')

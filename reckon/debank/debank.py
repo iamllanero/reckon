@@ -4,9 +4,11 @@ import tomllib
 import os
 import sys
 from config import (
-    DEBANK_SPAM_TOKEN_IDS, 
-    DEBANK_SPAM_TOKEN_NAMES, 
-    # TAGS_FILE, 
+    DEBANK_ALLOW_LIST,
+    DEBANK_BLOCK_LIST,
+    DEBANK_SPAM_TOKEN_IDS,
+    DEBANK_SPAM_TOKEN_NAMES,
+    # TAGS_FILE,
     WALLETS_DIR,
     FLATTEN_DIR,
     TAGS
@@ -133,7 +135,7 @@ class HistoryList:
         """Writes the HistoryList as a JSON to file"""
         with open(f'{WALLETS_DIR}/{self.get_wallet_addr()}-{self.get_chain_id()}.json', "w") as f:
             json.dump(self.data, f)
-    
+
     def write_flat_csv(self):
         """Writes the HistoryList as a flattend CSV file"""
         flat_hl = [FLAT_HEADERS]
@@ -158,7 +160,7 @@ class HistoryList:
                      'symbol': '',
                      'is_verified': False}
         return token
-    
+
     def get_project(self, id):
         """Returns a dict of the project"""
         if id in self.data['project_dict']:
@@ -197,23 +199,24 @@ class HistoryList:
                 row.append(entry['cate_id'])
             else:
                 row.append('')
-            
+
             row.extend([
                 entry['id'],
                 entry['other_addr'],
                 get_tag(entry['other_addr'])])
-            
+
             project_id = None
             if entry['project_id'] is not None:
                 project_id = entry['project_id']
                 row.append(project_id)
             else:
                 row.append('')
-            
+
             project = self.get_project(entry['project_id'])
+            chain = project['chain']
             row.extend([
                 project['name'],
-                project['chain'],
+                chain,
                 project['site_url'],
                 entry['time_at']
             ])
@@ -240,10 +243,12 @@ class HistoryList:
 
             sends_token_id = None
             sends_token_symbol = None
+            sends_token_is_verified = None
             if len(entry['sends']) > i:
                 sends_token_id = entry['sends'][i]['token_id']
                 token = self.get_token(sends_token_id)
                 sends_token_symbol = token['symbol']
+                sends_token_is_verified = token['is_verified']
                 row.extend([
                     entry['sends'][i]['amount'],
                     entry['sends'][i]['to_addr'],
@@ -292,61 +297,54 @@ class HistoryList:
                 row.extend([
                     entry['tx']['value'],
                     ':'.join(entry['tx']['params'])
-                ])                
+                ])
             else:
                 row.extend(['' for x in range(10)])
-            row.append(is_spam(receive_token_id,
-                               receive_token_is_verified,
-                               receive_token_symbol,
+
+            row.append(is_spam(chain,
                                project_id,
-                               sends_token_symbol,
+                               receive_token_id,
+                               receive_token_symbol,
+                               receive_token_is_verified,
                                sends_token_id,
+                               sends_token_symbol,
+                               sends_token_is_verified,
                                tx_name))
             row.append(get_id_url(entry['id'], self.get_chain_id()))
 
             entries.append(row)
 
         return entries
-    
-def is_spam(receives_token_id,
-            receives_token_is_verfied,
-            receives_token_symbol,
+
+def is_spam(chain,
             project_id,
-            sends_token_symbol,
+            receives_token_id,
+            receives_token_symbol,
+            receives_token_is_verified,
             sends_token_id,
+            sends_token_symbol,
+            sends_token_is_verified,
             tx_name
             ):
     """
-    Spam Detection Algo
-        - receives.token_id is not None
-        - receives.token.is_verified is not True
-        - project == '' or 'None'
-        - sends.token_id is None
-        - tx.name = is None
+    Focus on receive token
     """
-    has_receives = False if receives_token_id is None else True
-    is_verified = receives_token_is_verfied
-    has_project = False if project_id is None else True
-    has_sends = False if sends_token_id is None else True
-    has_tx = False if tx_name is None else True
 
-    # if receives_token_id in DEBANK_SPAM_TOKEN_IDS:
-    #     return True
+    receive_token = f"{chain}:{receives_token_id}"
+    send_token = f"{chain}:{sends_token_id}"
 
-    # if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES:
-    #     return True
-    if receives_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
-        receives_token_id in DEBANK_SPAM_TOKEN_IDS or \
-        sends_token_symbol in DEBANK_SPAM_TOKEN_NAMES or \
-        sends_token_id in DEBANK_SPAM_TOKEN_IDS:
+    # If receive_token on allow list return False (not spam)
+    if receive_token in DEBANK_ALLOW_LIST:
+        return False
+
+    # If on block list return True (spam)
+    if receive_token in DEBANK_BLOCK_LIST:
         return True
 
-    if has_receives and \
-        not is_verified and \
-        not has_project and \
-        not has_sends and \
-        not has_tx:
-        # print(f"SPAM: {receives_token_id} => {sends_token_id}")
+    # If Debank receives is_verified return False (not spam)
+    if receives_token_is_verified:
+        return False
+    else:
         return True
 
     return False
@@ -399,10 +397,10 @@ def fetch_history(id, chain_id, start_time=None):
 
 
 def fetch_all_history(id, chain_id):
-    """Fetches the full history from DeBank API for the wallet id. 
+    """Fetches the full history from DeBank API for the wallet id.
 
-    This function will keep calling the DeBank API until there are no more 
-    entries left for the wallet id. If fn (a filename) is provided, the 
+    This function will keep calling the DeBank API until there are no more
+    entries left for the wallet id. If fn (a filename) is provided, the
     function will first load the wallet, and then refresh the wallet with any
     new entries since the minimum time_at entry.
     """
@@ -450,4 +448,3 @@ def get_id_url(txn_id, chain_id):
         return f'{url_map[chain_id]}/{txn_id}'
     else:
         return ''
-
