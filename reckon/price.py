@@ -61,7 +61,7 @@ class PriceRule:
         if 'map_symbol_to' in self.params:
             symbol = self.params['map_symbol_to']
         if 'map_token_id_to' in self.params:
-            token_id = self.params['map_token_id_to'] 
+            token_id = self.params['map_token_id_to']
         return (chain, symbol, token_id)
 
 
@@ -77,7 +77,7 @@ class PriceRule:
 class CoinGeckoPriceRule(PriceRule):
 
 
-    def get_price(self, date, chain, symbol, token_id):
+    def get_price(self, date, chain, symbol, token_id): # type: ignore
         source = "coingecko"
         date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         date_obj = date_obj.replace(tzinfo=timezone.utc)
@@ -89,7 +89,7 @@ class CoinGeckoPriceRule(PriceRule):
 
 class DefiLlamaPriceRule(PriceRule):
 
-    def get_price(self, date, chain, symbol, token_id):
+    def get_price(self, date, chain, symbol, token_id): # type: ignore
         source = "defillama"
 
         # Look up any params and use them
@@ -98,7 +98,7 @@ class DefiLlamaPriceRule(PriceRule):
         if 'map_symbol_to' in self.params:
             symbol = self.params['map_symbol_to']
         if 'map_token_id_to' in self.params:
-            token_id = self.params['map_token_id_to'] 
+            token_id = self.params['map_token_id_to']
 
         # Map chain names to defillama API
         dl_chain = None
@@ -217,11 +217,11 @@ def get_prices():
         rule = price_rules_config.find_rule(chain, symbol, token_id)
         # print(f"- Match {date} {symbol} {token_id} => {rule}")
 
-        if rule.action == "ignore":
+        if rule.action == "ignore": # type: ignore
             print(f"- INFO: Ignoring {date} {chain} {symbol} {token_id}")
             continue
 
-        (chain, symbol, token_id, price, source) = rule.get_price(date, chain, symbol, token_id)
+        (chain, symbol, token_id, price, source) = rule.get_price(date, chain, symbol, token_id) # type: ignore
 
         # Save price to file
         with open(PRICE_REQ_OUTPUT, "a", newline="") as csvfile:
@@ -439,11 +439,12 @@ def create_priced_txns():
             # Get the action for this token request based on the price rules config
             rule = price_rules_config.find_rule(chain, symbol, token_id)
             # Remap the chain, symbol, token_id if needed
-            (chain, symbol, token_id) = rule.get_info(chain, symbol, token_id)
+            (chain, symbol, token_id) = rule.get_info(chain, symbol, token_id) # type: ignore
 
             # Handle manual prices
             continue_outer_loop = False
             for manual_price_row in manual_prices:
+                # print(manual_price_row)
                 (
                     manual_date,
                     manual_symbol,
@@ -638,6 +639,8 @@ def create_worksheet():
     Create worksheet for manual price entry.
     """
 
+    print(f"Creating worksheet for manual price entry at {PRICE_WORKSHEET_OUTPUT}")
+
     with open(PRICE_OUTPUT, newline="", mode="r") as csvfile:
         reader = csv.reader(csvfile)
         headers = next(reader)
@@ -670,10 +673,19 @@ def create_worksheet():
 
 def main():
 
+    # Reset the requested output and inferred prices files
     reset_prices_file()
+
+    # Request the prices using the requested prices file and also infer prices
     get_prices()
+
+    # Merge the requested and inferred prices
     merge_inferred_prices()
+
+    # With all of the pricing out of the way, create the priced transactions output
     create_priced_txns()
+
+    # Create the worksheet for manual price entry
     create_worksheet()
 
 

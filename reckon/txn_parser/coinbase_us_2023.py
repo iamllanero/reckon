@@ -40,7 +40,7 @@ def parse(fn):
 
             date = f'{date[:10]} {date[11:19]}'
 
-            if txn_type in ['Rewards Income']:
+            if txn_type in ['Rewards Income', 'Staking Income']:
                 if float(cost_basis) > 0.40:
                     txns.append([
                         date,
@@ -101,7 +101,7 @@ def parse(fn):
                         fn
                     ])
 
-            elif txn_type in ['Receive', 'Send']:
+            elif txn_type in ['Receive', 'Send', 'Deposit', 'Convert', 'Withdrawal']:
 
                 pass  # Not a transaction
 

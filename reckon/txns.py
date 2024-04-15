@@ -213,19 +213,21 @@ def process_batch(txn_dicts, do_overrides=True):
         # Otherwise, it is a one-sided send or receive
         else:
             # TODO Move this list to a config
-            if receives_token != '' and td['tx.name'] in [
-                'claim',
-                'claim_rewards',
-                'claimAll',
-                'claimAllCTR',
-                'claimFromDistributorViaUniV2EthPair',
-                'claimMulti',
-                'claimReward',
-                'claimRewards',
-                'getReward',
-                'harvest',
-                'redeem'
-            ]:
+            # 2024-04-10 Moved to TXNS_CONFIG (txns.toml)
+            # if receives_token != '' and td['tx.name'] in [
+            #     'claim',
+            #     'claim_rewards',
+            #     'claimAll',
+            #     'claimAllCTR',
+            #     'claimFromDistributorViaUniV2EthPair',
+            #     'claimMulti',
+            #     'claimReward',
+            #     'claimRewards',
+            #     'getReward',
+            #     'harvest',
+            #     'redeem'
+            # ]:
+            if receives_token != '' and td['tx.name'] in TXNS_CONFIG['income_txns']:
                 # Income
                 txns.append(txline('income', td))
 
@@ -247,7 +249,7 @@ def consolidated_txns():
     This main loop iterates through each line in the flatten output making
     decisions about how to process each line.
 
-    Lines for approvals, spam, stablecoin swaps, and equivalent swaps are 
+    Lines for approvals, spam, stablecoin swaps, and equivalent swaps are
     stored in separate lists for reference but not used in subsequent
     processing.
 
@@ -283,7 +285,6 @@ def consolidated_txns():
             txn_dict = dict(zip(FLAT_HEADERS, row))
 
             # Is it spam?
-            # TODO Allow for a spam allowlist
             if txn_dict['spam'] == 'True':
                 spam_txns.append(row)
                 continue
@@ -294,14 +295,15 @@ def consolidated_txns():
                 continue
 
             # Are there any ovrerrides for the token_id to use a different symbol?
-            if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
-                txn_dict['sends.token.symbol'] = \
-                    TXNS_CONFIG['token_name_overrides'][txn_dict['sends.token_id']]
+            # if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
+            #     txn_dict['sends.token.symbol'] = \
+            #         TXNS_CONFIG['token_name_overrides'][txn_dict['sends.token_id']]
 
-            if txn_dict['receives.token_id'] in TXNS_CONFIG['token_name_overrides']:
-                txn_dict['receives.token.symbol'] = \
-                    TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
+            # if txn_dict['receives.token_id'] in TXNS_CONFIG['token_name_overrides']:
+            #     txn_dict['receives.token.symbol'] = \
+            #         TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
 
+            # Is it an empty transaction?
             if txn_dict['sends.token.symbol'] == '' and \
                     txn_dict['receives.token.symbol'] == '':
                 empty_txns.append(row)

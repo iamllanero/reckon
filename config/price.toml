@@ -169,6 +169,42 @@ action = "defillama"
 map_token_id_to = "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0" # FXS
 
 [[rules]]
+chain = "eth"
+symbol = "clevCVX"
+action = "defillama"
+map_token_id_to = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B" # CVX
+
+[[rules]]
+chain = "eth"
+symbol = "abcCVX"
+action = "defillama"
+map_token_id_to = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B" # CVX
+
+[[rules]]
+chain = "eth"
+symbol = "cvxPrisma"
+action = "defillama"
+map_token_id_to = "0xdA47862a83dac0c112BA89c6abC2159b95afd71C" # Prisma
+
+[[rules]]
+chain = "eth"
+symbol = "pFXN"
+action = "defillama"
+map_token_id_to = "0x365AccFCa291e7D3914637ABf1F7635dB165Bb09" # FXN
+
+[[rules]]
+chain = "eth"
+symbol = "spFXN"
+action = "defillama"
+map_token_id_to = "0x365AccFCa291e7D3914637ABf1F7635dB165Bb09" # FXN
+
+[[rules]]
+chain = "eth"
+symbol = "pPEAS"
+action = "defillama"
+map_token_id_to = "0x02f92800F57BCD74066F5709F1Daa1A4302Df875" # PEAS
+
+[[rules]]
 chain = "ftm"
 symbol = "gETH"
 action = "defillama"
@@ -198,6 +234,7 @@ chain = "ftm"
 symbol = "moo2omb2OMB-2SHARE"
 action = "defillama"
 map_token_id_to = "0x7a6e4E3CC2ac9924605DCa4bA31d1831c84b44aE" # 2OMB
+
 
 # Incorrect symbols
 # NOTE: THIS DOES NOT CURRENLTY WORK / MAPPED SYMBOLS ARE IGNORED

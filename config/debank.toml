@@ -138,4 +138,10 @@ DEBANK_ALLOW_LIST = [
     "ftm:9b9854c53b5aca16cdbf5f25f9245ea5",            # veDEUS | False | True | 1
 ]
 
-DEBANK_BLOCK_LIST = []
+DEBANK_BLOCK_LIST = [
+    "bsc:0x82afb954fdeebd2370d575ac59ae4f119654be14", # MST
+    "arb:0xa8258c76506e0f56fdb9e9d0577a802cae4cecfc", # ARBK
+    "arb:0x27b15ee5391ad7d3770ae0cfa157f61c48a27a0b", # ORSO
+    "bsc:0x4f0ed527e8a95ecaa132af214dfd41f30b361600", # vBSWAP
+    "eth:0xed1e4aa1804b1708e3818c792e3078d16745f225", # REKTOBER
+]
