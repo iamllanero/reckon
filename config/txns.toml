@@ -60,8 +60,6 @@ parser = "kucoin_us"
 
 
 [output]
-include_send = true
-include_receive = true
 show_tags = true
 
 

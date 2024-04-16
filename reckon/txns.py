@@ -67,6 +67,10 @@ def write_csv(list, file_path):
 
 
 def create_price_requests(txns):
+    """
+    Create a CSV file of price requests for tokens that need to be priced.
+    """
+
     requests = [[
         'date',
         'chain',
@@ -122,9 +126,6 @@ def txline(txn_type, txn_dict):
     ]
     return line
 
-# TODO Remove the optionality to include overrides as well as unknown receives
-#      and sends
-
 
 def process_batch(txn_dicts, do_overrides=True):
     """
@@ -137,15 +138,15 @@ def process_batch(txn_dicts, do_overrides=True):
 
     txns = []
 
-    # If transaction id has an override entry, generate lines directly from it
-    if txn_dicts[0]['id'] in TXN_OVERRIDES.keys() and do_overrides:
-        for txline_data in TXN_OVERRIDES[txn_dicts[0]['id']]:
-            tl = []
-            for header in HEADERS:
-                tl.append(txline_data[header])
-            txns.append(tl)
+    # # If transaction id has an override entry, generate lines directly from it
+    # if txn_dicts[0]['id'] in TXN_OVERRIDES.keys() and do_overrides:
+    #     for txline_data in TXN_OVERRIDES[txn_dicts[0]['id']]:
+    #         tl = []
+    #         for header in HEADERS:
+    #             tl.append(txline_data[header])
+    #         txns.append(tl)
 
-        return txns
+    #     return txns
 
     # If multi-line txn, use average to calculate deposit and withdrawals
     if len(txn_dicts) > 1:
@@ -181,8 +182,8 @@ def process_batch(txn_dicts, do_overrides=True):
         sends_token = td['sends.token.symbol'].lower()
         receives_token = td['receives.token.symbol'].lower()
 
-        # If both are filled, must be a swap of some kind. Unless one side is
-        # a stablecoin, this means both a buy and sell transaction
+        # If both are filled, must be a swap of some kind.
+        # Unless one side is a stablecoin, this means both a buy and sell transaction
         if sends_token != '' and receives_token != '':
 
             # If not selling to stables, include "buy" transaction
@@ -192,15 +193,7 @@ def process_batch(txn_dicts, do_overrides=True):
             # If not buying w/stables, include "sell" transaction
             if sends_token not in STABLECOINS:
 
-                # If neither is a stablecoin (swap), invert send/recv for sell txn
-                # if receives_token not in STABLECOINS:
-                #     td['receives.amount'], td['sends.amount'] = \
-                #         td['sends.amount'], td['receives.amount']
-                #     td['receives.token.symbol'], td['sends.token.symbol'] = \
-                #         td['sends.token.symbol'], td['receives.token.symbol']
-                #     td['receives.token_id'], td['sends.token_id'] = \
-                #         td['sends.token_id'], td['receives.token_id']
-
+                # Swap sends and receives for sell transaction
                 td['receives.amount'], td['sends.amount'] = \
                     td['sends.amount'], td['receives.amount']
                 td['receives.token.symbol'], td['sends.token.symbol'] = \
@@ -210,35 +203,21 @@ def process_batch(txn_dicts, do_overrides=True):
 
                 txns.append(txline('sell', td))
 
-        # Otherwise, it is a one-sided send or receive
         else:
-            # TODO Move this list to a config
-            # 2024-04-10 Moved to TXNS_CONFIG (txns.toml)
-            # if receives_token != '' and td['tx.name'] in [
-            #     'claim',
-            #     'claim_rewards',
-            #     'claimAll',
-            #     'claimAllCTR',
-            #     'claimFromDistributorViaUniV2EthPair',
-            #     'claimMulti',
-            #     'claimReward',
-            #     'claimRewards',
-            #     'getReward',
-            #     'harvest',
-            #     'redeem'
-            # ]:
+            # Otherwise, it is income or a one-sided send or receive
+
+            # If tx.name is in the income_txns list, it is income
             if receives_token != '' and td['tx.name'] in TXNS_CONFIG['income_txns']:
-                # Income
                 txns.append(txline('income', td))
 
-            elif receives_token != '' and \
-                    TXNS_CONFIG['output']['include_receive']:
+            # If receive token is present, assume it is a receive
+            elif receives_token != '':
                 txns.append(txline('receive', td))
 
-            elif TXNS_CONFIG['output']['include_send']:
+            # Everything else is a send
+            else:
                 txns.append(txline('send', td))
 
-    # print(f"txns=>{txns}")
     return txns
 
 
@@ -294,15 +273,6 @@ def consolidated_txns():
                 approval_txns.append(row)
                 continue
 
-            # Are there any ovrerrides for the token_id to use a different symbol?
-            # if txn_dict['sends.token_id'] in TXNS_CONFIG['token_name_overrides']:
-            #     txn_dict['sends.token.symbol'] = \
-            #         TXNS_CONFIG['token_name_overrides'][txn_dict['sends.token_id']]
-
-            # if txn_dict['receives.token_id'] in TXNS_CONFIG['token_name_overrides']:
-            #     txn_dict['receives.token.symbol'] = \
-            #         TXNS_CONFIG['token_name_overrides'][txn_dict['receives.token_id']]
-
             # Is it an empty transaction?
             if txn_dict['sends.token.symbol'] == '' and \
                     txn_dict['receives.token.symbol'] == '':
@@ -357,67 +327,12 @@ def consolidated_txns():
     )
 
 
-# def cmd_init_override(ids_to_override):
-#     for _id in ids_to_override:
-
-#         # Retrieve relevant lines from consolidated
-#         with open(CONSOLIDATED_FILE, 'r') as f:
-#             next(f)
-#             reader = csv.reader(f)
-#             txn_batch = []
-
-#             for row in reader:
-#                 txn_dict = dict(zip(FLAT_HEADERS, row))
-
-#                 if txn_dict['id'] == _id:
-#                     txn_batch.append(txn_dict)
-
-#         # Generate txn_lines as dict corresponding to standard output
-#         std_txlines = process_batch(txn_batch, False)
-#         std_txlines_d = [dict(zip(HEADERS, i)) for i in std_txlines]
-
-#         # Write (or overwrite) these data to TXN_OVERRIDES_FILE
-#         with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
-#             overrides = tomlkit.parse(f.read())
-#             if len(overrides) == 0:
-#                 # TODO make a nicer more descriptive set of instructions
-#                 overrides.add(tomlkit.comment("Default values shown as comments."))
-
-#         if _id in overrides.keys():
-#             #  WARNING:  this depends on the order of subtransactions in consolidated and txns being consistent
-#             print(f"WARN: Overwriting existing override entry for {_id} with defaults.")
-#             for src, dest in zip(std_txlines_d, overrides[_id]):
-#                 for k,v in src.items():
-#                     dest[k] = v
-#         else:
-#             # Generate new tx group entry with comments.
-#             # overrides.add_line()
-#             overrides.add(tomlkit.ws("\n"))
-#             overrides.add(tomlkit.comment("########################################################################"))
-#             overrides.add(tomlkit.comment("#########################   NEW TX GROUP   #############################"))
-#             overrides.add(tomlkit.comment("########################################################################"))
-#             container = tomlkit.aot()
-
-#             for entry in std_txlines_d:
-#                 toml = tomlkit.table()
-
-#                 for k,v in entry.items():
-#                     toml.add(k, v)
-#                     toml[k].comment(v)
-
-#                 # toml.append(_id, toml)
-#                 container.append(toml)
-
-#             overrides.append(_id, container)
-
-#         with open(TRANSACTION_OVERRIDES_FILE, "wt") as f:
-#             tomlkit.dump(overrides, f)
-#             print(f"Updated {TRANSACTION_OVERRIDES_FILE}")
-
-
 def main():
+
+    # Create list of transactions with headers
     txns = [HEADERS]
 
+    # Get all of the transactions from the flatten output
     (consolidated,
      approval_txns,
      spam_txns,
@@ -425,8 +340,10 @@ def main():
      equivalent_txns,
      empty_txns) = consolidated_txns()
 
+    # Add to the list of transactions
     txns.extend(consolidated)
 
+    # Add reports to the list of transactions
     print("Processing reports")
     reports = TXNS_CONFIG['reports']
     for key in reports.keys():
@@ -444,6 +361,7 @@ def main():
 
     print(f"Created {len(txns)} transactions")
 
+    # Write a bunch of work files to help with debugging
     write_csv(txns, TXNS_OUTPUT)
     write_csv(approval_txns, APPROVALS_OUTPUT)
     write_csv(spam_txns, SPAM_OUTPUT)
@@ -451,6 +369,7 @@ def main():
     write_csv(equivalent_txns, EQUIVALENTS_OUTPUT)
     write_csv(empty_txns, EMPTY_OUTPUT)
 
+    # Create a list of txns that need prices
     create_price_requests(txns)
 
 
