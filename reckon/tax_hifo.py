@@ -1,6 +1,6 @@
 from config import (
-    PRICE_OUTPUT, 
-    TAX_HIFO_OUTPUT, 
+    PRICE_OUTPUT,
+    TAX_HIFO_OUTPUT,
     TAX_HIFO_DETAIL_OUTPUT,
     TAX_HIFO_PIVOT_GAINLOSS_OUTPUT,
     TAX_HIFO_PIVOT_INCOME_OUTPUT,
@@ -15,16 +15,20 @@ import re
 def init_files():
     with open(TAX_HIFO_DETAIL_OUTPUT, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['symbol', 
-                         'buy_date', 
-                         'sell_date', 
-                         'qty', 
+        writer.writerow(['symbol',
+                         'buy_date',
+                         'sell_date',
+                         'qty',
                          'cost_basis',
                          'proceeds',
-                         'gain_loss', 
+                         'gain_loss',
                          'duration_held',
                          'sell_year',
                          'st_lt',
+                         'buy_chain',
+                         'buy_id',
+                         'sell_chain',
+                         'sell_id',
                          ])
 
 
@@ -39,7 +43,7 @@ def get_transactions() -> list:
 def calculate_buy_sell_pairs(transactions, target_symbol):
     # Filter transactions by the target symbol
     buys = [
-        txn for txn in transactions 
+        txn for txn in transactions
         if txn['txn_type'] in ['buy', 'income'] and txn['symbol'].lower() == target_symbol.lower()
     ]
 
@@ -82,7 +86,11 @@ def calculate_buy_sell_pairs(transactions, target_symbol):
                 'cost_basis': sold_qty * buy_unit_price,
                 'proceeds': sold_qty * sell_unit_price,
                 'gain_loss': gain_loss,
-                'duration_held': duration_held
+                'duration_held': duration_held,
+                'buy_chain': buy['chain'],
+                'buy_id': buy['id'],
+                'sell_chain': sell['chain'],
+                'sell_id': sell['id'],
             })
 
             if gain_loss > TAX_HIFO_WARN_THRESHOLD:
@@ -216,7 +224,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
                         file.write(f"{buy_sell_pair['gain_loss']:14,.2f}  ")
                         file.write(f"{int(buy_sell_pair['duration_held']):>4}")
                         file.write("\n")
-            
+
             if yearly_incomes:
                 file.write("\nIncome\n")
                 file.write(f"Date        Qty             USD Value\n")
@@ -239,7 +247,7 @@ def create_report(symbol, buy_sell_pairs, unsold_assets, incomes):
                 file.write(f"{float(asset['usd_value']):14,.2f}  ")
                 file.write(f"{float(asset['usd_value']) / float(asset['buy_qty']):12,.2f}  ")
                 file.write("\n")
-        
+
         file.write(f"\n\nGenerated at {datetime.now()}\n")
 
 
@@ -259,7 +267,7 @@ def pivot_table(col, row, value, lines):
 
 
 def write_pivot(pivot_data, file_path):
-   
+
     with open(file_path, 'w') as f:
         f.write("Tax HIFO Pivot Table\n\n")
 
@@ -341,7 +349,7 @@ def main():
     # if duplicates:
     #     for symbol, token_ids in duplicates.items():
     #         print(f"Symbol: {symbol}, Token IDs: {token_ids}")
-    
+
     # Create a summary report for: year, symbol, total gain/loss, total income
     summary = [['year', 'symbol', 'total_gain_loss', 'total_income']]
 
@@ -350,8 +358,8 @@ def main():
         buy_sell_pairs, unsold = calculate_buy_sell_pairs(transactions, symbol)
         incomes = [txn for txn in transactions if txn['symbol'].lower() == symbol.lower() and txn['txn_type'] == 'income']
 
-        create_report(symbol, 
-                      buy_sell_pairs, 
+        create_report(symbol,
+                      buy_sell_pairs,
                       unsold,
                       incomes
         )
@@ -363,14 +371,18 @@ def main():
                 writer.writerow([
                     symbol,
                     row['buy_date'][:10],
-                    row['sell_date'][:10], 
-                    row['qty'], 
+                    row['sell_date'][:10],
+                    row['qty'],
                     f"{float(row['cost_basis']):.2f}",
                     f"{float(row['proceeds']):.2f}",
                     f"{float(row['gain_loss']):.2f}",
                     row['duration_held'],
                     row['sell_date'][:4],
                     'ST' if int(row['duration_held']) < 365 else 'LT',
+                    row['buy_chain'],
+                    row['buy_id'],
+                    row['sell_chain'],
+                    row['sell_id'],
                 ])
 
         years = set()
@@ -382,7 +394,7 @@ def main():
                 symbol,
                 sum([float(buy_sell_pair['gain_loss']) for buy_sell_pair in buy_sell_pairs if datetime.strptime(buy_sell_pair['sell_date'], '%Y-%m-%d %H:%M:%S').year == year]),
                 sum([float(income['usd_value']) for income in incomes if datetime.strptime(income['date'], '%Y-%m-%d %H:%M:%S').year == year])
-            ])
+            ]) # type: ignore
 
     # Save summary
     with open(TAX_HIFO_OUTPUT, 'w') as file:
