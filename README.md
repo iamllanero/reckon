@@ -54,6 +54,8 @@ Here are the main scripts (in order of intended use):
   - Reports as listed in `config/txns.toml`
 - Output is a single `txns.csv` file of all transactions
 - Uses `config/txns.toml` to get reports and some configuration options
+- Uses `config/txns_manual.toml` to manually override transactions from
+  flatten.csv
 
 `price.py`
 
@@ -112,7 +114,7 @@ at <https://cloud.debank.com/>.
 
 Be sure to configure the following file in the config directory:
 
-- `config/wallets.toml` (see `wallets_sample.toml`)
+- `config/wallets.toml` (see `sample_wallet.toml`)
 
 Other files with configuration type items that don't need to be changed:
 

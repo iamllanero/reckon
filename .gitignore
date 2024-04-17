@@ -6,7 +6,7 @@ output/*
 data/reports/*
 config/wallets.toml
 config/tags_local.toml
-config/txoverride.toml
+config/txns_manual.toml
 config/price_manual.csv
 wip.py
 pyrightconfig.json
