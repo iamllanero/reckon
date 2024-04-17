@@ -199,8 +199,9 @@ what's missing.
 ### Showing up as income instead of a buy
 
 - Some transactions show up incorrectly due to the way the protocol mechanism
-  works. For example, a purchase that requires a subsequent claim may show up
-  as income.
+  works. For example:
+  - A purchase that requires a subsequent claim may show up as income
+  - You may have purchased a token OTC or directly from someone
 - Bridging is usually excluded but could also show up as income.
 - The fix will likely require making an entry in `config/price_manual.csv` to
   remap the entry to a "buy" txn_type.
