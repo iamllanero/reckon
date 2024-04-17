@@ -1,0 +1,59 @@
+# Rename this file to txns_manual.toml
+
+# To modify a transaction, add an entry with the transaction id as the key
+# and the example values provided below. The transaction id can be found  in
+# flatten.csv and txns.csv as the 'id' column.
+#
+# The example below shows an entry that appears as a receive transaction,
+# however it is part of a sales transaction. We specify the correct transaction
+# here and ignore the USDC send trasnaction in the entry below.
+[[0x0acbb0acf44b75e852632c67414b77ff8f3b90af1d6be8a522b4f7b0b740dd31]]
+date = "2023-08-03 21:51:47"
+txn_type = "buy"
+qty = 275000.0
+symbol = "CRV"
+token_id = "0xd533a949740bb3306d119cc777fa900ba034cd52"
+purchase_token_cost = 110000.0
+purchase_token = "USDC"
+purchase_token_id = "0xb26c4b3ca601136daf98593feaeff9e0ca702a8d"
+chain = "eth"
+project = "OTC Purchase"
+txn_name = "transfer"
+wallet = "0x747feed4dc1d6df1020c7aed1aa3c29e5c4ace4a"
+id = "0x0acbb0acf44b75e852632c67414b77ff8f3b90af1d6be8a522b4f7b0b740dd31"
+
+[[0xefa7057b48ab7e66e789657edb77273c9dda139b0a8f69f92c61969ed02dd227]]
+
+# Another common mistake may be if a transaction swap is missing the send
+# token. In this case, you can create two entries with the same key. One
+# to record the buy and the other to record the sell. The (fake) example
+# below shows a transaction where the user swapped 100 ALD for xALD.
+[[0xdd74e6f571c52633767dc9f6e33289745857bd8835208171b2c9b265a7a1aa96]]
+date = "2024-01-04 18:29:11"
+txn_type = "buy"
+qty = 100.00
+symbol = "ALD"
+token_id = "0xb26c4b3ca601136daf98593feaeff9e0ca702a8d"
+purchase_token_cost = 100.00
+purchase_token = "xALD"
+purchase_token_id = "0xb13b85363a25c7361877eebaecced99e353f2af9"
+chain = "eth"
+project = "Aladdin"
+txn_name = "unstake"
+wallet = "0x747feed4dc1d6df1020c7aed1aa3c29e5c4a5699"
+id = "0xdd74e6f571c52633767dc9f6e33289745857bd8835208171b2c9b265a7a1aa96"
+
+[[0xdd74e6f571c52633767dc9f6e33289745857bd8835208171b2c9b265a7a1aa96]]
+date = "2024-01-04 18:29:11"
+txn_type = "sell"
+qty = 100.00
+symbol = "xALD"
+token_id = "0xb13b85363a25c7361877eebaecced99e353f2af9"
+purchase_token_cost = 100.00
+purchase_token = "ALD"
+purchase_token_id = "0xb26c4b3ca601136daf98593feaeff9e0ca702a8d"
+chain = "eth"
+project = "Aladdin"
+txn_name = "unstake"
+wallet = "0x747feed4dc1d6df1020c7aed1aa3c29e5c4a5699"
+id = "0xdd74e6f571c52633767dc9f6e33289745857bd8835208171b2c9b265a7a1aa96"

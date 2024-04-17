@@ -96,12 +96,14 @@ FLATTEN_NOWALLET_OUTPUT = 'output/work/flatten_nowallet.csv'
 
 # File that stores many config options for txns
 TXNS_TOML = 'config/txns.toml'
-
 with open(TXNS_TOML, 'rb') as f:
     TXNS_CONFIG = tomllib.load(f)
 
-TAGS_FILE = 'config/tags.toml'
-TAGS_LOCAL_FILE = 'config/tags_local.toml'
+# File that stores the manual txns overrides
+TXNS_MANUAL_TOML = 'config/txns_manual.toml'
+with open(TXNS_MANUAL_TOML, 'rb') as f:
+    TXNS_MANUAL_TOML = tomllib.load(f)
+
 
 # Files to store txns.py work products
 TXNS_PRICE_REQ_OUTPUT = 'output/work/txns_price_req.csv'
@@ -114,6 +116,9 @@ EMPTY_OUTPUT = 'output/work/txns_empty.csv'
 # Files to store key txns data
 TXNS_OUTPUT = 'output/txns.csv'
 
+# Files for tagging
+TAGS_FILE = 'config/tags.toml'
+TAGS_LOCAL_FILE = 'config/tags_local.toml'
 with open(TAGS_FILE, 'rb') as f:
     TAGS = tomllib.load(f)
 
@@ -122,14 +127,6 @@ with open(TAGS_FILE, 'rb') as f:
             local_tags = tomllib.load(g)
 
         TAGS.update(local_tags)
-
-TRANSACTION_OVERRIDES_FILE = 'config/txoverride.toml'
-
-if not os.path.exists(TRANSACTION_OVERRIDES_FILE):
-    open(TRANSACTION_OVERRIDES_FILE, "w").write("")
-
-with open(TRANSACTION_OVERRIDES_FILE, 'rb') as f:
-    TXN_OVERRIDES = tomllib.load(f)
 
 ###############################################################################
 # PRICE.PY CONFIGURATION OPTIONS

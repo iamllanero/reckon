@@ -331,6 +331,10 @@ def is_spam(chain,
     receive_token = f"{chain}:{receives_token_id}"
     send_token = f"{chain}:{sends_token_id}"
 
+    # If no receives_token_id return False (not spam)
+    if receives_token_id is None:
+        return False
+
     # If receive_token on allow list return False (not spam)
     if receive_token in DEBANK_ALLOW_LIST:
         return False

@@ -16,10 +16,9 @@ from config import (
     TXNS_OUTPUT,
     TXNS_PRICE_REQ_OUTPUT,
     TXNS_TOML,
+    TXNS_MANUAL_TOML,
     TXNS_CONFIG,
     TAGS,
-    TXN_OVERRIDES,
-    # TRANSACTION_OVERRIDES_FILE
 )
 from debank import FLAT_HEADERS
 # from utils import list_to_csv
@@ -138,15 +137,18 @@ def process_batch(txn_dicts, do_overrides=True):
 
     txns = []
 
-    # # If transaction id has an override entry, generate lines directly from it
-    # if txn_dicts[0]['id'] in TXN_OVERRIDES.keys() and do_overrides:
-    #     for txline_data in TXN_OVERRIDES[txn_dicts[0]['id']]:
-    #         tl = []
-    #         for header in HEADERS:
-    #             tl.append(txline_data[header])
-    #         txns.append(tl)
-
-    #     return txns
+    # If transaction id has an override entry, generate lines directly from it
+    if txn_dicts[0]['id'] in TXNS_MANUAL_TOML.keys():
+        manuals = TXNS_MANUAL_TOML[txn_dicts[0]['id']]
+        # If manuals is an emtpy dict, then ignore the txn altogether
+        if not manuals == [{}]:
+            # Otherwise, generate lines from the manual entry
+            for txline_data in TXNS_MANUAL_TOML[txn_dicts[0]['id']]:
+                tl = []
+                for header in HEADERS:
+                    tl.append(txline_data[header])
+                txns.append(tl)
+        return txns
 
     # If multi-line txn, use average to calculate deposit and withdrawals
     if len(txn_dicts) > 1:
@@ -178,6 +180,7 @@ def process_batch(txn_dicts, do_overrides=True):
 
     # Generate transaction line(s) for each transaction in batch
     for td in txn_dicts:
+
         # print(f"td=> {td}")
         sends_token = td['sends.token.symbol'].lower()
         receives_token = td['receives.token.symbol'].lower()
