@@ -10,3 +10,4 @@ config/txns_manual.toml
 config/price_manual.csv
 wip.py
 pyrightconfig.json
+SCRATCH.md
