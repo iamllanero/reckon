@@ -13,7 +13,7 @@ income_txns = [
     'redeem',
     'Interest',
     'Interest Payment',
-    'Rewards Income'
+    'Rewards Income',
 ]
 
 [reports]
@@ -37,6 +37,10 @@ parser = "coinbase_us_2022"
 [reports.coinbase-3]
 file = "data/reports/2023-coinbase/b2cc0a0e-74da-5fec-9c59-87c675c788cc_transactions_history.csv"
 parser = "coinbase_us_2023"
+
+[reports.coinbase-4]
+file = "data/reports/2024-coinbase/2024-12-22-coinbase.csv"
+parser = "coinbase_us_2024"
 
 [reports.coinbase-pro-1]
 file = "data/reports/2022-coinbasepro/account.csv"
@@ -66,11 +70,7 @@ show_tags = true
 [consolidated_parser]
 
 # Equivalent pairs must be alphabetical
-equivalents = [
-    ["eth", "leth"],
-    ["eth", "weth"],
-    ["ftm", "wftm"],
-]
+equivalents = [["eth", "leth"], ["eth", "weth"], ["ftm", "wftm"]]
 
 [token_name_overrides]
 "0xcbf6f78981e63ef813cb71852d72a060b583eecf" = "SLP MATIC-FISH"
