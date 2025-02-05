@@ -3,7 +3,6 @@ import os
 import sys
 
 import requests
-import tomllib
 from dotenv import load_dotenv
 from utils import list_to_csv
 

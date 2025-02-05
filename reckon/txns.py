@@ -143,11 +143,14 @@ def process_batch(txn_dicts, do_overrides=True):
         # If manuals is an emtpy dict, then ignore the txn altogether
         if not manuals == [{}]:
             # Otherwise, generate lines from the manual entry
+            print(f"WARN: Manual override {txn_dicts[0]['id']}")
             for txline_data in TXNS_MANUAL_TOML[txn_dicts[0]['id']]:
                 tl = []
                 for header in HEADERS:
                     tl.append(txline_data[header])
                 txns.append(tl)
+        else:
+            print(f"WARN: Skipping {txn_dicts[0]['id']} due to empty manual override")
         return txns
 
     # If multi-line txn, use average to calculate deposit and withdrawals
